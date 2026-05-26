@@ -28,6 +28,8 @@ class Product extends Model
 
     protected $appends = [
         'image_url',
+        'avg_rating',
+        'reviews_count',
     ];
 
     protected function casts(): array
@@ -57,6 +59,11 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     public function articleRecommendations(): HasMany
@@ -91,5 +98,31 @@ class Product extends Model
         }
 
         return Storage::url($this->image);
+    }
+
+    public function getAvgRatingAttribute(): ?float
+    {
+        $average = $this->attributes['avg_rating'] ?? null;
+
+        if ($average === null) {
+            $average = $this->relationLoaded('reviews')
+                ? $this->reviews->where('status', 'published')->avg('rating')
+                : $this->reviews()->where('status', 'published')->avg('rating');
+        }
+
+        return $average === null ? null : round((float) $average, 1);
+    }
+
+    public function getReviewsCountAttribute(): int
+    {
+        $count = $this->attributes['reviews_count'] ?? null;
+
+        if ($count === null) {
+            $count = $this->relationLoaded('reviews')
+                ? $this->reviews->where('status', 'published')->count()
+                : $this->reviews()->where('status', 'published')->count();
+        }
+
+        return (int) $count;
     }
 }

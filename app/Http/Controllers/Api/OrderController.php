@@ -16,7 +16,7 @@ class OrderController extends Controller
         $user = $request->user()->loadMissing('role');
 
         $orders = Order::query()
-            ->with(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment'])
+            ->with(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment', 'productReviews'])
             ->when(! $user->isAdmin(), fn ($query) => $query->where('user_id', $user->id))
             ->latest()
             ->paginate($request->integer('per_page', 10));
@@ -31,7 +31,7 @@ class OrderController extends Controller
         abort_if(! $user->isAdmin() && $order->user_id !== $user->id, 404);
 
         return response()->json([
-            'data' => $order->load(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment']),
+            'data' => $order->load(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment', 'productReviews']),
         ]);
     }
 
@@ -58,7 +58,7 @@ class OrderController extends Controller
 
         return response()->json([
             'message' => 'Status pembayaran disinkronkan.',
-            'data' => $order->fresh()->load(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment']),
+            'data' => $order->fresh()->load(['affiliateProfile:id,code', 'items.product', 'items.seller:id,store_name,slug', 'payment', 'productReviews']),
         ]);
     }
 }

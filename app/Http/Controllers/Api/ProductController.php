@@ -21,6 +21,8 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->with(['category', 'seller:id,store_name,slug,status', 'images'])
+            ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
+            ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
             ->where('status', 'active')
             ->whereHas('seller', fn ($query) => $query->where('status', 'active'))
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -49,6 +51,8 @@ class ProductController extends Controller
     {
         $product = Product::query()
             ->with(['category', 'seller:id,store_name,slug,status,description', 'images'])
+            ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
+            ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
             ->where(function ($query) use ($product) {
                 $query->where('slug', $product);
 

@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->hasMany(Article::class, 'author_id');
     }
 
+    public function productReviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
     public function hasRole(string|array $roles): bool
     {
         $roles = (array) $roles;

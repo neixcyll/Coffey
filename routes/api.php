@@ -1,28 +1,30 @@
 <?php
 
-use App\Http\Controllers\Api\AffiliateController;
-use App\Http\Controllers\Api\AffiliateContentController;
 use App\Http\Controllers\Api\Admin\AffiliateCommissionController as AdminAffiliateCommissionController;
 use App\Http\Controllers\Api\Admin\AffiliateController as AdminAffiliateController;
+use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Api\Admin\SellerController as AdminSellerController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\AffiliateContentController;
+use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\MidtransNotificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Api\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Api\Seller\ProductController as SellerProductController;
+use App\Http\Controllers\Api\Seller\ProductReviewController as SellerProductReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +33,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/categories', [ProductController::class, 'categories']);
 Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{product}/reviews', [ProductReviewController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::post('/affiliate/clicks', [AffiliateController::class, 'trackClick']);
 Route::get('/article-categories', [ArticleController::class, 'categories']);
@@ -56,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders/{order}/sync-payment', [OrderController::class, 'syncPayment']);
+        Route::get('/products/{product}/review-eligibility', [ProductReviewController::class, 'eligibility']);
+        Route::post('/products/{product}/reviews', [ProductReviewController::class, 'store']);
 
         Route::get('/affiliate/dashboard', [AffiliateController::class, 'dashboard']);
         Route::post('/affiliate/register', [AffiliateController::class, 'register']);
@@ -82,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders/{order}', [SellerOrderController::class, 'show']);
         Route::patch('/orders/{order}/status', [SellerOrderController::class, 'updateOrderStatus']);
         Route::patch('/orders/{order}/items/{orderItem}/status', [SellerOrderController::class, 'updateItemStatus']);
+        Route::get('/reviews', [SellerProductReviewController::class, 'index']);
+        Route::match(['post', 'put', 'patch'], '/reviews/{review}/reply', [SellerProductReviewController::class, 'reply']);
     });
 
     Route::prefix('admin')->middleware('role:admin')->group(function () {

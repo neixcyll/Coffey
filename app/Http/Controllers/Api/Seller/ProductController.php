@@ -18,6 +18,8 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->with(['category', 'images'])
+            ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
+            ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
             ->where('seller_id', $seller->id)
             ->latest()
             ->paginate($request->integer('per_page', 10));

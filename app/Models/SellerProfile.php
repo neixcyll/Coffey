@@ -32,4 +32,9 @@ class SellerProfile extends Model
     {
         return $this->hasMany(OrderItem::class, 'seller_id');
     }
+
+    public function productReviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class, 'seller_id');
+    }
 }
