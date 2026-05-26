@@ -28,6 +28,20 @@ const USER_STATUSES = ['active', 'banned'];
 const USER_ROLES = ['admin', 'seller', 'customer'];
 const AFFILIATE_PROFILE_STATUSES = ['active', 'inactive'];
 const AFFILIATE_COMMISSION_STATUSES = ['pending', 'approved', 'paid', 'cancelled'];
+const ARTICLE_STATUSES = ['draft', 'pending', 'published', 'rejected'];
+
+const CATEGORY_ROUTE_MAP = {
+    review: 'review',
+    'brewing-guide': 'brewing-guide',
+    comparison: 'compare',
+};
+
+const PUBLIC_ROUTE_MAP = {
+    blog: '/blog',
+    review: '/review',
+    'brewing-guide': '/brewing-guide',
+    compare: '/compare',
+};
 
 function formatPrice(value) {
     return new Intl.NumberFormat('id-ID', {
@@ -59,11 +73,39 @@ function rowsFrom(response) {
     return response?.data || [];
 }
 
-function parseHash() {
+function parseHashRoute() {
     const raw = window.location.hash.replace('#', '') || 'products';
     const [path] = raw.split('?');
     const [view, id] = path.split('/');
     return { view, id };
+}
+
+function parsePathRoute() {
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    const parts = path.split('/').filter(Boolean);
+
+    if (path === 'blog') return { view: 'blog' };
+    if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
+    if (path === 'review') return { view: 'review' };
+    if (path === 'brewing-guide') return { view: 'brewing-guide' };
+    if (path === 'compare') return { view: 'compare' };
+    if (parts[0] === 'creator' && parts[1]) return { view: 'creator', id: parts[1] };
+    if (parts[0] === 'product' && parts[1]) return { view: 'product', id: parts[1] };
+
+    return null;
+}
+
+function parseRoute() {
+    return parsePathRoute() || parseHashRoute();
+}
+
+function publicPathFor(view, id) {
+    if (PUBLIC_ROUTE_MAP[view]) return PUBLIC_ROUTE_MAP[view];
+    if (view === 'blog-detail' && id) return `/blog/${id}`;
+    if (view === 'creator' && id) return `/creator/${id}`;
+    if (view === 'product' && id) return `/product/${id}`;
+
+    return null;
 }
 
 function affiliateRefFromUrl() {
@@ -96,6 +138,84 @@ async function apiRequest(path, { method = 'GET', body, token, isForm = false } 
     return data;
 }
 
+function upsertHeadTag(selector, createTag, attrs = {}) {
+    let element = document.head.querySelector(selector);
+
+    if (!element) {
+        element = document.createElement(createTag);
+        document.head.appendChild(element);
+    }
+
+    Object.entries(attrs).forEach(([key, value]) => {
+        if (value === null || value === undefined || value === '') {
+            element.removeAttribute(key);
+        } else {
+            element.setAttribute(key, value);
+        }
+    });
+}
+
+function applyArticleSeo(article) {
+    if (!article) return;
+
+    const url = `${window.location.origin}/blog/${article.slug}`;
+    const title = article.meta_title || article.title;
+    const description = article.meta_description || article.excerpt || 'Artikel kopi dari Marketplace Kopi.';
+    const image = article.featured_image_url || article.featured_image;
+
+    document.title = title;
+    upsertHeadTag('meta[name="description"]', 'meta', { name: 'description', content: description });
+    upsertHeadTag('link[rel="canonical"]', 'link', { rel: 'canonical', href: url });
+    upsertHeadTag('meta[property="og:title"]', 'meta', { property: 'og:title', content: title });
+    upsertHeadTag('meta[property="og:description"]', 'meta', { property: 'og:description', content: description });
+    upsertHeadTag('meta[property="og:type"]', 'meta', { property: 'og:type', content: 'article' });
+    upsertHeadTag('meta[property="og:url"]', 'meta', { property: 'og:url', content: url });
+    upsertHeadTag('meta[property="og:image"]', 'meta', { property: 'og:image', content: image });
+
+    const articleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description,
+        image: image ? [image] : undefined,
+        datePublished: article.published_at,
+        author: {
+            '@type': 'Person',
+            name: article.author?.creator_profile?.display_name || article.author?.name || 'Marketplace Kopi',
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Marketplace Kopi',
+        },
+        mainEntityOfPage: url,
+    };
+
+    const products = (article.recommended_products || [])
+        .filter((item) => item.title)
+        .map((item) => ({
+            '@type': 'Product',
+            name: item.title,
+            image: item.image_url,
+            description: item.description,
+            offers: item.internal_available && item.price ? {
+                '@type': 'Offer',
+                priceCurrency: 'IDR',
+                price: Number(item.price),
+                availability: 'https://schema.org/InStock',
+                url: `${window.location.origin}/product/${item.product?.slug || item.product_id}`,
+            } : undefined,
+        }));
+
+    let schema = document.getElementById('article-schema');
+    if (!schema) {
+        schema = document.createElement('script');
+        schema.type = 'application/ld+json';
+        schema.id = 'article-schema';
+        document.head.appendChild(schema);
+    }
+    schema.textContent = JSON.stringify(products.length ? [articleSchema, ...products] : articleSchema);
+}
+
 function roleName(user) {
     return user?.role?.name;
 }
@@ -113,7 +233,7 @@ function canOpenAfterLogin(view, user) {
     const role = roleName(user);
 
     if (!view) return false;
-    if (['affiliate-dashboard', 'cart', 'checkout', 'orders', 'user-dashboard'].includes(view)) return role === 'customer';
+    if (['affiliate-dashboard', 'affiliate-content', 'cart', 'checkout', 'orders', 'user-dashboard'].includes(view)) return role === 'customer';
     if (view.startsWith('seller-')) return role === 'seller' || role === 'admin';
     if (view.startsWith('admin-')) return role === 'admin';
 
@@ -121,12 +241,13 @@ function canOpenAfterLogin(view, user) {
 }
 
 function rememberCurrentRoute() {
-    const current = window.location.hash.replace('#', '') || 'products';
+    const pathRoute = parsePathRoute();
+    const current = pathRoute ? `${pathRoute.view}${pathRoute.id ? `/${pathRoute.id}` : ''}` : window.location.hash.replace('#', '') || 'products';
     sessionStorage.setItem('post_login_redirect', current);
 }
 
 function App() {
-    const initialRoute = parseHash();
+    const initialRoute = parseRoute();
     const [route, setRoute] = useState(initialRoute);
     const [token, setToken] = useState(() => localStorage.getItem('kopi_token'));
     const [user, setUser] = useState(() => {
@@ -138,9 +259,13 @@ function App() {
     const [sellerNotifications, setSellerNotifications] = useState({ count: 0, orders: [] });
 
     useEffect(() => {
-        const onHashChange = () => setRoute(parseHash());
-        window.addEventListener('hashchange', onHashChange);
-        return () => window.removeEventListener('hashchange', onHashChange);
+        const onRouteChange = () => setRoute(parseRoute());
+        window.addEventListener('popstate', onRouteChange);
+        window.addEventListener('hashchange', onRouteChange);
+        return () => {
+            window.removeEventListener('popstate', onRouteChange);
+            window.removeEventListener('hashchange', onRouteChange);
+        };
     }, []);
 
     useEffect(() => {
@@ -148,7 +273,7 @@ function App() {
 
         if (!ref) return;
 
-        const productId = route.view === 'product' ? route.id : '';
+        const productId = route.view === 'product' && /^\d+$/.test(route.id || '') ? route.id : '';
         const clickKey = `${ref}:${productId || 'catalog'}`;
 
         localStorage.setItem('affiliate_ref', ref);
@@ -203,7 +328,18 @@ function App() {
     }, [token, user?.role?.name, user?.seller_profile?.status]);
 
     function navigate(view, id) {
-        window.location.hash = id ? `${view}/${id}` : view;
+        const publicPath = publicPathFor(view, id);
+
+        if (publicPath) {
+            window.history.pushState({}, '', publicPath);
+            setRoute(parseRoute());
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        window.history.pushState({}, '', `/#${id ? `${view}/${id}` : view}`);
+        setRoute(parseRoute());
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function saveSession(nextToken, nextUser) {
@@ -266,12 +402,19 @@ function App() {
             <main className="page">
                 {route.view === 'login' && <AuthPage mode="login" {...context} />}
                 {route.view === 'register' && <AuthPage mode="register" {...context} />}
+                {route.view === 'blog' && <BlogIndexPage {...context} />}
+                {route.view === 'review' && <BlogIndexPage categorySlug="review" {...context} />}
+                {route.view === 'brewing-guide' && <BlogIndexPage categorySlug="brewing-guide" {...context} />}
+                {route.view === 'compare' && <BlogIndexPage categorySlug="comparison" {...context} />}
+                {route.view === 'blog-detail' && <BlogArticlePage slug={route.id} {...context} />}
+                {route.view === 'creator' && <CreatorPage username={route.id} {...context} />}
                 {route.view === 'product' && <ProductDetail productId={route.id} {...context} />}
                 {route.view === 'cart' && <CartPage {...context} />}
                 {route.view === 'checkout' && <CheckoutPage {...context} />}
                 {route.view === 'orders' && <OrderHistory {...context} />}
                 {route.view === 'user-dashboard' && <UserDashboardPage {...context} />}
                 {route.view === 'affiliate-dashboard' && <AffiliateDashboardPage {...context} />}
+                {route.view === 'affiliate-content' && <AffiliateContentPage {...context} />}
                 {route.view === 'seller-dashboard' && <SellerDashboard {...context} />}
                 {route.view === 'seller-products' && <SellerProducts {...context} />}
                 {route.view === 'seller-orders' && <SellerOrders {...context} />}
@@ -285,15 +428,23 @@ function App() {
                 {route.view === 'admin-reports' && <AdminReportsPage {...context} />}
                 {route.view === 'admin-affiliates' && <AdminAffiliatesPage {...context} />}
                 {route.view === 'admin-affiliate-commissions' && <AdminAffiliateCommissionsPage {...context} />}
-                {![
+                {route.view === 'admin-content' && <AdminContentPage {...context} />}
+                {![ 
                     'login',
                     'register',
+                    'blog',
+                    'review',
+                    'brewing-guide',
+                    'compare',
+                    'blog-detail',
+                    'creator',
                     'product',
                     'cart',
                     'checkout',
                     'orders',
                     'user-dashboard',
                     'affiliate-dashboard',
+                    'affiliate-content',
                     'seller-dashboard',
                     'seller-products',
                     'seller-orders',
@@ -307,6 +458,7 @@ function App() {
                     'admin-reports',
                     'admin-affiliates',
                     'admin-affiliate-commissions',
+                    'admin-content',
                 ].includes(route.view) && <CatalogPage {...context} />}
             </main>
         </div>
@@ -331,6 +483,9 @@ function Header({ user, navigate, logout, currentView, cartCount, sellerNotifica
 
             <nav className="nav">
                 <button className={itemClass('products')} onClick={() => navigate('products')}>Produk</button>
+                <button className={itemClass('blog')} onClick={() => navigate('blog')}>Blog</button>
+                <button className={itemClass('review')} onClick={() => navigate('review')}>Review</button>
+                <button className={itemClass('brewing-guide')} onClick={() => navigate('brewing-guide')}>Guide</button>
                 {role === 'customer' && (
                     <>
                         <button className={itemClass('user-dashboard')} onClick={() => navigate('user-dashboard')}>Dashboard</button>
@@ -338,7 +493,10 @@ function Header({ user, navigate, logout, currentView, cartCount, sellerNotifica
                     </>
                 )}
                 {(!role || role === 'customer') && (
-                    <button className={itemClass('affiliate-dashboard')} onClick={() => navigate('affiliate-dashboard')}>Affiliate</button>
+                    <>
+                        <button className={itemClass('affiliate-dashboard')} onClick={() => navigate('affiliate-dashboard')}>Affiliate</button>
+                        {role === 'customer' && <button className={itemClass('affiliate-content')} onClick={() => navigate('affiliate-content')}>Content</button>}
+                    </>
                 )}
                 {role === 'seller' && (
                     <>
@@ -575,7 +733,7 @@ function CatalogPage({ token, user, navigate, setNotice, refreshCartCount }) {
                                 </div>
                                 <strong>{formatPrice(product.price)}</strong>
                                 <div className="row">
-                                    <button className="btn ghost" onClick={() => navigate('product', product.id)}>Detail</button>
+                                    <button className="btn ghost" onClick={() => navigate('product', product.slug || product.id)}>Detail</button>
                                     <button className="btn primary" onClick={() => addToCart(product.id)}>Cart</button>
                                 </div>
                             </div>
@@ -627,7 +785,7 @@ function ProductDetail({ productId, token, user, navigate, setNotice, refreshCar
                 return;
             }
             const code = response.data.profile.code;
-            await navigator.clipboard?.writeText(`${window.location.origin}${window.location.pathname}?ref=${code}#product/${product.id}`);
+            await navigator.clipboard?.writeText(`${window.location.origin}/product/${product.slug || product.id}?ref=${code}`);
             setNotice('Link affiliate produk disalin.');
         } catch (error) {
             setNotice(error.message);
@@ -659,6 +817,289 @@ function ProductDetail({ productId, token, user, navigate, setNotice, refreshCar
             </div>
         </section>
     );
+}
+
+function BlogIndexPage({ categorySlug = '', navigate, setNotice }) {
+    const [articles, setArticles] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(categorySlug);
+    const [search, setSearch] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setSelectedCategory(categorySlug);
+    }, [categorySlug]);
+
+    useEffect(() => {
+        apiRequest('/article-categories')
+            .then((response) => setCategories(response.data || []))
+            .catch((error) => setNotice(error.message));
+    }, [setNotice]);
+
+    useEffect(() => {
+        const query = new URLSearchParams();
+        if (selectedCategory) query.set('category', selectedCategory);
+        if (search) query.set('search', search);
+        setLoading(true);
+        apiRequest(`/articles?${query}`)
+            .then((response) => setArticles(rowsFrom(response)))
+            .catch((error) => setNotice(error.message))
+            .finally(() => setLoading(false));
+    }, [selectedCategory, search, setNotice]);
+
+    function openCategory(category) {
+        const route = CATEGORY_ROUTE_MAP[category.slug];
+        if (route) {
+            navigate(route);
+            return;
+        }
+
+        setSelectedCategory(category.slug);
+    }
+
+    const activeCategory = categories.find((category) => category.slug === selectedCategory);
+    const title = activeCategory ? activeCategory.name : 'Coffee Journal';
+    const featured = articles[0];
+    const rest = featured ? articles.slice(1) : articles;
+
+    return (
+        <section className="content-page">
+            <div className="content-hero">
+                <div>
+                    <p className="eyebrow">Content layer</p>
+                    <h1>{title}</h1>
+                    <p className="muted">Review, brewing guide, comparison, dan rekomendasi produk yang terhubung langsung ke marketplace.</p>
+                </div>
+                <div className="content-search">
+                    <input placeholder="Cari artikel kopi" value={search} onChange={(event) => setSearch(event.target.value)} />
+                </div>
+            </div>
+
+            <div className="category-tabs">
+                <button className={!selectedCategory ? 'active' : ''} onClick={() => { setSelectedCategory(''); navigate('blog'); }}>Semua</button>
+                {categories.map((category) => (
+                    <button key={category.id} className={selectedCategory === category.slug ? 'active' : ''} onClick={() => openCategory(category)}>
+                        {category.name}
+                    </button>
+                ))}
+            </div>
+
+            {loading ? <p className="muted">Memuat artikel...</p> : (
+                <>
+                    {featured && (
+                        <article className="featured-article">
+                            <ArticleImage article={featured} />
+                            <div className="featured-copy">
+                                <span className="tag">{featured.category?.name}</span>
+                                <h2>{featured.title}</h2>
+                                <p className="muted">{featured.excerpt}</p>
+                                <div className="row">
+                                    <button className="btn primary" onClick={() => navigate('blog-detail', featured.slug)}>Baca artikel</button>
+                                    {featured.author?.creator_profile?.username && (
+                                        <button className="btn ghost" onClick={() => navigate('creator', featured.author.creator_profile.username)}>
+                                            {featured.author.creator_profile.display_name}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </article>
+                    )}
+
+                    <div className="article-grid">
+                        {rest.map((article) => <ArticleCard key={article.id} article={article} navigate={navigate} />)}
+                    </div>
+                    {articles.length === 0 && <p className="muted">Belum ada artikel published untuk kategori ini.</p>}
+                </>
+            )}
+        </section>
+    );
+}
+
+function BlogArticlePage({ slug, token, navigate, setNotice }) {
+    const [article, setArticle] = useState(null);
+
+    useEffect(() => {
+        if (!slug) return;
+        apiRequest(`/articles/${slug}`)
+            .then((response) => {
+                setArticle(response.data);
+                applyArticleSeo(response.data);
+            })
+            .catch((error) => setNotice(error.message));
+    }, [slug, setNotice]);
+
+    async function trackProductClick(item) {
+        if (!article) return;
+
+        try {
+            const response = await apiRequest(`/articles/${article.slug}/clicks`, {
+                method: 'POST',
+                token,
+                body: {
+                    article_product_id: item.id,
+                    product_id: item.product_id || undefined,
+                    target_url: item.external_url || undefined,
+                    referrer: document.referrer || window.location.href,
+                    landing_url: window.location.href,
+                },
+            });
+            const payload = response.data;
+
+            if (payload.affiliate_code) localStorage.setItem('affiliate_ref', payload.affiliate_code);
+            if (payload.affiliate_click_id) localStorage.setItem('affiliate_click_id', payload.affiliate_click_id);
+
+            if (payload.internal && item.product) {
+                navigate('product', item.product.slug || item.product.id);
+                return;
+            }
+
+            if (payload.target_url) {
+                window.location.href = payload.target_url;
+                return;
+            }
+
+            setNotice('Link produk belum tersedia.');
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    if (!article) return <p className="muted">Memuat artikel...</p>;
+
+    const authorProfile = article.author?.creator_profile;
+    const paragraphs = (article.content || '').split(/\n{2,}/).filter(Boolean);
+
+    return (
+        <article className="article-layout">
+            <header className="article-header">
+                <span className="tag">{article.category?.name}</span>
+                <h1>{article.title}</h1>
+                <p className="article-excerpt">{article.excerpt}</p>
+                <div className="article-meta">
+                    <span>{authorProfile?.display_name || article.author?.name}</span>
+                    <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID') : '-'}</span>
+                    <span>{article.views_count || 0} views</span>
+                </div>
+            </header>
+
+            {article.featured_image_url && <img className="article-cover" src={article.featured_image_url} alt={article.title} />}
+
+            <div className="article-body">
+                {paragraphs.map((paragraph, index) => <p key={`${article.id}-p-${index}`}>{paragraph}</p>)}
+            </div>
+
+            {(article.recommended_products || []).length > 0 && (
+                <section className="recommended-section">
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">Recommended Products</p>
+                            <h2>Produk yang disebut di artikel</h2>
+                        </div>
+                    </div>
+                    <div className="recommended-grid">
+                        {article.recommended_products.map((item) => (
+                            <div className="recommended-card" key={item.id}>
+                                {item.image_url ? <img src={item.image_url} alt={item.title} /> : <div className="product-image small placeholder">{item.title?.slice(0, 1) || 'K'}</div>}
+                                <div>
+                                    <span className="tag">{item.internal_available ? 'Marketplace' : item.external_platform || 'External'}</span>
+                                    <h3>{item.title}</h3>
+                                    <p className="muted">{item.description}</p>
+                                    <strong>{item.internal_available ? formatPrice(item.price) : item.price_label || 'Cek harga terbaru'}</strong>
+                                </div>
+                                <button className={item.internal_available ? 'btn primary wide' : 'btn ghost wide'} onClick={() => trackProductClick(item)}>
+                                    {item.cta_label}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <section className="author-box">
+                <div className="author-avatar">{(authorProfile?.display_name || article.author?.name || 'K').slice(0, 1)}</div>
+                <div>
+                    <p className="eyebrow">Author</p>
+                    <h2>{authorProfile?.display_name || article.author?.name}</h2>
+                    <p className="muted">{authorProfile?.bio || 'Creator dan reviewer kopi di Marketplace Kopi.'}</p>
+                    {authorProfile?.username && <button className="btn ghost" onClick={() => navigate('creator', authorProfile.username)}>Lihat profil creator</button>}
+                </div>
+            </section>
+
+            {(article.related_articles || []).length > 0 && (
+                <section>
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">Artikel terkait</p>
+                            <h2>Baca selanjutnya</h2>
+                        </div>
+                    </div>
+                    <div className="article-grid">
+                        {article.related_articles.map((related) => <ArticleCard key={related.id} article={related} navigate={navigate} />)}
+                    </div>
+                </section>
+            )}
+        </article>
+    );
+}
+
+function CreatorPage({ username, navigate, setNotice }) {
+    const [profile, setProfile] = useState(null);
+    const [articles, setArticles] = useState([]);
+
+    useEffect(() => {
+        if (!username) return;
+        apiRequest(`/creators/${username}`)
+            .then((response) => {
+                setProfile(response.data.profile);
+                setArticles(response.data.articles?.data || []);
+            })
+            .catch((error) => setNotice(error.message));
+    }, [username, setNotice]);
+
+    if (!profile) return <p className="muted">Memuat creator...</p>;
+
+    return (
+        <section className="content-page">
+            <div className="creator-header">
+                <div className="author-avatar large">{profile.display_name?.slice(0, 1) || 'K'}</div>
+                <div>
+                    <p className="eyebrow">Creator</p>
+                    <h1>{profile.display_name}</h1>
+                    <p className="muted">{profile.bio || 'Creator kopi di Marketplace Kopi.'}</p>
+                    {profile.affiliate_code && <code>{profile.affiliate_code}</code>}
+                </div>
+            </div>
+            <div className="article-grid">
+                {articles.map((article) => <ArticleCard key={article.id} article={article} navigate={navigate} />)}
+            </div>
+            {articles.length === 0 && <p className="muted">Creator ini belum memiliki artikel published.</p>}
+        </section>
+    );
+}
+
+function ArticleCard({ article, navigate }) {
+    return (
+        <article className="article-card">
+            <ArticleImage article={article} />
+            <div className="article-card-body">
+                <span className="tag">{article.category?.name}</span>
+                <h3>{article.title}</h3>
+                <p className="muted">{article.excerpt}</p>
+                <div className="row between">
+                    <small className="muted">{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID') : '-'}</small>
+                    <button className="btn ghost compact-btn" onClick={() => navigate('blog-detail', article.slug)}>Baca</button>
+                </div>
+            </div>
+        </article>
+    );
+}
+
+function ArticleImage({ article }) {
+    const src = article.featured_image_url || article.featured_image;
+
+    if (src) return <img className="article-image" src={src} alt={article.title} />;
+
+    return <div className="article-image placeholder">{article.title?.slice(0, 1) || 'K'}</div>;
 }
 
 function CartPage({ token, navigate, setNotice, refreshCartCount }) {
@@ -1067,6 +1508,7 @@ function AffiliateDashboardPage({ token, user, navigate, setNotice, logout }) {
                 </div>
                 <div className="row">
                     <button className="btn primary" onClick={() => copyLink('#products')}>Copy katalog link</button>
+                    <button className="btn ghost" onClick={() => navigate('affiliate-content')}>Content</button>
                 </div>
             </div>
             <div className="stats">
@@ -1093,6 +1535,262 @@ function AffiliateDashboardPage({ token, user, navigate, setNotice, logout }) {
                         {commissions.length === 0 && <tr><td colSpan="5">Belum ada komisi.</td></tr>}
                     </tbody>
                 </table>
+            </div>
+        </section>
+    );
+}
+
+function emptyArticleForm() {
+    return {
+        article_category_id: '',
+        title: '',
+        excerpt: '',
+        content: '',
+        featured_image: '',
+        meta_title: '',
+        meta_description: '',
+        status: 'pending',
+        external_title: '',
+        external_platform: '',
+        external_url: '',
+        external_price_label: '',
+    };
+}
+
+function AffiliateContentPage({ token, user, navigate, setNotice, logout }) {
+    const [summary, setSummary] = useState(null);
+    const [articles, setArticles] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [form, setForm] = useState(emptyArticleForm());
+    const [selectedProductIds, setSelectedProductIds] = useState([]);
+    const [editingArticle, setEditingArticle] = useState(null);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (!token) return;
+        loadContent();
+    }, [token]);
+
+    async function loadContent() {
+        try {
+            const [summaryResponse, articleResponse, categoryResponse, productResponse] = await Promise.all([
+                apiRequest('/affiliate/content/summary', { token }),
+                apiRequest('/affiliate/content/articles', { token }),
+                apiRequest('/affiliate/content/categories', { token }),
+                apiRequest('/products?per_page=100'),
+            ]);
+
+            setSummary(summaryResponse.data);
+            setArticles(rowsFrom(articleResponse));
+            setCategories(categoryResponse.data || []);
+            setProducts(rowsFrom(productResponse));
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    function update(field, value) {
+        setForm((current) => ({ ...current, [field]: value }));
+    }
+
+    function toggleProduct(productId) {
+        setSelectedProductIds((current) => {
+            const id = String(productId);
+            return current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+        });
+    }
+
+    function editArticle(article) {
+        const external = (article.recommended_products || []).find((item) => !item.product_id) || {};
+        setEditingArticle(article);
+        setForm({
+            article_category_id: article.category?.id || '',
+            title: article.title || '',
+            excerpt: article.excerpt || '',
+            content: article.content || '',
+            featured_image: article.featured_image || article.featured_image_url || '',
+            meta_title: article.meta_title || '',
+            meta_description: article.meta_description || '',
+            status: article.status === 'draft' ? 'draft' : 'pending',
+            external_title: external.title || '',
+            external_platform: external.external_platform || '',
+            external_url: external.external_url || '',
+            external_price_label: external.price_label || '',
+        });
+        setSelectedProductIds((article.recommended_products || []).filter((item) => item.product_id).map((item) => String(item.product_id)));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        setEditingArticle(null);
+        setForm(emptyArticleForm());
+        setSelectedProductIds([]);
+    }
+
+    async function saveArticle(event) {
+        event.preventDefault();
+        setSaving(true);
+
+        const recommendations = selectedProductIds.map((productId, index) => ({
+            product_id: Number(productId),
+            sort_order: index,
+        }));
+
+        if (form.external_title || form.external_url) {
+            recommendations.push({
+                custom_title: form.external_title,
+                external_platform: form.external_platform,
+                external_url: form.external_url,
+                external_price_label: form.external_price_label,
+                sort_order: recommendations.length,
+            });
+        }
+
+        const payload = {
+            article_category_id: Number(form.article_category_id),
+            title: form.title,
+            excerpt: form.excerpt,
+            content: form.content,
+            featured_image: form.featured_image,
+            meta_title: form.meta_title,
+            meta_description: form.meta_description,
+            status: form.status,
+            recommendations,
+        };
+
+        try {
+            const path = editingArticle ? `/affiliate/content/articles/${editingArticle.id}` : '/affiliate/content/articles';
+            await apiRequest(path, { method: editingArticle ? 'PATCH' : 'POST', token, body: payload });
+            setNotice(editingArticle ? 'Artikel diperbarui dan menunggu review admin.' : 'Artikel dibuat dan menunggu review admin.');
+            resetForm();
+            await loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    if (!token) return <NeedLogin navigate={navigate} />;
+    if (!user) return <p className="muted">Memuat akun...</p>;
+    if (roleName(user) !== 'customer') return <NeedCustomerAccount logout={logout} />;
+
+    return (
+        <section className="content-manager">
+            <div className="section-head">
+                <div>
+                    <p className="eyebrow">Affiliate Content</p>
+                    <h1>Content creator dashboard</h1>
+                </div>
+                <button className="btn ghost" onClick={() => navigate('affiliate-dashboard')}>Affiliate overview</button>
+            </div>
+
+            {summary && (
+                <div className="stats">
+                    <Stat label="My Articles" value={summary.total_articles} />
+                    <Stat label="Published" value={summary.published_articles} />
+                    <Stat label="Pending" value={summary.pending_articles} />
+                    <Stat label="Article Views" value={summary.article_views} />
+                    <Stat label="Product Clicks" value={summary.product_clicks} />
+                    <Stat label="Estimated Commission" value={formatPrice(summary.estimated_commission)} />
+                </div>
+            )}
+
+            <div className="manager-layout content-editor-layout">
+                <form className="panel form-grid" onSubmit={saveArticle}>
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">{editingArticle ? 'Edit Article' : 'Create Article'}</p>
+                            <h2>{editingArticle ? editingArticle.title : 'Artikel baru'}</h2>
+                        </div>
+                        {editingArticle && <button type="button" className="btn ghost compact-btn" onClick={resetForm}>Batal</button>}
+                    </div>
+                    <label>
+                        <span>Kategori</span>
+                        <select value={form.article_category_id} onChange={(event) => update('article_category_id', event.target.value)} required>
+                            <option value="">Pilih kategori</option>
+                            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                        </select>
+                    </label>
+                    <TextInput label="Title" value={form.title} onChange={(value) => update('title', value)} />
+                    <TextInput label="Featured image URL" value={form.featured_image} onChange={(value) => update('featured_image', value)} required={false} />
+                    <TextArea label="Excerpt" value={form.excerpt} onChange={(value) => update('excerpt', value)} />
+                    <label>
+                        <span>Content</span>
+                        <textarea value={form.content} onChange={(event) => update('content', event.target.value)} rows="12" required />
+                    </label>
+                    <div className="grid-2">
+                        <TextInput label="Meta title" value={form.meta_title} onChange={(value) => update('meta_title', value)} required={false} />
+                        <TextInput label="Meta description" value={form.meta_description} onChange={(value) => update('meta_description', value)} required={false} />
+                    </div>
+                    <label>
+                        <span>Status</span>
+                        <select value={form.status} onChange={(event) => update('status', event.target.value)}>
+                            <option value="pending">Submit for review</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                    </label>
+
+                    <div className="recommendation-picker">
+                        <span>Produk rekomendasi marketplace</span>
+                        <div className="product-choice-grid">
+                            {products.slice(0, 12).map((product) => (
+                                <label className="choice-card" key={product.id}>
+                                    <input type="checkbox" checked={selectedProductIds.includes(String(product.id))} onChange={() => toggleProduct(product.id)} />
+                                    <span>{product.name}</span>
+                                    <small>{formatPrice(product.price)}</small>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="external-product-box">
+                        <h3>External affiliate product</h3>
+                        <div className="grid-2">
+                            <TextInput label="Nama produk" value={form.external_title} onChange={(value) => update('external_title', value)} required={false} />
+                            <TextInput label="Platform" value={form.external_platform} onChange={(value) => update('external_platform', value)} required={false} />
+                        </div>
+                        <TextInput label="Affiliate URL" value={form.external_url} onChange={(value) => update('external_url', value)} required={false} />
+                        <TextInput label="Label harga" value={form.external_price_label} onChange={(value) => update('external_price_label', value)} required={false} />
+                    </div>
+
+                    <button className="btn primary wide" disabled={saving}>{saving ? 'Menyimpan...' : editingArticle ? 'Update Article' : 'Create Article'}</button>
+                </form>
+
+                <div className="stack">
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">My Articles</p>
+                            <h2>Article Status</h2>
+                        </div>
+                    </div>
+                    <div className="table-wrap">
+                        <table>
+                            <thead><tr><th>Artikel</th><th>Status</th><th>Views</th><th>Clicks</th><th>Aksi</th></tr></thead>
+                            <tbody>
+                                {articles.map((article) => (
+                                    <tr key={article.id}>
+                                        <td>
+                                            <strong>{article.title}</strong>
+                                            <p className="muted">{article.category?.name}</p>
+                                        </td>
+                                        <td>{article.status}</td>
+                                        <td>{article.views_count || 0}</td>
+                                        <td>{article.clicks_count || 0}</td>
+                                        <td>
+                                            <div className="actions">
+                                                <button className="btn ghost compact-btn" onClick={() => editArticle(article)}>Edit</button>
+                                                {article.status === 'published' && <button className="btn ghost compact-btn" onClick={() => navigate('blog-detail', article.slug)}>View</button>}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {articles.length === 0 && <tr><td colSpan="5">Belum ada artikel.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
     );
@@ -1385,6 +2083,7 @@ function AdminLayout({ current, navigate, children }) {
         ['admin-products', 'Products'],
         ['admin-orders', 'Orders'],
         ['admin-payments', 'Payments'],
+        ['admin-content', 'Content'],
         ['admin-affiliates', 'Affiliates'],
         ['admin-affiliate-commissions', 'Commissions'],
         ['admin-reports', 'Reports'],
@@ -1431,6 +2130,9 @@ function AdminDashboardPage({ token, navigate, setNotice }) {
                     <Stat label="Affiliates" value={data.total_affiliates} />
                     <Stat label="Pending commissions" value={data.pending_affiliate_commissions} />
                     <Stat label="Affiliate amount" value={formatPrice(data.affiliate_commission_amount)} />
+                    <Stat label="Articles" value={data.total_articles} />
+                    <Stat label="Published articles" value={data.published_articles} />
+                    <Stat label="Pending articles" value={data.pending_articles} />
                 </div>
             )}
         </AdminLayout>
@@ -2010,6 +2712,255 @@ function AdminAffiliateCommissionsPage({ token, navigate, setNotice }) {
                         ))}
                     </tbody>
                 </table>
+            </div>
+        </AdminLayout>
+    );
+}
+
+function AdminContentPage({ token, navigate, setNotice }) {
+    const [articles, setArticles] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [status, setStatus] = useState('');
+    const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
+    const [editingArticle, setEditingArticle] = useState(null);
+    const [form, setForm] = useState({
+        article_category_id: '',
+        title: '',
+        excerpt: '',
+        content: '',
+        featured_image: '',
+        meta_title: '',
+        meta_description: '',
+        status: 'pending',
+        is_featured: false,
+        featured_rank: 0,
+    });
+
+    useEffect(() => {
+        if (!token) return;
+        loadContent();
+    }, [token, status]);
+
+    async function loadContent() {
+        const query = status ? `?status=${status}` : '';
+        try {
+            const [articleResponse, categoryResponse] = await Promise.all([
+                apiRequest(`/admin/content/articles${query}`, { token }),
+                apiRequest('/admin/content/categories', { token }),
+            ]);
+            setArticles(rowsFrom(articleResponse));
+            setCategories(categoryResponse.data || []);
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    function editArticle(article) {
+        setEditingArticle(article);
+        setForm({
+            article_category_id: article.category?.id || '',
+            title: article.title || '',
+            excerpt: article.excerpt || '',
+            content: article.content || '',
+            featured_image: article.featured_image || article.featured_image_url || '',
+            meta_title: article.meta_title || '',
+            meta_description: article.meta_description || '',
+            status: article.status || 'pending',
+            is_featured: Boolean(article.is_featured),
+            featured_rank: article.featured_rank || 0,
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function update(field, value) {
+        setForm((current) => ({ ...current, [field]: value }));
+    }
+
+    async function saveArticle(event) {
+        event.preventDefault();
+        if (!editingArticle) return;
+
+        try {
+            await apiRequest(`/admin/content/articles/${editingArticle.id}`, {
+                method: 'PATCH',
+                token,
+                body: {
+                    ...form,
+                    article_category_id: Number(form.article_category_id),
+                    featured_rank: Number(form.featured_rank || 0),
+                },
+            });
+            setNotice('Artikel diperbarui.');
+            setEditingArticle(null);
+            await loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    async function approveArticle(article) {
+        try {
+            await apiRequest(`/admin/content/articles/${article.id}/approve`, { method: 'POST', token });
+            setNotice('Artikel dipublish.');
+            loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    async function rejectArticle(article) {
+        const reason = window.prompt('Alasan reject artikel:', article.rejection_reason || '');
+        if (reason === null) return;
+
+        try {
+            await apiRequest(`/admin/content/articles/${article.id}/reject`, { method: 'POST', token, body: { rejection_reason: reason } });
+            setNotice('Artikel ditolak.');
+            loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    async function toggleFeatured(article) {
+        try {
+            await apiRequest(`/admin/content/articles/${article.id}`, {
+                method: 'PATCH',
+                token,
+                body: {
+                    is_featured: !article.is_featured,
+                    featured_rank: article.featured_rank || 0,
+                },
+            });
+            setNotice('Featured content diperbarui.');
+            loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    async function createCategory(event) {
+        event.preventDefault();
+        try {
+            await apiRequest('/admin/content/categories', { method: 'POST', token, body: categoryForm });
+            setCategoryForm({ name: '', description: '' });
+            setNotice('Kategori konten dibuat.');
+            loadContent();
+        } catch (error) {
+            setNotice(error.message);
+        }
+    }
+
+    if (!token) return <NeedLogin navigate={navigate} />;
+
+    return (
+        <AdminLayout current="admin-content" navigate={navigate}>
+            <PageTitle eyebrow="Admin" title="Content Management" />
+            <div className="filters compact">
+                <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                    <option value="">All Articles</option>
+                    {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
+                </select>
+                <button className="btn ghost" onClick={() => setStatus('pending')}>Pending Articles</button>
+            </div>
+
+            {editingArticle && (
+                <form className="panel form-grid" onSubmit={saveArticle}>
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">Edit Article</p>
+                            <h2>{editingArticle.title}</h2>
+                        </div>
+                        <button type="button" className="btn ghost compact-btn" onClick={() => setEditingArticle(null)}>Tutup</button>
+                    </div>
+                    <label>
+                        <span>Kategori</span>
+                        <select value={form.article_category_id} onChange={(event) => update('article_category_id', event.target.value)} required>
+                            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                        </select>
+                    </label>
+                    <TextInput label="Title" value={form.title} onChange={(value) => update('title', value)} />
+                    <TextInput label="Featured image URL" value={form.featured_image} onChange={(value) => update('featured_image', value)} required={false} />
+                    <TextArea label="Excerpt" value={form.excerpt} onChange={(value) => update('excerpt', value)} />
+                    <label>
+                        <span>Content</span>
+                        <textarea rows="10" value={form.content} onChange={(event) => update('content', event.target.value)} required />
+                    </label>
+                    <div className="grid-2">
+                        <TextInput label="Meta title" value={form.meta_title} onChange={(value) => update('meta_title', value)} required={false} />
+                        <TextInput label="Meta description" value={form.meta_description} onChange={(value) => update('meta_description', value)} required={false} />
+                    </div>
+                    <div className="grid-2">
+                        <label>
+                            <span>Status</span>
+                            <select value={form.status} onChange={(event) => update('status', event.target.value)}>
+                                {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
+                            </select>
+                        </label>
+                        <TextInput label="Featured rank" type="number" value={form.featured_rank} onChange={(value) => update('featured_rank', value)} required={false} />
+                    </div>
+                    <label className="inline-check">
+                        <input type="checkbox" checked={form.is_featured} onChange={(event) => update('is_featured', event.target.checked)} />
+                        <span>Featured content</span>
+                    </label>
+                    <button className="btn primary">Simpan artikel</button>
+                </form>
+            )}
+
+            <div className="table-wrap">
+                <table>
+                    <thead><tr><th>Artikel</th><th>Author</th><th>Status</th><th>Views</th><th>Clicks</th><th>Featured</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        {articles.map((article) => (
+                            <tr key={article.id}>
+                                <td>
+                                    <strong>{article.title}</strong>
+                                    <p className="muted">{article.category?.name}</p>
+                                </td>
+                                <td>{article.author?.creator_profile?.display_name || article.author?.name}</td>
+                                <td>{article.status}</td>
+                                <td>{article.views_count || 0}</td>
+                                <td>{article.clicks_count || 0}</td>
+                                <td>
+                                    <button className="btn ghost compact-btn" onClick={() => toggleFeatured(article)}>
+                                        {article.is_featured ? 'Featured' : 'Normal'}
+                                    </button>
+                                </td>
+                                <td>
+                                    <div className="actions">
+                                        <button className="btn ghost compact-btn" onClick={() => editArticle(article)}>Edit</button>
+                                        <button className="btn primary compact-btn" onClick={() => approveArticle(article)}>Approve</button>
+                                        <button className="btn danger compact-btn" onClick={() => rejectArticle(article)}>Reject</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {articles.length === 0 && <tr><td colSpan="7">Belum ada artikel.</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="admin-split">
+                <form className="panel form-grid" onSubmit={createCategory}>
+                    <div>
+                        <p className="eyebrow">Manage Categories</p>
+                        <h2>Kategori artikel</h2>
+                    </div>
+                    <TextInput label="Nama kategori" value={categoryForm.name} onChange={(value) => setCategoryForm({ ...categoryForm, name: value })} />
+                    <TextArea label="Deskripsi" value={categoryForm.description} onChange={(value) => setCategoryForm({ ...categoryForm, description: value })} />
+                    <button className="btn primary">Tambah kategori</button>
+                </form>
+                <div className="panel">
+                    <p className="eyebrow">Existing</p>
+                    <h2>Content categories</h2>
+                    <div className="category-list">
+                        {categories.map((category) => (
+                            <div className="category-row" key={category.id}>
+                                <span>{category.name}</span>
+                                <small>{category.articles_count || 0} artikel</small>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </AdminLayout>
     );

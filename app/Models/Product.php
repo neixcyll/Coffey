@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -56,6 +57,27 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function articleRecommendations(): HasMany
+    {
+        return $this->hasMany(ArticleProduct::class);
+    }
+
+    public function articles(): BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'article_product')
+            ->withPivot([
+                'id',
+                'custom_title',
+                'custom_description',
+                'external_platform',
+                'external_url',
+                'external_price_label',
+                'external_image',
+                'sort_order',
+            ])
+            ->withTimestamps();
     }
 
     public function getImageUrlAttribute(): ?string

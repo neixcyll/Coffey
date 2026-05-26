@@ -45,13 +45,24 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function show(Product $product): JsonResponse
+    public function show(string $product): JsonResponse
     {
+        $product = Product::query()
+            ->with(['category', 'seller:id,store_name,slug,status,description', 'images'])
+            ->where(function ($query) use ($product) {
+                $query->where('slug', $product);
+
+                if (ctype_digit($product)) {
+                    $query->orWhereKey((int) $product);
+                }
+            })
+            ->firstOrFail();
+
         abort_if($product->status !== 'active', 404);
         abort_if($product->seller?->status !== 'active', 404);
 
         return response()->json([
-            'data' => $product->load(['category', 'seller:id,store_name,slug,status,description', 'images']),
+            'data' => $product,
         ]);
     }
 }

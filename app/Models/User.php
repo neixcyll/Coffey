@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -57,6 +58,16 @@ class User extends Authenticatable
     public function affiliateProfile(): HasOne
     {
         return $this->hasOne(AffiliateProfile::class);
+    }
+
+    public function creatorProfile(): HasOne
+    {
+        return $this->hasOne(CreatorProfile::class);
+    }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class, 'author_id');
     }
 
     public function hasRole(string|array $roles): bool

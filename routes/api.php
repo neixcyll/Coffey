@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\AffiliateContentController;
 use App\Http\Controllers\Api\Admin\AffiliateCommissionController as AdminAffiliateCommissionController;
 use App\Http\Controllers\Api\Admin\AffiliateController as AdminAffiliateController;
+use App\Http\Controllers\Api\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
@@ -30,6 +33,11 @@ Route::get('/categories', [ProductController::class, 'categories']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::post('/affiliate/clicks', [AffiliateController::class, 'trackClick']);
+Route::get('/article-categories', [ArticleController::class, 'categories']);
+Route::get('/articles', [ArticleController::class, 'index']);
+Route::get('/articles/{article:slug}', [ArticleController::class, 'show']);
+Route::post('/articles/{article:slug}/clicks', [ArticleController::class, 'trackClick']);
+Route::get('/creators/{username}', [ArticleController::class, 'creator']);
 
 Route::post('/midtrans/notification', MidtransNotificationController::class);
 
@@ -53,6 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/affiliate/register', [AffiliateController::class, 'register']);
         Route::get('/affiliate/commissions', [AffiliateController::class, 'commissions']);
         Route::get('/affiliate/clicks', [AffiliateController::class, 'clicks']);
+        Route::get('/affiliate/content/summary', [AffiliateContentController::class, 'summary']);
+        Route::get('/affiliate/content/categories', [AffiliateContentController::class, 'categories']);
+        Route::get('/affiliate/content/articles', [AffiliateContentController::class, 'index']);
+        Route::post('/affiliate/content/articles', [AffiliateContentController::class, 'store']);
+        Route::get('/affiliate/content/articles/{article}', [AffiliateContentController::class, 'show']);
+        Route::match(['put', 'patch'], '/affiliate/content/articles/{article}', [AffiliateContentController::class, 'update']);
     });
 
     Route::prefix('seller')->middleware('role:seller')->group(function () {
@@ -104,5 +118,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/affiliate-commissions', [AdminAffiliateCommissionController::class, 'index']);
         Route::get('/affiliate-commissions/{commission}', [AdminAffiliateCommissionController::class, 'show']);
         Route::patch('/affiliate-commissions/{commission}', [AdminAffiliateCommissionController::class, 'update']);
+
+        Route::get('/content/articles', [AdminContentController::class, 'index']);
+        Route::get('/content/articles/{article}', [AdminContentController::class, 'show']);
+        Route::patch('/content/articles/{article}', [AdminContentController::class, 'update']);
+        Route::post('/content/articles/{article}/approve', [AdminContentController::class, 'approve']);
+        Route::post('/content/articles/{article}/reject', [AdminContentController::class, 'reject']);
+        Route::get('/content/categories', [AdminContentController::class, 'categories']);
+        Route::post('/content/categories', [AdminContentController::class, 'storeCategory']);
+        Route::patch('/content/categories/{category}', [AdminContentController::class, 'updateCategory']);
+        Route::delete('/content/categories/{category}', [AdminContentController::class, 'destroyCategory']);
     });
 });

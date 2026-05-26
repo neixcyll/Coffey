@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AffiliateCommission;
 use App\Models\AffiliateProfile;
+use App\Models\Article;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\Product;
@@ -36,6 +37,9 @@ class DashboardController extends Controller
                 'total_affiliates' => AffiliateProfile::count(),
                 'pending_affiliate_commissions' => AffiliateCommission::where('status', 'pending')->count(),
                 'affiliate_commission_amount' => (float) AffiliateCommission::whereIn('status', ['pending', 'approved', 'paid'])->sum('commission_amount'),
+                'total_articles' => Article::count(),
+                'published_articles' => Article::where('status', 'published')->count(),
+                'pending_articles' => Article::where('status', 'pending')->count(),
             ],
         ]);
     }

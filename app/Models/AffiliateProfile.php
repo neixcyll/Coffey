@@ -42,4 +42,9 @@ class AffiliateProfile extends Model
     {
         return $this->hasMany(AffiliateCommission::class);
     }
+
+    public function articleClicks(): HasMany
+    {
+        return $this->hasMany(ArticleClick::class, 'affiliate_id');
+    }
 }

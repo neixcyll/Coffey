@@ -17,16 +17,21 @@ class AffiliateService
 
     public function profileFor(User $user): ?AffiliateProfile
     {
-        return $user->affiliateProfile;
+        return $user->affiliateProfile()->first();
     }
 
     public function registerProfile(User $user, array $data): AffiliateProfile
     {
-        if ($user->affiliateProfile) {
-            return $user->affiliateProfile;
+        $existing = $user->affiliateProfile()->first();
+
+        if ($existing) {
+            app(ArticleService::class)->ensureCreatorProfile($user, $existing->affiliate_name ?: $user->name);
+            $user->setRelation('affiliateProfile', $existing);
+
+            return $existing;
         }
 
-        return AffiliateProfile::create([
+        $profile = AffiliateProfile::create([
             'user_id' => $user->id,
             'code' => $this->uniqueCode($user),
             'affiliate_name' => $data['affiliate_name'],
@@ -38,6 +43,11 @@ class AffiliateService
             'commission_rate' => 5,
             'status' => 'active',
         ]);
+
+        app(ArticleService::class)->ensureCreatorProfile($user, $profile->affiliate_name);
+        $user->setRelation('affiliateProfile', $profile);
+
+        return $profile;
     }
 
     public function activeProfileByCode(?string $code): ?AffiliateProfile
