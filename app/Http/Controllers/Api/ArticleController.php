@@ -70,6 +70,7 @@ class ArticleController extends Controller
             'articleProducts.product.category',
             'articleProducts.product.seller:id,store_name,slug,status',
             'articleProducts.product.images',
+            'articleProducts.product.variants',
         ])->loadCount(['views', 'clicks']);
 
         $related = Article::query()
@@ -120,7 +121,6 @@ class ArticleController extends Controller
         }
 
         $internalAvailable = $product
-            && $product->status === 'active'
             && $product->stock > 0
             && $product->seller?->status === 'active';
 

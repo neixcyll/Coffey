@@ -7,7 +7,7 @@ import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminSellersPage({ token, navigate, setNotice }) {
+export default function AdminSellersPage({ token, navigate, setNotice, user, logout, notice }) {
     const [sellers, setSellers] = useState([]);
     const [status, setStatus] = useState('');
     const [detail, setDetail] = useState(null);
@@ -47,7 +47,7 @@ export default function AdminSellersPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-sellers" navigate={navigate}>
+        <AdminLayout current="admin-sellers" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Seller management" />
             <div className="filters compact">
                 <select value={status} onChange={(event) => setStatus(event.target.value)}>

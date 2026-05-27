@@ -7,7 +7,7 @@ import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminUsersPage({ token, navigate, setNotice }) {
+export default function AdminUsersPage({ token, navigate, setNotice, user, logout, notice }) {
     const [users, setUsers] = useState([]);
     const [filters, setFilters] = useState({ role: '', status: '' });
     const [detail, setDetail] = useState(null);
@@ -47,7 +47,7 @@ export default function AdminUsersPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-users" navigate={navigate}>
+        <AdminLayout current="admin-users" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="User management" />
             <div className="filters compact">
                 <select value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })}>

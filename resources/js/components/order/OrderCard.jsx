@@ -15,7 +15,7 @@ export default function OrderCard({ order, navigate }) {
             </div>
             {order.items?.map((item) => (
                 <div className="order-item-review-row" key={item.id}>
-                    <p className="muted">{item.product_name} x {item.quantity} - {item.status}</p>
+                    <p className="muted">{item.product_name}{item.variant_label ? ` (${item.variant_label})` : ''} x {item.quantity} - {item.status}</p>
                     {canReviewOrder && item.status === 'completed' && item.product_id && (
                         reviewedProductIds.has(Number(item.product_id)) ? (
                             <span className="badge">Sudah direview</span>

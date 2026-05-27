@@ -6,7 +6,7 @@ import { apiRequest } from '../../services/api.js';
 import { formatPrice } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminDashboardPage({ token, navigate, setNotice }) {
+export default function AdminDashboardPage({ token, navigate, setNotice, user, logout, notice }) {
     const [data, setData] = useState(null);
 
     useEffect(() => {
@@ -19,7 +19,7 @@ export default function AdminDashboardPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-dashboard" navigate={navigate}>
+        <AdminLayout current="admin-dashboard" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Dashboard" />
             {!data ? <p className="muted">Memuat admin dashboard...</p> : (
                 <div className="stats">

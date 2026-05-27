@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
-import { PRODUCT_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminProductsPage({ token, navigate, setNotice }) {
+export default function AdminProductsPage({ token, navigate, setNotice, user, logout, notice }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [sellers, setSellers] = useState([]);
-    const [filters, setFilters] = useState({ status: '', category_id: '', seller_id: '' });
+    const [filters, setFilters] = useState({ category_id: '', seller_id: '' });
 
     useEffect(() => {
         if (!token) return;
@@ -21,7 +20,7 @@ export default function AdminProductsPage({ token, navigate, setNotice }) {
     useEffect(() => {
         if (!token) return;
         loadProducts();
-    }, [token, filters.status, filters.category_id, filters.seller_id]);
+    }, [token, filters.category_id, filters.seller_id]);
 
     async function loadProducts() {
         const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
@@ -32,26 +31,12 @@ export default function AdminProductsPage({ token, navigate, setNotice }) {
         setProducts(rowsFrom(response));
     }
 
-    async function updateProductStatus(product, status) {
-        try {
-            await apiRequest(`/admin/products/${product.id}/status`, { method: 'PATCH', token, body: { status } });
-            setNotice('Status produk diperbarui.');
-            loadProducts();
-        } catch (error) {
-            setNotice(error.message);
-        }
-    }
-
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-products" navigate={navigate}>
+        <AdminLayout current="admin-products" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Product monitoring" />
             <div className="filters compact">
-                <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
-                    <option value="">Semua status</option>
-                    {PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                </select>
                 <select value={filters.category_id} onChange={(event) => setFilters({ ...filters, category_id: event.target.value })}>
                     <option value="">Semua kategori</option>
                     {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -63,20 +48,16 @@ export default function AdminProductsPage({ token, navigate, setNotice }) {
             </div>
             <div className="table-wrap">
                 <table>
-                    <thead><tr><th>Produk</th><th>Seller</th><th>Kategori</th><th>Harga</th><th>Stock</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Produk</th><th>Seller</th><th>Kategori</th><th>Harga</th><th>Stock</th><th>Variant</th></tr></thead>
                     <tbody>
                         {products.map((product) => (
                             <tr key={product.id}>
                                 <td>{product.name}</td>
                                 <td>{product.seller?.store_name}</td>
                                 <td>{product.category?.name}</td>
-                                <td>{formatPrice(product.price)}</td>
+                                <td>{priceLabel(product)}</td>
                                 <td>{product.stock}</td>
-                                <td>
-                                    <select value={product.status} onChange={(event) => updateProductStatus(product, event.target.value)}>
-                                        {PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                                    </select>
-                                </td>
+                                <td>{product.variants?.length || 0}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -84,4 +65,11 @@ export default function AdminProductsPage({ token, navigate, setNotice }) {
             </div>
         </AdminLayout>
     );
+}
+
+function priceLabel(product) {
+    const min = Number(product.min_price ?? product.price ?? 0);
+    const max = Number(product.max_price ?? product.price ?? min);
+
+    return max > min ? `${formatPrice(min)} - ${formatPrice(max)}` : formatPrice(min);
 }

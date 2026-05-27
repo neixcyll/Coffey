@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Api\Seller\OrderController as SellerOrderController;
+use App\Http\Controllers\Api\Seller\ProfileController as SellerProfileController;
 use App\Http\Controllers\Api\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Api\Seller\ProductReviewController as SellerProductReviewController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,7 @@ Route::post('/register/seller', [AuthController::class, 'registerSeller']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/categories', [ProductController::class, 'categories']);
+Route::get('/brewing-methods', [ProductController::class, 'brewingMethods']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}/reviews', [ProductReviewController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
@@ -76,6 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('seller')->middleware('role:seller')->group(function () {
         Route::get('/dashboard', SellerDashboardController::class);
+        Route::get('/profile', [SellerProfileController::class, 'show']);
+        Route::patch('/profile', [SellerProfileController::class, 'update']);
         Route::get('/products', [SellerProductController::class, 'index']);
         Route::post('/products', [SellerProductController::class, 'store']);
         Route::get('/products/{product}', [SellerProductController::class, 'show']);
@@ -108,7 +112,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products', [AdminProductController::class, 'index']);
         Route::get('/products/{product}', [AdminProductController::class, 'show']);
-        Route::patch('/products/{product}/status', [AdminProductController::class, 'updateStatus']);
 
         Route::get('/orders', [AdminOrderController::class, 'index']);
         Route::get('/orders/{order}', [AdminOrderController::class, 'show']);

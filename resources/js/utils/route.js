@@ -1,4 +1,4 @@
-import { PUBLIC_ROUTE_MAP } from '../constants/options.js';
+import { ADMIN_ROUTE_MAP, PUBLIC_ROUTE_MAP, SELLER_ROUTE_MAP } from '../constants/options.js';
 
 export function parseHashRoute() {
     const raw = window.location.hash.replace('#', '') || 'products';
@@ -10,6 +10,24 @@ export function parseHashRoute() {
 export function parsePathRoute() {
     const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
     const parts = path.split('/').filter(Boolean);
+    const sellerPathMap = {
+        profile: 'seller-profile',
+        products: 'seller-products',
+        orders: 'seller-orders',
+        reviews: 'seller-reviews',
+    };
+    const adminPathMap = {
+        users: 'admin-users',
+        sellers: 'admin-sellers',
+        categories: 'admin-categories',
+        products: 'admin-products',
+        orders: 'admin-orders',
+        payments: 'admin-payments',
+        content: 'admin-content',
+        affiliates: 'admin-affiliates',
+        commissions: 'admin-affiliate-commissions',
+        reports: 'admin-reports',
+    };
 
     if (path === 'blog') return { view: 'blog' };
     if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
@@ -18,6 +36,10 @@ export function parsePathRoute() {
     if (path === 'compare') return { view: 'compare' };
     if (parts[0] === 'creator' && parts[1]) return { view: 'creator', id: parts[1] };
     if (parts[0] === 'product' && parts[1]) return { view: 'product', id: parts[1] };
+    if (path === 'seller' || path === 'seller/dashboard') return { view: 'seller-dashboard' };
+    if (parts[0] === 'seller' && sellerPathMap[parts[1]]) return { view: sellerPathMap[parts[1]] };
+    if (path === 'admin-dashboard') return { view: 'admin-dashboard' };
+    if (parts[0] === 'admin' && adminPathMap[parts[1]]) return { view: adminPathMap[parts[1]] };
 
     return null;
 }
@@ -28,6 +50,8 @@ export function parseRoute() {
 
 export function publicPathFor(view, id) {
     if (PUBLIC_ROUTE_MAP[view]) return PUBLIC_ROUTE_MAP[view];
+    if (SELLER_ROUTE_MAP[view]) return SELLER_ROUTE_MAP[view];
+    if (ADMIN_ROUTE_MAP[view]) return ADMIN_ROUTE_MAP[view];
     if (view === 'blog-detail' && id) return `/blog/${id}`;
     if (view === 'creator' && id) return `/creator/${id}`;
     if (view === 'product' && id) return `/product/${id}`;
@@ -61,7 +85,7 @@ export function canOpenAfterLogin(view, user) {
 
     if (!view) return false;
     if (['affiliate-dashboard', 'affiliate-content', 'cart', 'checkout', 'orders', 'user-dashboard'].includes(view)) return role === 'customer';
-    if (view.startsWith('seller-')) return role === 'seller' || role === 'admin';
+    if (view.startsWith('seller-')) return role === 'seller';
     if (view.startsWith('admin-')) return role === 'admin';
 
     return true;

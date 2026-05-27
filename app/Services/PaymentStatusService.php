@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Payment;
-use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -14,9 +14,7 @@ class PaymentStatusService
     public function __construct(
         private readonly MidtransService $midtrans,
         private readonly AffiliateService $affiliates,
-    )
-    {
-    }
+    ) {}
 
     public function syncFromGateway(Payment $payment, ?array $snapCallbackResult = null): Payment
     {
@@ -74,11 +72,11 @@ class PaymentStatusService
 
                 if (! $wasAlreadyPaid) {
                     foreach ($order->items as $item) {
-                        $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+                        $variant = ProductVariant::whereKey($item->product_variant_id)->lockForUpdate()->first();
 
-                        if ($product) {
-                            $product->update([
-                                'stock' => max(0, $product->stock - $item->quantity),
+                        if ($variant) {
+                            $variant->update([
+                                'stock' => max(0, $variant->stock - $item->quantity),
                             ]);
                         }
                     }

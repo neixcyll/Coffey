@@ -16,29 +16,25 @@ class Product extends Model
         'name',
         'slug',
         'description',
-        'price',
-        'stock',
-        'weight',
         'roast_level',
         'origin',
-        'brewing_method',
         'image',
-        'status',
     ];
 
     protected $appends = [
         'image_url',
         'avg_rating',
         'reviews_count',
+        'price',
+        'min_price',
+        'max_price',
+        'stock',
+        'weight',
     ];
 
     protected function casts(): array
     {
-        return [
-            'price' => 'decimal:2',
-            'stock' => 'integer',
-            'weight' => 'integer',
-        ];
+        return [];
     }
 
     public function category(): BelongsTo
@@ -54,6 +50,21 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)
+            ->orderBy('sort_order')
+            ->orderBy('weight_grams')
+            ->orderBy('grind_size');
+    }
+
+    public function brewingMethods(): BelongsToMany
+    {
+        return $this->belongsToMany(BrewingMethod::class, 'product_brewing_method')
+            ->withTimestamps()
+            ->orderBy('name');
     }
 
     public function orderItems(): HasMany
@@ -98,6 +109,49 @@ class Product extends Model
         }
 
         return Storage::url($this->image);
+    }
+
+    public function getPriceAttribute($value = null): ?float
+    {
+        return $this->getMinPriceAttribute() ?? ($value === null ? null : (float) $value);
+    }
+
+    public function getMinPriceAttribute(): ?float
+    {
+        $variant = $this->relationLoaded('variants')
+            ? $this->variants->sortBy(fn (ProductVariant $variant) => (float) $variant->price)->first()
+            : $this->variants()->orderBy('price')->first();
+
+        return $variant ? (float) $variant->price : null;
+    }
+
+    public function getMaxPriceAttribute(): ?float
+    {
+        $variant = $this->relationLoaded('variants')
+            ? $this->variants->sortByDesc(fn (ProductVariant $variant) => (float) $variant->price)->first()
+            : $this->variants()->orderByDesc('price')->first();
+
+        return $variant ? (float) $variant->price : null;
+    }
+
+    public function getStockAttribute($value = null): int
+    {
+        if ($this->relationLoaded('variants')) {
+            return (int) $this->variants->sum('stock');
+        }
+
+        return $this->variants()->exists()
+            ? (int) $this->variants()->sum('stock')
+            : (int) ($value ?? 0);
+    }
+
+    public function getWeightAttribute($value = null): ?int
+    {
+        $variant = $this->relationLoaded('variants')
+            ? $this->variants->sortBy('weight_grams')->first()
+            : $this->variants()->orderBy('weight_grams')->first();
+
+        return $variant ? (int) $variant->weight_grams : ($value === null ? null : (int) $value);
     }
 
     public function getAvgRatingAttribute(): ?float

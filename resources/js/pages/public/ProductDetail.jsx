@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BREWING_OPTIONS, ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
+import { ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
 import ProductImage from '../../components/product/ProductImage.jsx';
 import ReviewForm from '../../components/review/ReviewForm.jsx';
 import StarRating from '../../components/review/StarRating.jsx';
@@ -13,13 +13,20 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const [reviewMeta, setReviewMeta] = useState({ avg_rating: null, reviews_count: 0 });
     const [eligibility, setEligibility] = useState(null);
     const [showReviewForm, setShowReviewForm] = useState(false);
+    const [selectedWeight, setSelectedWeight] = useState('');
+    const [selectedGrind, setSelectedGrind] = useState('');
 
     useEffect(() => {
         setProduct(null);
         setEligibility(null);
         setShowReviewForm(false);
         apiRequest(`/products/${productId}`)
-            .then((data) => setProduct(data.data))
+            .then((data) => {
+                setProduct(data.data);
+                const firstVariant = preferredVariant(data.data?.variants || []);
+                setSelectedWeight(firstVariant ? String(firstVariant.weight_grams) : '');
+                setSelectedGrind(firstVariant?.grind_size || '');
+            })
             .catch((error) => setNotice(error.message));
         loadReviews();
     }, [productId, setNotice]);
@@ -52,7 +59,18 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
         }
 
         try {
-            await apiRequest('/cart/items', { method: 'POST', token, body: { product_id: product.id, quantity: 1 } });
+            const variant = selectedVariant(product?.variants || [], selectedWeight, selectedGrind);
+
+            if (!variant) {
+                setNotice('Pilih variant berat dan gilingan terlebih dahulu.');
+                return;
+            }
+
+            await apiRequest('/cart/items', {
+                method: 'POST',
+                token,
+                body: { product_id: product.id, product_variant_id: variant.id, quantity: 1 },
+            });
             await refreshCartCount?.();
             setNotice('Produk berhasil ditambahkan ke cart. Cek ikon cart di kanan atas.');
         } catch (error) {
@@ -94,6 +112,10 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const averageRating = reviewMeta.avg_rating ?? product.avg_rating;
     const reviewsCount = Number(reviewMeta.reviews_count ?? product.reviews_count ?? 0);
     const eligibleOrders = eligibility?.eligible_orders || [];
+    const variants = product.variants || [];
+    const weightOptions = uniqueWeights(variants);
+    const grindOptions = variants.filter((variant) => String(variant.weight_grams) === selectedWeight);
+    const currentVariant = selectedVariant(variants, selectedWeight, selectedGrind);
 
     return (
         <div className="product-detail-page">
@@ -114,17 +136,55 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                         )}
                     </div>
                     <p>{product.description}</p>
+                    {variants.length > 0 && (
+                        <div className="variant-picker">
+                            <div>
+                                <span>Berat</span>
+                                <div className="option-pills">
+                                    {weightOptions.map((weight) => (
+                                        <button
+                                            type="button"
+                                            className={`pill-button ${selectedWeight === String(weight) ? 'selected' : ''}`}
+                                            key={weight}
+                                            onClick={() => {
+                                                const nextVariant = preferredVariant(variants.filter((variant) => variant.weight_grams === weight));
+                                                setSelectedWeight(String(weight));
+                                                setSelectedGrind(nextVariant?.grind_size || '');
+                                            }}
+                                        >
+                                            {formatWeight(weight)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <span>Gilingan</span>
+                                <div className="option-pills">
+                                    {grindOptions.map((variant) => (
+                                        <button
+                                            type="button"
+                                            className={`pill-button ${selectedGrind === variant.grind_size ? 'selected' : ''}`}
+                                            key={variant.id}
+                                            disabled={variant.stock <= 0}
+                                            onClick={() => setSelectedGrind(variant.grind_size)}
+                                        >
+                                            {variant.grind_size}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <dl className="specs">
-                        <div><dt>Harga</dt><dd>{formatPrice(product.price)}</dd></div>
-                        <div><dt>Stock</dt><dd>{product.stock}</dd></div>
-                        <div><dt>Berat</dt><dd>{formatWeight(product.weight)}</dd></div>
+                        <div><dt>Harga</dt><dd>{formatPrice(currentVariant?.price ?? product.price)}</dd></div>
+                        <div><dt>Stock</dt><dd>{currentVariant?.stock ?? product.stock}</dd></div>
                         <div><dt>Origin</dt><dd>{product.origin}</dd></div>
                         <div><dt>Roast</dt><dd>{optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level)}</dd></div>
-                        <div><dt>Brewing</dt><dd>{optionLabel(BREWING_OPTIONS, product.brewing_method)}</dd></div>
+                        <div><dt>Brewing</dt><dd><span className="tag-row">{(product.brewing_methods || []).map((method) => <span className="badge" key={method.id}>{method.name}</span>)}</span></dd></div>
                         <div><dt>Seller</dt><dd>{product.seller?.store_name}</dd></div>
                     </dl>
                     <div className="row">
-                        <button className="btn primary" onClick={addToCart}>Tambah ke Cart</button>
+                        <button className="btn primary" disabled={!currentVariant || currentVariant.stock <= 0} onClick={addToCart}>Tambah ke Cart</button>
                         {roleName(user) === 'customer' && <button className="btn ghost" onClick={copyAffiliateLink}>Copy affiliate link</button>}
                     </div>
                 </div>
@@ -205,4 +265,17 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
             </section>
         </div>
     );
+}
+
+function preferredVariant(variants) {
+    return variants.find((variant) => Number(variant.stock) > 0) || variants[0] || null;
+}
+
+function selectedVariant(variants, weight, grindSize) {
+    return variants.find((variant) => String(variant.weight_grams) === String(weight) && variant.grind_size === grindSize) || null;
+}
+
+function uniqueWeights(variants) {
+    return [...new Set(variants.map((variant) => Number(variant.weight_grams)).filter(Boolean))]
+        .sort((a, b) => a - b);
 }

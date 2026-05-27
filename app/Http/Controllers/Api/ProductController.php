@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BrewingMethod;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
@@ -17,13 +18,19 @@ class ProductController extends Controller
         ]);
     }
 
+    public function brewingMethods(): JsonResponse
+    {
+        return response()->json([
+            'data' => BrewingMethod::query()->orderBy('name')->get(),
+        ]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $products = Product::query()
-            ->with(['category', 'seller:id,store_name,slug,status', 'images'])
+            ->with(['category', 'seller:id,store_name,slug,status', 'images', 'variants', 'brewingMethods'])
             ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
             ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
-            ->where('status', 'active')
             ->whereHas('seller', fn ($query) => $query->where('status', 'active'))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->toString();
@@ -50,7 +57,7 @@ class ProductController extends Controller
     public function show(string $product): JsonResponse
     {
         $product = Product::query()
-            ->with(['category', 'seller:id,store_name,slug,status,description', 'images'])
+            ->with(['category', 'seller:id,store_name,slug,status,description', 'images', 'variants', 'brewingMethods'])
             ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
             ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
             ->where(function ($query) use ($product) {
@@ -62,7 +69,6 @@ class ProductController extends Controller
             })
             ->firstOrFail();
 
-        abort_if($product->status !== 'active', 404);
         abort_if($product->seller?->status !== 'active', 404);
 
         return response()->json([

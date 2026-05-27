@@ -17,7 +17,7 @@ class ContentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $articles = Article::query()
-            ->with(['category', 'author.creatorProfile', 'articleProducts.product.seller'])
+            ->with(['category', 'author.creatorProfile', 'articleProducts.product.seller', 'articleProducts.product.variants'])
             ->withCount(['views', 'clicks'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->toString()))
             ->when($request->filled('category_id'), fn ($query) => $query->where('article_category_id', $request->integer('category_id')))
@@ -39,7 +39,7 @@ class ContentController extends Controller
 
     public function show(Article $article): JsonResponse
     {
-        return (new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.category', 'articleProducts.product.seller'])->loadCount(['views', 'clicks'])))->response();
+        return (new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.category', 'articleProducts.product.seller', 'articleProducts.product.variants'])->loadCount(['views', 'clicks'])))->response();
     }
 
     public function update(Request $request, Article $article, ArticleService $articles): JsonResponse
@@ -86,7 +86,7 @@ class ContentController extends Controller
 
         return response()->json([
             'message' => 'Artikel berhasil diperbarui.',
-            'data' => new ArticleResource($article->fresh()->load(['category', 'author.creatorProfile', 'articleProducts.product.seller'])->loadCount(['views', 'clicks'])),
+            'data' => new ArticleResource($article->fresh()->load(['category', 'author.creatorProfile', 'articleProducts.product.seller', 'articleProducts.product.variants'])->loadCount(['views', 'clicks'])),
         ]);
     }
 

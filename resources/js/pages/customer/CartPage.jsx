@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import ProductImage from '../../components/product/ProductImage.jsx';
 import { apiRequest } from '../../services/api.js';
-import { formatPrice } from '../../utils/format.js';
+import { formatPrice, formatWeight } from '../../utils/format.js';
 
 export default function CartPage({ token, navigate, setNotice, refreshCartCount }) {
     const [cart, setCart] = useState(null);
@@ -55,7 +55,9 @@ export default function CartPage({ token, navigate, setNotice, refreshCartCount 
                         <ProductImage product={item.product} small />
                         <div>
                             <strong>{item.product.name}</strong>
-                            <p className="muted">{formatPrice(item.product.price)} - stock {item.product.stock}</p>
+                            <p className="muted">
+                                {formatPrice(item.variant?.price)} - {variantLabel(item.variant)} - stock {item.variant?.stock ?? 0}
+                            </p>
                         </div>
                         <input className="qty" type="number" min="1" value={item.quantity} onChange={(event) => updateItem(item, event.target.value)} />
                         <strong>{formatPrice(item.subtotal)}</strong>
@@ -67,4 +69,10 @@ export default function CartPage({ token, navigate, setNotice, refreshCartCount 
             <button className="btn primary checkout-btn" disabled={cart.items.length === 0} onClick={() => navigate('checkout')}>Checkout</button>
         </section>
     );
+}
+
+function variantLabel(variant) {
+    if (!variant) return 'Variant tidak tersedia';
+
+    return `${formatWeight(variant.weight_grams)} / ${variant.grind_size}`;
 }

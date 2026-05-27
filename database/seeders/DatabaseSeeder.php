@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\BrewingMethod;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -87,48 +88,56 @@ class DatabaseSeeder extends Seeder
                 'category' => 'arabica',
                 'name' => 'Arabika Gayo Wine Process',
                 'description' => 'Biji kopi Gayo dengan aroma fermentasi lembut, body medium, dan aftertaste manis.',
-                'price' => 95000,
-                'stock' => 35,
-                'weight' => 250,
                 'roast_level' => 'medium',
                 'origin' => 'Aceh Gayo',
-                'brewing_method' => 'V60, Aeropress, Tubruk',
+                'brewing_methods' => ['V60', 'Aeropress', 'Tubruk'],
+                'variants' => [
+                    ['weight_grams' => 100, 'grind_size' => 'Medium', 'price' => 42000, 'stock' => 18],
+                    ['weight_grams' => 250, 'grind_size' => 'Medium', 'price' => 95000, 'stock' => 35],
+                    ['weight_grams' => 250, 'grind_size' => 'Fine', 'price' => 97000, 'stock' => 20],
+                ],
                 'image' => 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=900&q=80',
             ],
             [
                 'category' => 'arabica',
                 'name' => 'Toraja Sapan Washed',
                 'description' => 'Kopi Toraja dengan acidity bersih, note rempah, dan sweetness cokelat.',
-                'price' => 88000,
-                'stock' => 42,
-                'weight' => 250,
                 'roast_level' => 'medium-dark',
                 'origin' => 'Tana Toraja',
-                'brewing_method' => 'French Press, V60, Espresso',
+                'brewing_methods' => ['French Press', 'V60', 'Espresso'],
+                'variants' => [
+                    ['weight_grams' => 200, 'grind_size' => 'Coarse', 'price' => 72000, 'stock' => 14],
+                    ['weight_grams' => 250, 'grind_size' => 'Medium', 'price' => 88000, 'stock' => 42],
+                    ['weight_grams' => 500, 'grind_size' => 'Medium', 'price' => 165000, 'stock' => 16],
+                ],
                 'image' => 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=80',
             ],
             [
                 'category' => 'robusta',
                 'name' => 'Robusta Temanggung Natural',
                 'description' => 'Robusta dengan body tebal, crema kuat, dan rasa kacang panggang.',
-                'price' => 62000,
-                'stock' => 50,
-                'weight' => 250,
                 'roast_level' => 'dark',
                 'origin' => 'Temanggung',
-                'brewing_method' => 'Espresso, Moka Pot, Tubruk',
+                'brewing_methods' => ['Espresso', 'Moka Pot', 'Tubruk'],
+                'variants' => [
+                    ['weight_grams' => 100, 'grind_size' => 'Fine', 'price' => 28000, 'stock' => 24],
+                    ['weight_grams' => 250, 'grind_size' => 'Fine', 'price' => 62000, 'stock' => 50],
+                    ['weight_grams' => 1000, 'grind_size' => 'Medium', 'price' => 225000, 'stock' => 8],
+                ],
                 'image' => 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80',
             ],
             [
                 'category' => 'blend',
                 'name' => 'Espresso Blend Cokelat',
                 'description' => 'Blend arabika dan robusta untuk espresso dengan rasa cokelat, kacang, dan body stabil.',
-                'price' => 78000,
-                'stock' => 60,
-                'weight' => 250,
                 'roast_level' => 'medium-dark',
                 'origin' => 'Jawa Barat, Lampung',
-                'brewing_method' => 'Espresso, Cappuccino, Moka Pot',
+                'brewing_methods' => ['Espresso', 'Moka Pot'],
+                'variants' => [
+                    ['weight_grams' => 250, 'grind_size' => 'Fine', 'price' => 78000, 'stock' => 60],
+                    ['weight_grams' => 500, 'grind_size' => 'Fine', 'price' => 148000, 'stock' => 22],
+                    ['weight_grams' => 500, 'grind_size' => 'Medium', 'price' => 148000, 'stock' => 18],
+                ],
                 'image' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80',
             ],
         ];
@@ -142,16 +151,32 @@ class DatabaseSeeder extends Seeder
                     'name' => $product['name'],
                     'slug' => Str::slug($product['name']),
                     'description' => $product['description'],
-                    'price' => $product['price'],
-                    'stock' => $product['stock'],
-                    'weight' => $product['weight'],
                     'roast_level' => $product['roast_level'],
                     'origin' => $product['origin'],
-                    'brewing_method' => $product['brewing_method'],
                     'image' => $product['image'],
-                    'status' => 'active',
                 ],
             );
+
+            $methodIds = collect($product['brewing_methods'])
+                ->map(function (string $name) {
+                    return BrewingMethod::updateOrCreate(
+                        ['slug' => Str::slug($name)],
+                        ['name' => $name],
+                    )->id;
+                })
+                ->all();
+
+            $model->brewingMethods()->sync($methodIds);
+
+            foreach ($product['variants'] as $index => $variant) {
+                $model->variants()->updateOrCreate(
+                    [
+                        'weight_grams' => $variant['weight_grams'],
+                        'grind_size' => $variant['grind_size'],
+                    ],
+                    $variant + ['sort_order' => $index],
+                );
+            }
 
             ProductImage::updateOrCreate(
                 ['product_id' => $model->id, 'path' => $product['image']],

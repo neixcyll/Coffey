@@ -54,10 +54,10 @@ class MidtransService
                 ],
             ],
             'item_details' => $order->items->map(fn ($item) => [
-                'id' => (string) $item->product_id,
+                'id' => (string) ($item->product_variant_id ?: $item->product_id),
                 'price' => (int) round((float) $item->price),
                 'quantity' => $item->quantity,
-                'name' => mb_substr($item->product_name, 0, 50),
+                'name' => mb_substr(trim($item->product_name.' '.$item->variant_label), 0, 50),
             ])->values()->all(),
         ];
 

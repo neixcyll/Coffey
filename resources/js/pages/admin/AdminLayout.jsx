@@ -1,27 +1,31 @@
-export default function AdminLayout({ current, navigate, children }) {
-    const items = [
-        ['admin-dashboard', 'Dashboard'],
-        ['admin-users', 'Users'],
-        ['admin-sellers', 'Sellers'],
-        ['admin-categories', 'Categories'],
-        ['admin-products', 'Products'],
-        ['admin-orders', 'Orders'],
-        ['admin-payments', 'Payments'],
-        ['admin-content', 'Content'],
-        ['admin-affiliates', 'Affiliates'],
-        ['admin-affiliate-commissions', 'Commissions'],
-        ['admin-reports', 'Reports'],
-    ];
+import { useState } from 'react';
+import AdminSidebar from './AdminSidebar.jsx';
+import AdminTopbar from './AdminTopbar.jsx';
+
+export default function AdminLayout({ current, navigate, user, logout, notice, children }) {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
         <section className="admin-layout">
-            <aside className="admin-sidebar">
-                <strong>Admin</strong>
-                {items.map(([view, label]) => (
-                    <button key={view} className={current === view ? 'active' : ''} onClick={() => navigate(view)}>{label}</button>
-                ))}
-            </aside>
-            <div className="admin-content">{children}</div>
+            {sidebarOpen && <button className="admin-sidebar-overlay" type="button" aria-label="Tutup menu admin" onClick={() => setSidebarOpen(false)} />}
+            <AdminSidebar
+                current={current}
+                navigate={navigate}
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
+            <div className="admin-shell">
+                <AdminTopbar
+                    current={current}
+                    user={user}
+                    logout={logout}
+                    onMenuClick={() => setSidebarOpen(true)}
+                />
+                <main className="admin-content">
+                    {notice && <div className="notice admin-notice">{notice}</div>}
+                    {children}
+                </main>
+            </div>
         </section>
     );
 }

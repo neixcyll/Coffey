@@ -15,18 +15,14 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');
-            $table->decimal('price', 12, 2);
-            $table->unsignedInteger('stock');
-            $table->unsignedInteger('weight')->comment('Weight in grams');
             $table->string('roast_level')->index();
             $table->string('origin')->index();
-            $table->string('brewing_method')->nullable();
             $table->string('image')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active')->index();
             $table->timestamps();
 
-            $table->index(['category_id', 'status']);
-            $table->index(['seller_id', 'status']);
+            $table->index('category_id');
+            $table->index('seller_id');
+            $table->unique(['seller_id', 'name']);
         });
     }
 

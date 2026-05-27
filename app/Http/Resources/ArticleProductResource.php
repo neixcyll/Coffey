@@ -11,7 +11,6 @@ class ArticleProductResource extends JsonResource
     {
         $product = $this->product;
         $internalAvailable = $product
-            && $product->status === 'active'
             && $product->stock > 0
             && $product->seller?->status === 'active';
 
@@ -34,7 +33,6 @@ class ArticleProductResource extends JsonResource
                 'slug' => $product->slug,
                 'price' => $product->price,
                 'stock' => $product->stock,
-                'status' => $product->status,
                 'image_url' => $product->image_url,
                 'category' => $product->category ? [
                     'id' => $product->category->id,

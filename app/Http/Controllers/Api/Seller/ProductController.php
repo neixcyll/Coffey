@@ -8,6 +8,7 @@ use App\Http\Requests\Seller\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -17,7 +18,7 @@ class ProductController extends Controller
         $seller = $this->seller($request);
 
         $products = Product::query()
-            ->with(['category', 'images'])
+            ->with(['category', 'images', 'variants', 'brewingMethods'])
             ->withAvg(['reviews as avg_rating' => fn ($query) => $query->where('status', 'published')], 'rating')
             ->withCount(['reviews as reviews_count' => fn ($query) => $query->where('status', 'published')])
             ->where('seller_id', $seller->id)
@@ -30,21 +31,26 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request): JsonResponse
     {
         $seller = $this->seller($request);
-        $data = $request->safe()->except(['image', 'images']);
+        $data = $request->safe()->except(['image', 'images', 'variants', 'brewing_methods']);
         $data['seller_id'] = $seller->id;
         $data['slug'] = $this->uniqueProductSlug($data['name']);
-        $data['status'] = $data['status'] ?? 'active';
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        $product = Product::create($data);
-        $this->storeImages($request, $product);
+        $product = DB::transaction(function () use ($request, $data) {
+            $product = Product::create($data);
+            $this->syncBrewingMethods($product, $request->input('brewing_methods', []));
+            $this->syncVariants($product, $request->input('variants', []));
+            $this->storeImages($request, $product);
+
+            return $product;
+        });
 
         return response()->json([
             'message' => 'Produk berhasil dibuat.',
-            'data' => $product->load(['category', 'images']),
+            'data' => $product->fresh()->load(['category', 'images', 'variants', 'brewingMethods']),
         ], 201);
     }
 
@@ -53,7 +59,7 @@ class ProductController extends Controller
         $this->authorizeSellerProduct($request, $product);
 
         return response()->json([
-            'data' => $product->load(['category', 'images']),
+            'data' => $product->load(['category', 'images', 'variants', 'brewingMethods']),
         ]);
     }
 
@@ -61,7 +67,7 @@ class ProductController extends Controller
     {
         $this->authorizeSellerProduct($request, $product);
 
-        $data = $request->safe()->except(['image', 'images']);
+        $data = $request->safe()->except(['image', 'images', 'variants', 'brewing_methods']);
 
         if (isset($data['name']) && $data['name'] !== $product->name) {
             $data['slug'] = $this->uniqueProductSlug($data['name'], $product);
@@ -71,12 +77,23 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        $product->update($data);
-        $this->storeImages($request, $product);
+        DB::transaction(function () use ($request, $product, $data) {
+            $product->update($data);
+
+            if ($request->has('brewing_methods') || $request->has('brewing_methods_present')) {
+                $this->syncBrewingMethods($product, $request->input('brewing_methods', []));
+            }
+
+            if ($request->has('variants')) {
+                $this->syncVariants($product, $request->input('variants', []));
+            }
+
+            $this->storeImages($request, $product);
+        });
 
         return response()->json([
             'message' => 'Produk berhasil diperbarui.',
-            'data' => $product->fresh()->load(['category', 'images']),
+            'data' => $product->fresh()->load(['category', 'images', 'variants', 'brewingMethods']),
         ]);
     }
 
@@ -151,5 +168,51 @@ class ProductController extends Controller
         if (! $product->image) {
             $product->update(['image' => $paths[0]]);
         }
+    }
+
+    private function syncBrewingMethods(Product $product, array $methodIds): void
+    {
+        $product->brewingMethods()->sync(
+            collect($methodIds)
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
+        );
+    }
+
+    private function syncVariants(Product $product, array $variants): void
+    {
+        $keptVariantIds = [];
+
+        foreach (array_values($variants) as $index => $variant) {
+            $payload = [
+                'weight_grams' => (int) $variant['weight_grams'],
+                'grind_size' => trim((string) $variant['grind_size']),
+                'price' => $variant['price'],
+                'stock' => (int) $variant['stock'],
+                'sku' => $variant['sku'] ?? null,
+                'sort_order' => $index,
+            ];
+
+            $existing = ! empty($variant['id'])
+                ? $product->variants()->whereKey((int) $variant['id'])->first()
+                : null;
+
+            if ($existing) {
+                $existing->update($payload);
+                $keptVariantIds[] = $existing->id;
+
+                continue;
+            }
+
+            $created = $product->variants()->create($payload);
+            $keptVariantIds[] = $created->id;
+        }
+
+        $product->variants()
+            ->when($keptVariantIds !== [], fn ($query) => $query->whereKeyNot($keptVariantIds))
+            ->delete();
     }
 }

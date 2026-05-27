@@ -39,13 +39,14 @@ class PaymentStatusServiceTest extends TestCase
             'name' => 'Kopi Test',
             'slug' => 'kopi-test',
             'description' => 'Kopi untuk test',
-            'price' => 50000,
-            'stock' => 7,
-            'weight' => 250,
             'roast_level' => 'medium',
             'origin' => 'Bandung',
-            'brewing_method' => 'espresso',
-            'status' => 'active',
+        ]);
+        $variant = $product->variants()->create([
+            'weight_grams' => 250,
+            'grind_size' => 'Medium',
+            'price' => 50000,
+            'stock' => 7,
         ]);
         $order = Order::create([
             'user_id' => $customer->id,
@@ -58,8 +59,12 @@ class PaymentStatusServiceTest extends TestCase
         ]);
         $order->items()->create([
             'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
             'seller_id' => $seller->id,
             'product_name' => $product->name,
+            'variant_label' => $variant->label,
+            'weight_grams' => $variant->weight_grams,
+            'grind_size' => $variant->grind_size,
             'price' => 50000,
             'quantity' => 2,
             'subtotal' => 100000,
@@ -100,6 +105,6 @@ class PaymentStatusServiceTest extends TestCase
             'payment_type' => 'qris',
         ]);
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
-        $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 5]);
+        $this->assertDatabaseHas('product_variants', ['id' => $variant->id, 'stock' => 5]);
     }
 }

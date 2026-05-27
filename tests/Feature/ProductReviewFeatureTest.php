@@ -149,13 +149,14 @@ class ProductReviewFeatureTest extends TestCase
             'name' => 'Kopi Review Test',
             'slug' => 'kopi-review-test',
             'description' => 'Kopi untuk test review produk.',
-            'price' => 50000,
-            'stock' => 7,
-            'weight' => 250,
             'roast_level' => 'medium',
             'origin' => 'Bandung',
-            'brewing_method' => 'v60',
-            'status' => 'active',
+        ]);
+        $product->variants()->create([
+            'weight_grams' => 250,
+            'grind_size' => 'Medium',
+            'price' => 50000,
+            'stock' => 7,
         ]);
         $order = $this->completedOrder($customer, $product, $seller, $orderStatus, $itemStatus);
 
@@ -169,6 +170,14 @@ class ProductReviewFeatureTest extends TestCase
         string $orderStatus = 'completed',
         string $itemStatus = 'completed',
     ): Order {
+        $variant = $product->variants()->first()
+            ?: $product->variants()->create([
+                'weight_grams' => 250,
+                'grind_size' => 'Medium',
+                'price' => 50000,
+                'stock' => 7,
+            ]);
+
         $order = Order::create([
             'user_id' => $customer->id,
             'order_number' => 'KOPI-TEST-'.uniqid(),
@@ -181,8 +190,12 @@ class ProductReviewFeatureTest extends TestCase
 
         $order->items()->create([
             'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
             'seller_id' => $seller->id,
             'product_name' => $product->name,
+            'variant_label' => $variant->label,
+            'weight_grams' => $variant->weight_grams,
+            'grind_size' => $variant->grind_size,
             'price' => 50000,
             'quantity' => 2,
             'subtotal' => 100000,

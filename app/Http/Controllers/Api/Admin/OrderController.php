@@ -12,7 +12,7 @@ class OrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         $orders = Order::query()
-            ->with(['user.role', 'affiliateProfile.user', 'items.product', 'items.seller.user', 'payment'])
+            ->with(['user.role', 'affiliateProfile.user', 'items.product', 'items.productVariant', 'items.seller.user', 'payment'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->toString()))
             ->when($request->filled('seller_id'), function ($query) use ($request) {
                 $query->whereHas('items', fn ($query) => $query->where('seller_id', $request->integer('seller_id')));
@@ -36,7 +36,7 @@ class OrderController extends Controller
     public function show(Order $order): JsonResponse
     {
         return response()->json([
-            'data' => $order->load(['user.role', 'affiliateProfile.user', 'affiliateCommissions', 'items.product', 'items.seller.user', 'payment']),
+            'data' => $order->load(['user.role', 'affiliateProfile.user', 'affiliateCommissions', 'items.product', 'items.productVariant', 'items.seller.user', 'payment']),
         ]);
     }
 }

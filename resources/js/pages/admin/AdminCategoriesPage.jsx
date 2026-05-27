@@ -7,7 +7,7 @@ import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminCategoriesPage({ token, navigate, setNotice }) {
+export default function AdminCategoriesPage({ token, navigate, setNotice, user, logout, notice }) {
     const [categories, setCategories] = useState([]);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({ name: '', description: '' });
@@ -58,7 +58,7 @@ export default function AdminCategoriesPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-categories" navigate={navigate}>
+        <AdminLayout current="admin-categories" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Category management" />
             <form className="panel form-grid admin-form" onSubmit={saveCategory}>
                 <TextInput label="Nama kategori" value={form.name} onChange={(value) => setForm({ ...form, name: value })} />

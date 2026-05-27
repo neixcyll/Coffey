@@ -27,7 +27,7 @@ class RoleMiddleware
             return response()->json(['message' => 'Akun ini diblokir.'], 403);
         }
 
-        if ($user->isAdmin() || $user->hasRole($roles)) {
+        if ($user->hasRole($roles)) {
             return $next($request);
         }
 

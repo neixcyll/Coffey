@@ -47,7 +47,7 @@ export default function SellerOrders({ token, navigate, setNotice, refreshSeller
                             <strong>{formatPrice(order.seller_total)}</strong>
                         </div>
                         {order.items.map((item) => (
-                            <p className="muted" key={item.id}>{item.product_name} x {item.quantity} - {item.status}</p>
+                            <p className="muted" key={item.id}>{item.product_name}{item.variant_label ? ` (${item.variant_label})` : ''} x {item.quantity} - {item.status}</p>
                         ))}
                         <div className="row">
                             {['processing', 'shipped', 'completed'].map((status) => (

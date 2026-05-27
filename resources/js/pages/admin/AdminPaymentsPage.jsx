@@ -6,7 +6,7 @@ import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminPaymentsPage({ token, navigate, setNotice }) {
+export default function AdminPaymentsPage({ token, navigate, setNotice, user, logout, notice }) {
     const [payments, setPayments] = useState([]);
     const [status, setStatus] = useState('');
 
@@ -27,7 +27,7 @@ export default function AdminPaymentsPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-payments" navigate={navigate}>
+        <AdminLayout current="admin-payments" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Payment monitoring" />
             <div className="filters compact">
                 <select value={status} onChange={(event) => setStatus(event.target.value)}>

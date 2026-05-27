@@ -8,7 +8,7 @@ import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminContentPage({ token, navigate, setNotice }) {
+export default function AdminContentPage({ token, navigate, setNotice, user, logout, notice }) {
     const [articles, setArticles] = useState([]);
     const [categories, setCategories] = useState([]);
     const [status, setStatus] = useState('');
@@ -144,7 +144,7 @@ export default function AdminContentPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-content" navigate={navigate}>
+        <AdminLayout current="admin-content" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Content Management" />
             <div className="filters compact">
                 <select value={status} onChange={(event) => setStatus(event.target.value)}>

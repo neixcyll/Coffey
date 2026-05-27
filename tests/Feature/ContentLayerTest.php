@@ -42,13 +42,14 @@ class ContentLayerTest extends TestCase
             'name' => 'Grinder Test',
             'slug' => 'grinder-test',
             'description' => 'Grinder untuk test review',
-            'price' => 750000,
-            'stock' => 5,
-            'weight' => 500,
             'roast_level' => 'medium',
             'origin' => 'Bandung',
-            'brewing_method' => 'v60',
-            'status' => 'active',
+        ]);
+        $product->variants()->create([
+            'weight_grams' => 500,
+            'grind_size' => 'Medium',
+            'price' => 750000,
+            'stock' => 5,
         ]);
 
         app(AffiliateService::class)->registerProfile($affiliateUser, [

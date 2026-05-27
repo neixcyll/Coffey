@@ -40,7 +40,10 @@ class UserController extends Controller
                 'role',
                 'sellerProfile.products.category',
                 'sellerProfile.products.images',
+                'sellerProfile.products.variants',
+                'sellerProfile.products.brewingMethods',
                 'cart.items.product',
+                'cart.items.productVariant',
             ])->loadCount('cart'),
         ]);
     }

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
-use App\Models\Cart;
 use App\Models\AffiliateClick;
+use App\Models\Cart;
 use App\Models\Order;
-use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\AffiliateService;
 use App\Services\MidtransService;
 use Illuminate\Http\JsonResponse;
@@ -51,24 +51,37 @@ class CheckoutController extends Controller
             $totalAmount = 0;
 
             foreach ($items as $cartItem) {
-                $product = Product::with('seller')->whereKey($cartItem->product_id)->lockForUpdate()->firstOrFail();
+                $variant = ProductVariant::query()
+                    ->with('product.seller')
+                    ->whereKey($cartItem->product_variant_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $product = $variant->product;
 
-                if ($product->status !== 'active' || $product->seller?->status !== 'active') {
+                if ($variant->product_id !== (int) $cartItem->product_id) {
+                    abort(response()->json(['message' => "Variant {$product->name} tidak valid."], 422));
+                }
+
+                if ($product->seller?->status !== 'active') {
                     abort(response()->json(['message' => "Produk {$product->name} tidak aktif."], 422));
                 }
 
-                if ($cartItem->quantity > $product->stock) {
-                    abort(response()->json(['message' => "Stock {$product->name} tidak mencukupi."], 422));
+                if ($cartItem->quantity > $variant->stock) {
+                    abort(response()->json(['message' => "Stock variant {$product->name} tidak mencukupi."], 422));
                 }
 
-                $subtotal = (float) $product->price * $cartItem->quantity;
+                $subtotal = (float) $variant->price * $cartItem->quantity;
                 $totalAmount += $subtotal;
 
                 $orderItems[] = [
                     'product_id' => $product->id,
+                    'product_variant_id' => $variant->id,
                     'seller_id' => $product->seller_id,
                     'product_name' => $product->name,
-                    'price' => $product->price,
+                    'variant_label' => $variant->label,
+                    'weight_grams' => $variant->weight_grams,
+                    'grind_size' => $variant->grind_size,
+                    'price' => $variant->price,
                     'quantity' => $cartItem->quantity,
                     'subtotal' => $subtotal,
                     'status' => 'pending',
@@ -97,7 +110,7 @@ class CheckoutController extends Controller
                 'status' => 'pending',
             ]);
 
-            return $order->load(['items.product', 'payment', 'user']);
+            return $order->load(['items.product', 'items.productVariant', 'payment', 'user']);
         });
 
         try {
@@ -119,7 +132,7 @@ class CheckoutController extends Controller
 
         return response()->json([
             'message' => 'Checkout berhasil dibuat.',
-            'data' => $order->fresh()->load(['items.product', 'payment']),
+            'data' => $order->fresh()->load(['items.product', 'items.productVariant', 'payment']),
             'snap_token' => $snap->token,
             'redirect_url' => $snap->redirect_url,
             'midtrans_client_key' => $midtrans->clientKey(),

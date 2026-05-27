@@ -19,7 +19,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->whereHas('items', fn ($query) => $query->where('seller_id', $seller->id))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->toString()))
-            ->with(['items' => fn ($query) => $query->where('seller_id', $seller->id)->with('product')])
+            ->with(['items' => fn ($query) => $query->where('seller_id', $seller->id)->with(['product', 'productVariant'])])
             ->with('payment')
             ->latest()
             ->paginate($request->integer('per_page', 10));
@@ -48,7 +48,7 @@ class OrderController extends Controller
             ->with(['items' => function ($query) use ($seller) {
                 $query->where('seller_id', $seller->id)
                     ->where('status', 'pending')
-                    ->with('product');
+                    ->with(['product', 'productVariant']);
             }])
             ->with('payment')
             ->latest()
@@ -72,7 +72,7 @@ class OrderController extends Controller
         abort_if(! $order->items()->where('seller_id', $seller->id)->exists(), 404);
 
         $order->load([
-            'items' => fn ($query) => $query->where('seller_id', $seller->id)->with('product'),
+            'items' => fn ($query) => $query->where('seller_id', $seller->id)->with(['product', 'productVariant']),
             'payment',
         ]);
 

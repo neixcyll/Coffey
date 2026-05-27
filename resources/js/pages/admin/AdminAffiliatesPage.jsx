@@ -6,7 +6,7 @@ import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
 
-export default function AdminAffiliatesPage({ token, navigate, setNotice }) {
+export default function AdminAffiliatesPage({ token, navigate, setNotice, user, logout, notice }) {
     const [affiliates, setAffiliates] = useState([]);
     const [status, setStatus] = useState('');
 
@@ -37,7 +37,7 @@ export default function AdminAffiliatesPage({ token, navigate, setNotice }) {
     if (!token) return <NeedLogin navigate={navigate} />;
 
     return (
-        <AdminLayout current="admin-affiliates" navigate={navigate}>
+        <AdminLayout current="admin-affiliates" navigate={navigate} user={user} logout={logout} notice={notice}>
             <PageTitle eyebrow="Admin" title="Affiliate monitoring" />
             <div className="filters compact">
                 <select value={status} onChange={(event) => setStatus(event.target.value)}>

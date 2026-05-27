@@ -4,9 +4,8 @@ import ProductImage from '../../components/product/ProductImage.jsx';
 import StarRating from '../../components/review/StarRating.jsx';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, optionLabel } from '../../utils/format.js';
-import { roleName } from '../../utils/route.js';
 
-export default function CatalogPage({ token, user, navigate, setNotice, refreshCartCount }) {
+export default function CatalogPage({ navigate, setNotice }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,22 +23,6 @@ export default function CatalogPage({ token, user, navigate, setNotice, refreshC
             .catch((error) => setNotice(error.message))
             .finally(() => setLoading(false));
     }, [filters, setNotice]);
-
-    async function addToCart(productId) {
-        if (!token || roleName(user) !== 'customer') {
-            setNotice('Login sebagai customer untuk belanja.');
-            navigate('login');
-            return;
-        }
-
-        try {
-            await apiRequest('/cart/items', { method: 'POST', token, body: { product_id: productId, quantity: 1 } });
-            await refreshCartCount?.();
-            setNotice('Produk berhasil ditambahkan ke cart. Cek ikon cart di kanan atas.');
-        } catch (error) {
-            setNotice(error.message);
-        }
-    }
 
     return (
         <section>
@@ -84,10 +67,10 @@ export default function CatalogPage({ token, user, navigate, setNotice, refreshC
                                     </div>
                                     <p className="muted">{product.origin} - {optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level)}</p>
                                 </div>
-                                <strong>{formatPrice(product.price)}</strong>
+                                <strong>{priceLabel(product)}</strong>
                                 <div className="row">
                                     <button className="btn ghost" onClick={() => navigate('product', product.slug || product.id)}>Detail</button>
-                                    <button className="btn primary" onClick={() => addToCart(product.id)}>Cart</button>
+                                    <button className="btn primary" onClick={() => navigate('product', product.slug || product.id)}>Pilih Varian</button>
                                 </div>
                             </div>
                         </article>
@@ -96,4 +79,11 @@ export default function CatalogPage({ token, user, navigate, setNotice, refreshC
             )}
         </section>
     );
+}
+
+function priceLabel(product) {
+    const min = Number(product.min_price ?? product.price ?? 0);
+    const max = Number(product.max_price ?? product.price ?? min);
+
+    return max > min ? `${formatPrice(min)} - ${formatPrice(max)}` : formatPrice(min);
 }

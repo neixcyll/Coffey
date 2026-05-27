@@ -37,7 +37,7 @@ class SellerController extends Controller
 
     public function show(SellerProfile $seller): JsonResponse
     {
-        $seller->load(['user.role', 'products.category', 'products.images']);
+        $seller->load(['user.role', 'products.category', 'products.images', 'products.variants', 'products.brewingMethods']);
 
         return response()->json([
             'data' => $this->sellerPayload($seller) + [

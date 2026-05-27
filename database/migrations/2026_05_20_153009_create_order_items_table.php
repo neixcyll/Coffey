@@ -12,8 +12,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
+            $table->foreignId('product_variant_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('seller_id')->constrained('seller_profiles')->cascadeOnDelete();
             $table->string('product_name');
+            $table->string('variant_label')->nullable();
+            $table->unsignedInteger('weight_grams')->nullable();
+            $table->string('grind_size', 100)->nullable();
             $table->decimal('price', 12, 2);
             $table->unsignedInteger('quantity');
             $table->decimal('subtotal', 12, 2);

@@ -165,7 +165,6 @@ class ProductReviewController extends Controller
             })
             ->firstOrFail();
 
-        abort_if($product->status !== 'active', 404);
         abort_if($product->seller?->status !== 'active', 404);
 
         return $product;

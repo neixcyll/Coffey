@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BREWING_OPTIONS, ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
-import { PRODUCT_STATUSES } from '../../constants/statuses.js';
+import { ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
 import TextArea from '../common/TextArea.jsx';
 import TextInput from '../common/TextInput.jsx';
 
 const PRODUCT_IMAGE_LIMIT_BYTES = 1.8 * 1024 * 1024;
 
-export default function ProductForm({ categories, product, onSubmit, feedback }) {
+export default function ProductForm({ categories, brewingMethods = [], product, onSubmit, feedback }) {
     const [form, setForm] = useState(defaultProductForm(product));
     const [file, setFile] = useState(null);
     const [fileMessage, setFileMessage] = useState('');
@@ -26,22 +25,66 @@ export default function ProductForm({ categories, product, onSubmit, feedback })
         setForm((current) => ({ ...current, [field]: value }));
     }
 
+    function toggleBrewing(methodId) {
+        const id = String(methodId);
+        setForm((current) => ({
+            ...current,
+            brewing_method_ids: current.brewing_method_ids.includes(id)
+                ? current.brewing_method_ids.filter((item) => item !== id)
+                : [...current.brewing_method_ids, id],
+        }));
+    }
+
+    function updateVariant(index, field, value) {
+        setForm((current) => ({
+            ...current,
+            variants: current.variants.map((variant, variantIndex) => (
+                variantIndex === index ? { ...variant, [field]: value } : variant
+            )),
+        }));
+    }
+
+    function addVariant() {
+        setForm((current) => ({
+            ...current,
+            variants: [...current.variants, emptyVariant()],
+        }));
+    }
+
+    function removeVariant(index) {
+        setForm((current) => ({
+            ...current,
+            variants: current.variants.length === 1
+                ? current.variants
+                : current.variants.filter((_, variantIndex) => variantIndex !== index),
+        }));
+    }
+
     function submit(event) {
         event.preventDefault();
         if (processingImage || fileError) return;
 
         const payload = new FormData();
-        Object.entries(form).forEach(([key, value]) => {
-            if (key === 'weight_unit') return;
-            if (key === 'weight') {
-                const grams = form.weight_unit === 'kg'
-                    ? Math.round(Number(value || 0) * 1000)
-                    : Number(value || 0);
-                payload.append('weight', grams);
-                return;
-            }
-            payload.append(key, value);
+        ['category_id', 'name', 'description', 'roast_level', 'origin'].forEach((key) => {
+            payload.append(key, form[key]);
         });
+
+        payload.append('brewing_methods_present', '1');
+        form.brewing_method_ids.forEach((id) => payload.append('brewing_methods[]', id));
+
+        form.variants.forEach((variant, index) => {
+            const grams = variant.weight_unit === 'kg'
+                ? Math.round(Number(variant.weight || 0) * 1000)
+                : Number(variant.weight || 0);
+
+            if (variant.id) payload.append(`variants[${index}][id]`, variant.id);
+            payload.append(`variants[${index}][weight_grams]`, grams);
+            payload.append(`variants[${index}][grind_size]`, variant.grind_size);
+            payload.append(`variants[${index}][price]`, variant.price);
+            payload.append(`variants[${index}][stock]`, variant.stock);
+            if (variant.sku) payload.append(`variants[${index}][sku]`, variant.sku);
+        });
+
         if (file) payload.append('image', file);
         onSubmit(payload, product?.id);
     }
@@ -86,11 +129,9 @@ export default function ProductForm({ categories, product, onSubmit, feedback })
         }
     }
 
-    const hasCustomBrewing = form.brewing_method && !BREWING_OPTIONS.some((option) => option.value === form.brewing_method);
-
     return (
         <form className="panel form-grid" onSubmit={submit}>
-            <h2>{product ? 'Edit produk' : 'Tambah produk'}</h2>
+            <h2>Informasi produk</h2>
             <select value={form.category_id} onChange={(event) => update('category_id', event.target.value)} required>
                 <option value="">Pilih kategori</option>
                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -98,18 +139,6 @@ export default function ProductForm({ categories, product, onSubmit, feedback })
             <TextInput label="Nama" value={form.name} onChange={(value) => update('name', value)} />
             <TextArea label="Deskripsi" value={form.description} onChange={(value) => update('description', value)} required />
             <div className="grid-2">
-                <TextInput label="Harga" type="number" value={form.price} onChange={(value) => update('price', value)} />
-                <TextInput label="Stock" type="number" value={form.stock} onChange={(value) => update('stock', value)} />
-                <div className="unit-row">
-                    <TextInput label="Berat" type="number" value={form.weight} onChange={(value) => update('weight', value)} />
-                    <label>
-                        <span>Satuan</span>
-                        <select value={form.weight_unit} onChange={(event) => update('weight_unit', event.target.value)}>
-                            <option value="gram">Gram</option>
-                            <option value="kg">Kg</option>
-                        </select>
-                    </label>
-                </div>
                 <label>
                     <span>Roast level</span>
                     <select value={form.roast_level} onChange={(event) => update('roast_level', event.target.value)} required>
@@ -118,18 +147,66 @@ export default function ProductForm({ categories, product, onSubmit, feedback })
                     </select>
                 </label>
                 <TextInput label="Origin" value={form.origin} onChange={(value) => update('origin', value)} />
-                <label>
-                    <span>Brewing</span>
-                    <select value={form.brewing_method} onChange={(event) => update('brewing_method', event.target.value)}>
-                        <option value="">Pilih brewing</option>
-                        {hasCustomBrewing && <option value={form.brewing_method}>{form.brewing_method}</option>}
-                        {BREWING_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                    </select>
-                </label>
             </div>
-            <select value={form.status} onChange={(event) => update('status', event.target.value)}>
-                {PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-            </select>
+
+            <div className="field-block">
+                <span>Brewing method</span>
+                <div className="option-pills">
+                    {brewingMethods.map((method) => {
+                        const selected = form.brewing_method_ids.includes(String(method.id));
+
+                        return (
+                            <label className={`pill-check ${selected ? 'selected' : ''}`} key={method.id}>
+                                <input type="checkbox" checked={selected} onChange={() => toggleBrewing(method.id)} />
+                                <span>{method.name}</span>
+                            </label>
+                        );
+                    })}
+                    {brewingMethods.length === 0 && <p className="muted">Brewing method belum tersedia.</p>}
+                </div>
+            </div>
+
+            <div className="variant-editor">
+                <div className="section-head compact-head">
+                    <h3>Variant berat dan gilingan</h3>
+                    <button type="button" className="btn ghost compact-btn" onClick={addVariant}>Tambah variant</button>
+                </div>
+                <div className="variant-list">
+                    {form.variants.map((variant, index) => (
+                        <div className="variant-row" key={variant.client_id}>
+                            <div className="unit-row">
+                                <label>
+                                    <span>Berat</span>
+                                    <input type="number" min="1" value={variant.weight} onChange={(event) => updateVariant(index, 'weight', event.target.value)} required />
+                                </label>
+                                <label>
+                                    <span>Satuan</span>
+                                    <select value={variant.weight_unit} onChange={(event) => updateVariant(index, 'weight_unit', event.target.value)}>
+                                        <option value="gram">Gram</option>
+                                        <option value="kg">Kg</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <label>
+                                <span>Gilingan</span>
+                                <input value={variant.grind_size} onChange={(event) => updateVariant(index, 'grind_size', event.target.value)} required />
+                            </label>
+                            <label>
+                                <span>Harga</span>
+                                <input type="number" min="0" value={variant.price} onChange={(event) => updateVariant(index, 'price', event.target.value)} required />
+                            </label>
+                            <label>
+                                <span>Stok</span>
+                                <input type="number" min="0" value={variant.stock} onChange={(event) => updateVariant(index, 'stock', event.target.value)} required />
+                            </label>
+                            <button type="button" className="btn danger compact-btn" disabled={form.variants.length === 1} onClick={() => removeVariant(index)}>
+                                Hapus
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             <input key={fileInputKey} type="file" accept="image/*" onChange={handleFileChange} />
             {(feedback || fileMessage || fileError) && (
                 <div className={`form-alert ${fileError || feedback ? 'error' : 'success'}`}>
@@ -148,14 +225,43 @@ export function defaultProductForm(product) {
         category_id: product?.category_id || '',
         name: product?.name || '',
         description: product?.description || '',
-        price: product?.price || '',
-        stock: product?.stock || '',
-        weight: product?.weight >= 1000 ? Number(product.weight) / 1000 : product?.weight || '',
-        weight_unit: product?.weight >= 1000 ? 'kg' : 'gram',
         roast_level: product?.roast_level || '',
         origin: product?.origin || '',
-        brewing_method: product?.brewing_method || '',
-        status: product?.status || 'active',
+        brewing_method_ids: (product?.brewing_methods || []).map((method) => String(method.id)),
+        variants: normalizeVariants(product?.variants),
+    };
+}
+
+function normalizeVariants(variants = []) {
+    if (!variants.length) return [emptyVariant()];
+
+    return variants.map((variant) => {
+        const grams = Number(variant.weight_grams || 0);
+        const useKg = grams >= 1000 && grams % 1000 === 0;
+
+        return {
+            client_id: `variant-${variant.id}`,
+            id: variant.id ? String(variant.id) : '',
+            weight: useKg ? String(grams / 1000) : String(grams || ''),
+            weight_unit: useKg ? 'kg' : 'gram',
+            grind_size: variant.grind_size || '',
+            price: variant.price || '',
+            stock: variant.stock ?? '',
+            sku: variant.sku || '',
+        };
+    });
+}
+
+function emptyVariant() {
+    return {
+        client_id: `variant-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        id: '',
+        weight: '',
+        weight_unit: 'gram',
+        grind_size: '',
+        price: '',
+        stock: '',
+        sku: '',
     };
 }
 

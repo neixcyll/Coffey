@@ -54,7 +54,7 @@ class AffiliateContentController extends Controller
         $this->profile($request, $affiliates);
 
         $articles = Article::query()
-            ->with(['category', 'author.creatorProfile', 'articleProducts.product.seller'])
+            ->with(['category', 'author.creatorProfile', 'articleProducts.product.seller', 'articleProducts.product.variants'])
             ->withCount(['views', 'clicks'])
             ->where('author_id', $request->user()->id)
             ->where('author_type', 'affiliate')
@@ -84,7 +84,7 @@ class AffiliateContentController extends Controller
 
         return response()->json([
             'message' => 'Artikel dibuat dan menunggu review admin.',
-            'data' => new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.seller'])->loadCount(['views', 'clicks'])),
+            'data' => new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.seller', 'articleProducts.product.variants'])->loadCount(['views', 'clicks'])),
         ], 201);
     }
 
@@ -93,7 +93,7 @@ class AffiliateContentController extends Controller
         $this->profile($request, $affiliates);
         abort_if($article->author_id !== $request->user()->id || $article->author_type !== 'affiliate', 404);
 
-        return (new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.category', 'articleProducts.product.seller'])->loadCount(['views', 'clicks'])))->response();
+        return (new ArticleResource($article->load(['category', 'author.creatorProfile', 'articleProducts.product.category', 'articleProducts.product.seller', 'articleProducts.product.variants'])->loadCount(['views', 'clicks'])))->response();
     }
 
     public function update(Request $request, Article $article, AffiliateService $affiliates, ArticleService $articles): JsonResponse
@@ -120,7 +120,7 @@ class AffiliateContentController extends Controller
 
         return response()->json([
             'message' => 'Artikel diperbarui dan kembali menunggu review admin.',
-            'data' => new ArticleResource($article->fresh()->load(['category', 'author.creatorProfile', 'articleProducts.product.seller'])->loadCount(['views', 'clicks'])),
+            'data' => new ArticleResource($article->fresh()->load(['category', 'author.creatorProfile', 'articleProducts.product.seller', 'articleProducts.product.variants'])->loadCount(['views', 'clicks'])),
         ]);
     }
 
