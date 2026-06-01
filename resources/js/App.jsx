@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import Header from './components/common/Header.jsx';
+import { useCallback, useEffect, useState } from 'react';
 import NeedLogin from './components/common/NeedLogin.jsx';
+import NotificationToast from './components/common/NotificationToast.jsx';
+import PublicLayout from './components/public/PublicLayout.jsx';
 import { apiRequest } from './services/api.js';
 import { affiliateRefFromUrl, defaultLandingFor, parseRoute, publicPathFor, rememberCurrentRoute, roleName } from './utils/route.js';
 import AuthPage from './pages/auth/AuthPage.jsx';
-import AffiliateContentPage from './pages/affiliate/AffiliateContentPage.jsx';
-import AffiliateDashboardPage from './pages/affiliate/AffiliateDashboardPage.jsx';
 import AdminAffiliateCommissionsPage from './pages/admin/AdminAffiliateCommissionsPage.jsx';
 import AdminAffiliatesPage from './pages/admin/AdminAffiliatesPage.jsx';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage.jsx';
@@ -17,14 +16,18 @@ import AdminProductsPage from './pages/admin/AdminProductsPage.jsx';
 import AdminReportsPage from './pages/admin/AdminReportsPage.jsx';
 import AdminSellersPage from './pages/admin/AdminSellersPage.jsx';
 import AdminUsersPage from './pages/admin/AdminUsersPage.jsx';
-import CartPage from './pages/customer/CartPage.jsx';
 import CheckoutPage from './pages/customer/CheckoutPage.jsx';
-import OrderHistory from './pages/customer/OrderHistory.jsx';
-import UserDashboardPage from './pages/customer/UserDashboardPage.jsx';
+import CustomerAccountSettings from './pages/customer/CustomerAccountSettings.jsx';
+import CustomerAffiliatePanel from './pages/customer/CustomerAffiliatePanel.jsx';
+import CustomerHub from './pages/customer/CustomerHub.jsx';
+import CustomerOrders from './pages/customer/CustomerOrders.jsx';
+import AboutPage from './pages/public/AboutPage.jsx';
 import BlogArticlePage from './pages/public/BlogArticlePage.jsx';
 import BlogIndexPage from './pages/public/BlogIndexPage.jsx';
 import CatalogPage from './pages/public/CatalogPage.jsx';
+import ContentLayerPage from './pages/public/ContentLayerPage.jsx';
 import CreatorPage from './pages/public/CreatorPage.jsx';
+import ExplorePage from './pages/public/ExplorePage.jsx';
 import ProductDetail from './pages/public/ProductDetail.jsx';
 import SellerDashboard from './pages/seller/SellerDashboard.jsx';
 import SellerLayout from './pages/seller/SellerLayout.jsx';
@@ -55,6 +58,15 @@ const ADMIN_VIEWS = [
     'admin-content',
 ];
 
+const CUSTOMER_VIEWS = [
+    'user-dashboard',
+    'orders',
+    'account-settings',
+    'affiliate-dashboard',
+    'affiliate-content-upload',
+    'affiliate-my-content',
+];
+
 export default function App() {
     const initialRoute = parseRoute();
     const [route, setRoute] = useState(initialRoute);
@@ -68,6 +80,7 @@ export default function App() {
     const [sellerNotifications, setSellerNotifications] = useState({ count: 0, orders: [] });
     const isSellerRoute = SELLER_VIEWS.includes(route.view);
     const isAdminRoute = ADMIN_VIEWS.includes(route.view);
+    const isCustomerRoute = CUSTOMER_VIEWS.includes(route.view);
 
     useEffect(() => {
         const onRouteChange = () => setRoute(parseRoute());
@@ -168,26 +181,54 @@ export default function App() {
         }
     }, [isAdminRoute, token, user?.role?.name]);
 
-    function navigate(view, id) {
+    useEffect(() => {
+        if (!isCustomerRoute) return;
+
+        if (!token) {
+            rememberCurrentRoute();
+            navigate('login');
+            return;
+        }
+
+        if (user && roleName(user) !== 'customer') {
+            setNotice('Halaman customer hanya untuk akun customer.');
+            navigate(defaultLandingFor(user));
+        }
+    }, [isCustomerRoute, token, user?.role?.name]);
+
+    useEffect(() => {
+        if (route.view !== 'user-dashboard') return;
+
+        navigate('orders', undefined, { replace: true });
+    }, [route.view]);
+
+    function navigate(view, id, { replace = false } = {}) {
         const publicPath = publicPathFor(view, id);
+        const updateHistory = replace ? 'replaceState' : 'pushState';
 
         if (publicPath) {
-            window.history.pushState({}, '', publicPath);
+            window.history[updateHistory]({}, '', publicPath);
             setRoute(parseRoute());
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
-        window.history.pushState({}, '', `/#${id ? `${view}/${id}` : view}`);
+        window.history[updateHistory]({}, '', `/#${id ? `${view}/${id}` : view}`);
         setRoute(parseRoute());
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function saveSession(nextToken, nextUser) {
+    function saveSession(nextToken, nextUser, { persist = true } = {}) {
         setToken(nextToken);
         setUser(nextUser);
-        localStorage.setItem('kopi_token', nextToken);
-        localStorage.setItem('kopi_user', JSON.stringify(nextUser));
+
+        if (persist) {
+            localStorage.setItem('kopi_token', nextToken);
+            localStorage.setItem('kopi_user', JSON.stringify(nextUser));
+        } else {
+            localStorage.removeItem('kopi_token');
+            localStorage.removeItem('kopi_user');
+        }
     }
 
     function updateCurrentUser(nextUser) {
@@ -222,6 +263,10 @@ export default function App() {
         const response = await apiRequest('/seller/notifications', { token }).catch(() => null);
         setSellerNotifications(response?.data || { count: 0, orders: [] });
     }
+
+    const dismissNotice = useCallback((message) => {
+        setNotice((current) => current === message ? '' : current);
+    }, []);
 
     const context = {
         token,
@@ -284,8 +329,28 @@ export default function App() {
         return <AdminDashboardPage {...context} />;
     }
 
+    function renderCustomerPage() {
+        if (!token) return <NeedLogin navigate={navigate} />;
+        if (!user) return <p className="muted">Memuat akses customer...</p>;
+        if (roleName(user) !== 'customer') {
+            return (
+                <div className="panel empty-state">
+                    <h1>Akses ditolak</h1>
+                    <p className="muted">Dashboard customer hanya bisa dibuka oleh akun customer.</p>
+                </div>
+            );
+        }
+
+        if (route.view === 'affiliate-dashboard') return <CustomerAffiliatePanel section={route.id || 'overview'} {...context} />;
+        if (route.view === 'affiliate-content-upload') return <CustomerAffiliatePanel section="upload" {...context} />;
+        if (route.view === 'affiliate-my-content') return <CustomerAffiliatePanel section="content" {...context} />;
+        if (route.view === 'account-settings') return <CustomerAccountSettings {...context} />;
+
+        return <CustomerOrders {...context} />;
+    }
+
     return (
-        <div className={`app-shell ${isSellerRoute ? 'seller-app-shell' : isAdminRoute ? 'admin-app-shell' : ''}`}>
+        <div className={`app-shell ${isSellerRoute ? 'seller-app-shell' : isAdminRoute ? 'admin-app-shell' : isCustomerRoute ? 'customer-app-shell' : ''}`}>
             {isSellerRoute ? (
                 <SellerLayout
                     current={route.view}
@@ -299,44 +364,53 @@ export default function App() {
                 </SellerLayout>
             ) : isAdminRoute ? (
                 renderAdminPage()
+            ) : isCustomerRoute ? (
+                <CustomerHub
+                    current={route.view}
+                    navigate={navigate}
+                    user={user}
+                    logout={logout}
+                    notice={notice}
+                >
+                    {renderCustomerPage()}
+                </CustomerHub>
             ) : (
-                <>
-                    <Header
-                        user={user}
-                        navigate={navigate}
-                        logout={logout}
-                        currentView={route.view}
-                        cartCount={cartCount}
-                        sellerNotifications={sellerNotifications}
-                    />
-                    {notice && <div className="notice">{notice}</div>}
-                    <main className="page">
+                <PublicLayout
+                    token={token}
+                    user={user}
+                    navigate={navigate}
+                    logout={logout}
+                    currentView={route.view}
+                    cartCount={cartCount}
+                    notice={notice}
+                    setNotice={setNotice}
+                    refreshCartCount={refreshCartCount}
+                >
                         {route.view === 'login' && <AuthPage mode="login" {...context} />}
                         {route.view === 'register' && <AuthPage mode="register" {...context} />}
-                        {route.view === 'blog' && <BlogIndexPage {...context} />}
+                        {route.view === 'blog' && <ExplorePage {...context} />}
+                        {route.view === 'deals' && <BlogIndexPage categorySlug="deals" {...context} />}
                         {route.view === 'review' && <BlogIndexPage categorySlug="review" {...context} />}
                         {route.view === 'brewing-guide' && <BlogIndexPage categorySlug="brewing-guide" {...context} />}
                         {route.view === 'compare' && <BlogIndexPage categorySlug="comparison" {...context} />}
+                        {route.view === 'about' && <AboutPage navigate={navigate} />}
                         {route.view === 'blog-detail' && <BlogArticlePage slug={route.id} {...context} />}
                         {route.view === 'creator' && <CreatorPage username={route.id} {...context} />}
                         {route.view === 'product' && <ProductDetail productId={route.id} {...context} />}
-                        {route.view === 'cart' && <CartPage {...context} />}
                         {route.view === 'checkout' && <CheckoutPage {...context} />}
-                        {route.view === 'orders' && <OrderHistory {...context} />}
-                        {route.view === 'user-dashboard' && <UserDashboardPage {...context} />}
-                        {route.view === 'affiliate-dashboard' && <AffiliateDashboardPage {...context} />}
-                        {route.view === 'affiliate-content' && <AffiliateContentPage {...context} />}
+                        {route.view === 'affiliate-content' && <ContentLayerPage {...context} />}
                         {![ 
                             'login',
                             'register',
                             'blog',
+                            'deals',
                             'review',
                             'brewing-guide',
                             'compare',
+                            'about',
                             'blog-detail',
                             'creator',
                             'product',
-                            'cart',
                             'checkout',
                             'orders',
                             'user-dashboard',
@@ -354,9 +428,13 @@ export default function App() {
                             'admin-affiliate-commissions',
                             'admin-content',
                         ].includes(route.view) && <CatalogPage {...context} />}
-                    </main>
-                </>
+                </PublicLayout>
             )}
+            <NotificationToast
+                message={notice}
+                enabled={!['login', 'register'].includes(route.view)}
+                onDismiss={dismissNotice}
+            />
         </div>
     );
 }

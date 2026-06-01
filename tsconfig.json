@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "esModuleInterop": true,
+        "jsx": "react-jsx",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "noEmit": true,
+        "paths": {
+            "@/*": ["./resources/js/*"]
+        },
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "ES2022"
+    },
+    "include": ["resources/js/**/*.js", "resources/js/**/*.jsx", "resources/js/**/*.ts", "resources/js/**/*.tsx"]
+}

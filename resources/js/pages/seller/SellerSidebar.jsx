@@ -1,9 +1,9 @@
 const sellerNavItems = [
-    { view: 'seller-dashboard', label: 'Dashboard Seller', icon: DashboardIcon },
-    { view: 'seller-profile', label: 'Profil Toko', icon: StoreIcon },
-    { view: 'seller-products', label: 'List Produk', icon: BoxIcon },
-    { view: 'seller-orders', label: 'Order Masuk', icon: ReceiptIcon },
-    { view: 'seller-reviews', label: 'Ulasan Produk', icon: StarIcon },
+    { view: 'seller-dashboard', label: 'Dashboard', icon: DashboardIcon },
+    { view: 'seller-profile', label: 'Store Profile', icon: StoreIcon },
+    { view: 'seller-products', label: 'Products', icon: BoxIcon },
+    { view: 'seller-orders', label: 'Orders', icon: ReceiptIcon },
+    { view: 'seller-reviews', label: 'Reviews', icon: StarIcon },
 ];
 
 export default function SellerSidebar({ current, navigate, storeName, open, onClose }) {

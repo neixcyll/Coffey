@@ -34,8 +34,15 @@ class ArticleController extends Controller
     {
         $articles = Article::query()
             ->published()
-            ->with(['category', 'author.creatorProfile'])
-            ->withCount(['views', 'clicks'])
+            ->with([
+                'category',
+                'author.creatorProfile',
+                'articleProducts.product.category',
+                'articleProducts.product.seller:id,store_name,slug,status',
+                'articleProducts.product.variants',
+            ])
+            ->withCount(['views', 'clicks', 'articleProducts'])
+            ->when($request->boolean('affiliate_only'), fn ($query) => $query->where('author_type', 'affiliate'))
             ->when($request->filled('category'), function ($query) use ($request) {
                 $category = $request->string('category')->toString();
                 $query->whereHas('category', fn ($query) => $query->where('slug', $category));
@@ -76,7 +83,7 @@ class ArticleController extends Controller
         $related = Article::query()
             ->published()
             ->with(['category', 'author.creatorProfile'])
-            ->withCount(['views', 'clicks'])
+            ->withCount(['views', 'clicks', 'articleProducts'])
             ->whereKeyNot($article->id)
             ->where('article_category_id', $article->article_category_id)
             ->latest('published_at')
@@ -166,7 +173,7 @@ class ArticleController extends Controller
         $articles = Article::query()
             ->published()
             ->with(['category', 'author.creatorProfile'])
-            ->withCount(['views', 'clicks'])
+            ->withCount(['views', 'clicks', 'articleProducts'])
             ->where('author_id', $profile->user_id)
             ->latest('published_at')
             ->paginate(12);

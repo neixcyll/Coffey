@@ -69,6 +69,7 @@ class AffiliateContentController extends Controller
     {
         $profile = $this->profile($request, $affiliates);
         $data = $this->validatedArticleData($request, false);
+        $data = $this->storeUploadedCover($request, $data);
         $articles->ensureCreatorProfile($request->user(), $profile->affiliate_name);
 
         $article = Article::create([
@@ -102,6 +103,7 @@ class AffiliateContentController extends Controller
         abort_if($article->author_id !== $request->user()->id || $article->author_type !== 'affiliate', 404);
 
         $data = $this->validatedArticleData($request, true);
+        $data = $this->storeUploadedCover($request, $data);
         $article->fill($this->articleAttributes($data));
 
         if (($data['title'] ?? null) && $article->isDirty('title')) {
@@ -149,6 +151,7 @@ class AffiliateContentController extends Controller
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => [$required, 'string'],
             'featured_image' => ['nullable', 'string', 'max:2000'],
+            'featured_image_file' => ['nullable', 'image', 'max:2048'],
             'status' => ['nullable', Rule::in(['draft', 'pending'])],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:500'],
@@ -162,6 +165,17 @@ class AffiliateContentController extends Controller
             'recommendations.*.external_image' => ['nullable', 'string', 'max:2000'],
             'recommendations.*.sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
+    }
+
+    private function storeUploadedCover(Request $request, array $data): array
+    {
+        if ($request->hasFile('featured_image_file')) {
+            $data['featured_image'] = $request->file('featured_image_file')->store('articles', 'public');
+        }
+
+        unset($data['featured_image_file']);
+
+        return $data;
     }
 
     private function articleAttributes(array $data): array

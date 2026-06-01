@@ -15,6 +15,8 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [selectedWeight, setSelectedWeight] = useState('');
     const [selectedGrind, setSelectedGrind] = useState('');
+    const [selectedImage, setSelectedImage] = useState('');
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         setProduct(null);
@@ -23,6 +25,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
         apiRequest(`/products/${productId}`)
             .then((data) => {
                 setProduct(data.data);
+                setSelectedImage(firstProductImage(data.data));
                 const firstVariant = preferredVariant(data.data?.variants || []);
                 setSelectedWeight(firstVariant ? String(firstVariant.weight_grams) : '');
                 setSelectedGrind(firstVariant?.grind_size || '');
@@ -51,7 +54,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
         setReviewMeta(response.meta || { avg_rating: null, reviews_count: 0 });
     }
 
-    async function addToCart() {
+    async function addToCart({ checkout = false } = {}) {
         if (!token || roleName(user) !== 'customer') {
             setNotice('Login sebagai customer untuk belanja.');
             navigate('login');
@@ -66,12 +69,21 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                 return;
             }
 
+            if (quantity > Number(variant.stock)) {
+                setNotice('Quantity melebihi stock variant produk.');
+                return;
+            }
+
             await apiRequest('/cart/items', {
                 method: 'POST',
                 token,
-                body: { product_id: product.id, product_variant_id: variant.id, quantity: 1 },
+                body: { product_id: product.id, product_variant_id: variant.id, quantity },
             });
             await refreshCartCount?.();
+            if (checkout) {
+                navigate('checkout');
+                return;
+            }
             setNotice('Produk berhasil ditambahkan ke cart. Cek ikon cart di kanan atas.');
         } catch (error) {
             setNotice(error.message);
@@ -116,78 +128,138 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const weightOptions = uniqueWeights(variants);
     const grindOptions = variants.filter((variant) => String(variant.weight_grams) === selectedWeight);
     const currentVariant = selectedVariant(variants, selectedWeight, selectedGrind);
+    const gallery = galleryImages(product);
+    const currentStock = Number(currentVariant?.stock ?? product.stock ?? 0);
+    const canPurchase = Boolean(currentVariant && currentStock > 0);
 
     return (
         <div className="product-detail-page">
-            <section className="detail-layout">
-                <ProductImage product={product} large />
-                <div className="panel detail-copy">
-                    <span className="tag">{product.category?.name}</span>
-                    <h1>{product.name}</h1>
-                    <div className="rating-line">
-                        {reviewsCount > 0 ? (
-                            <>
-                                <StarRating value={averageRating} />
-                                <strong>{Number(averageRating).toLocaleString('id-ID', { maximumFractionDigits: 1 })}</strong>
-                                <span className="muted">({reviewsCount} review)</span>
-                            </>
-                        ) : (
-                            <span className="muted">Belum ada rating</span>
+            <section className="pdp-grid">
+                <ProductGallery product={product} images={gallery} selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
+
+                <div className="pdp-information">
+                    <header className="pdp-heading">
+                        <span className="tag">{product.category?.name || 'Coffee'}</span>
+                        <h1>{product.name}</h1>
+                        <div className="pdp-price-row">
+                            <strong className="product-detail-price">{formatPrice(currentVariant?.price ?? product.price)}</strong>
+                            <span className={`pdp-stock-chip ${currentStock > 0 ? 'available' : 'empty'}`}>
+                                {currentStock > 0 ? `Stock ${currentStock}` : 'Stock habis'}
+                            </span>
+                        </div>
+                        <div className="rating-line">
+                            {reviewsCount > 0 ? (
+                                <>
+                                    <StarRating value={averageRating} />
+                                    <strong>{Number(averageRating).toLocaleString('id-ID', { maximumFractionDigits: 1 })}</strong>
+                                    <span className="muted">{reviewsCount} ulasan</span>
+                                </>
+                            ) : (
+                                <span className="muted">Belum ada rating</span>
+                            )}
+                        </div>
+                    </header>
+
+                    <section className="pdp-content-card">
+                        <h2>Detail produk</h2>
+                        <dl className="pdp-spec-list">
+                            <div><dt>Asal kopi</dt><dd>{product.origin || '-'}</dd></div>
+                            <div><dt>Roast level</dt><dd>{optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level) || '-'}</dd></div>
+                            <div><dt>Varian berat</dt><dd>{weightOptions.map(formatWeight).join(', ') || '-'}</dd></div>
+                            <div><dt>Brewing method</dt><dd><BrewingMethods methods={product.brewing_methods} /></dd></div>
+                        </dl>
+                    </section>
+
+                    <section className="pdp-content-card">
+                        <h2>Deskripsi produk</h2>
+                        <p className="pdp-description">{product.description || 'Seller belum menambahkan deskripsi produk.'}</p>
+                    </section>
+
+                    <section className="pdp-seller-card">
+                        <span className="pdp-seller-avatar">{initials(product.seller?.store_name)}</span>
+                        <div>
+                            <small>Produk dari seller</small>
+                            <strong>{product.seller?.store_name || 'Seller kopi'}</strong>
+                            <p>Temukan pilihan kopi dan informasi produk langsung dari seller marketplace.</p>
+                        </div>
+                        <span className="badge verified">Seller aktif</span>
+                    </section>
+                </div>
+
+                <aside className="pdp-purchase-card">
+                    <div>
+                        <p className="eyebrow">Atur pesanan</p>
+                        <h2>Pilih varian produk</h2>
+                    </div>
+                    {variants.length > 0 ? (
+                        <div className="pdp-variant-picker">
+                            <VariantGroup label="Berat">
+                                {weightOptions.map((weight) => (
+                                    <button
+                                        type="button"
+                                        className={`pill-button ${selectedWeight === String(weight) ? 'selected' : ''}`}
+                                        key={weight}
+                                        onClick={() => {
+                                            const nextVariant = preferredVariant(variants.filter((variant) => variant.weight_grams === weight));
+                                            setSelectedWeight(String(weight));
+                                            setSelectedGrind(nextVariant?.grind_size || '');
+                                            setQuantity(1);
+                                        }}
+                                    >
+                                        {formatWeight(weight)}
+                                    </button>
+                                ))}
+                            </VariantGroup>
+                            <VariantGroup label="Gilingan">
+                                {grindOptions.map((variant) => (
+                                    <button
+                                        type="button"
+                                        className={`pill-button ${selectedGrind === variant.grind_size ? 'selected' : ''}`}
+                                        key={variant.id}
+                                        disabled={variant.stock <= 0}
+                                        onClick={() => {
+                                            setSelectedGrind(variant.grind_size);
+                                            setQuantity(1);
+                                        }}
+                                    >
+                                        {variant.grind_size}
+                                    </button>
+                                ))}
+                            </VariantGroup>
+                        </div>
+                    ) : (
+                        <p className="muted">Varian produk belum tersedia.</p>
+                    )}
+
+                    <div className="pdp-quantity-row">
+                        <span>Jumlah</span>
+                        <div className="pdp-quantity-control">
+                            <button type="button" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
+                            <strong>{quantity}</strong>
+                            <button type="button" disabled={!canPurchase || quantity >= currentStock} onClick={() => setQuantity((value) => Math.min(currentStock, value + 1))}>+</button>
+                        </div>
+                    </div>
+
+                    <div className="pdp-order-total">
+                        <span>Subtotal</span>
+                        <strong>{formatPrice(Number(currentVariant?.price ?? product.price ?? 0) * quantity)}</strong>
+                    </div>
+
+                    <div className="pdp-action-stack">
+                        <button className="btn primary wide" type="button" disabled={!canPurchase} onClick={() => addToCart()}>
+                            Tambah ke Cart
+                        </button>
+                        <button className="btn ghost wide" type="button" disabled={!canPurchase} onClick={() => addToCart({ checkout: true })}>
+                            Beli Sekarang
+                        </button>
+                        {roleName(user) === 'customer' && (
+                            <button className="pdp-affiliate-button" type="button" onClick={copyAffiliateLink}>
+                                Salin link affiliate
+                            </button>
                         )}
                     </div>
-                    <p>{product.description}</p>
-                    {variants.length > 0 && (
-                        <div className="variant-picker">
-                            <div>
-                                <span>Berat</span>
-                                <div className="option-pills">
-                                    {weightOptions.map((weight) => (
-                                        <button
-                                            type="button"
-                                            className={`pill-button ${selectedWeight === String(weight) ? 'selected' : ''}`}
-                                            key={weight}
-                                            onClick={() => {
-                                                const nextVariant = preferredVariant(variants.filter((variant) => variant.weight_grams === weight));
-                                                setSelectedWeight(String(weight));
-                                                setSelectedGrind(nextVariant?.grind_size || '');
-                                            }}
-                                        >
-                                            {formatWeight(weight)}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <span>Gilingan</span>
-                                <div className="option-pills">
-                                    {grindOptions.map((variant) => (
-                                        <button
-                                            type="button"
-                                            className={`pill-button ${selectedGrind === variant.grind_size ? 'selected' : ''}`}
-                                            key={variant.id}
-                                            disabled={variant.stock <= 0}
-                                            onClick={() => setSelectedGrind(variant.grind_size)}
-                                        >
-                                            {variant.grind_size}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <dl className="specs">
-                        <div><dt>Harga</dt><dd>{formatPrice(currentVariant?.price ?? product.price)}</dd></div>
-                        <div><dt>Stock</dt><dd>{currentVariant?.stock ?? product.stock}</dd></div>
-                        <div><dt>Origin</dt><dd>{product.origin}</dd></div>
-                        <div><dt>Roast</dt><dd>{optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level)}</dd></div>
-                        <div><dt>Brewing</dt><dd><span className="tag-row">{(product.brewing_methods || []).map((method) => <span className="badge" key={method.id}>{method.name}</span>)}</span></dd></div>
-                        <div><dt>Seller</dt><dd>{product.seller?.store_name}</dd></div>
-                    </dl>
-                    <div className="row">
-                        <button className="btn primary" disabled={!currentVariant || currentVariant.stock <= 0} onClick={addToCart}>Tambah ke Cart</button>
-                        {roleName(user) === 'customer' && <button className="btn ghost" onClick={copyAffiliateLink}>Copy affiliate link</button>}
-                    </div>
-                </div>
+                    <p className="pdp-purchase-note">Pastikan berat dan tipe gilingan sudah sesuai sebelum checkout.</p>
+                </aside>
             </section>
 
             <section className="review-section">
@@ -267,6 +339,64 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     );
 }
 
+function VariantGroup({ label, children }) {
+    return (
+        <div className="pdp-variant-group">
+            <span>{label}</span>
+            <div className="option-pills">{children}</div>
+        </div>
+    );
+}
+
+function BrewingMethods({ methods = [] }) {
+    if (!methods.length) return '-';
+
+    return (
+        <span className="tag-row">
+            {methods.map((method) => <span className="badge" key={method.id}>{method.name}</span>)}
+        </span>
+    );
+}
+
+function ProductGallery({ product, images, selectedImage, setSelectedImage }) {
+    const currentImage = selectedImage || images[0]?.url || product.image_url || product.image;
+
+    return (
+        <div className="product-gallery">
+            {currentImage ? (
+                <img className="product-image large" src={currentImage} alt={product.name} />
+            ) : (
+                <ProductImage product={product} large />
+            )}
+            {images.length > 1 && (
+                <div className="product-gallery-thumbs">
+                    {images.map((image) => (
+                        <button
+                            className={currentImage === image.url ? 'active' : ''}
+                            key={image.url}
+                            type="button"
+                            onClick={() => setSelectedImage(image.url)}
+                            aria-label={`Lihat gambar ${image.label}`}
+                        >
+                            <img src={image.url} alt={image.label} />
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function initials(value = 'Seller Kopi') {
+    return value
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase();
+}
+
 function preferredVariant(variants) {
     return variants.find((variant) => Number(variant.stock) > 0) || variants[0] || null;
 }
@@ -278,4 +408,25 @@ function selectedVariant(variants, weight, grindSize) {
 function uniqueWeights(variants) {
     return [...new Set(variants.map((variant) => Number(variant.weight_grams)).filter(Boolean))]
         .sort((a, b) => a - b);
+}
+
+function galleryImages(product) {
+    const images = [];
+
+    if (product.image_url || product.image) {
+        images.push({ url: product.image_url || product.image, label: product.name });
+    }
+
+    (product.images || []).forEach((image, index) => {
+        const url = image.url || image.path;
+        if (url && !images.some((item) => item.url === url)) {
+            images.push({ url, label: `${product.name} ${index + 1}` });
+        }
+    });
+
+    return images;
+}
+
+function firstProductImage(product) {
+    return galleryImages(product)[0]?.url || '';
 }

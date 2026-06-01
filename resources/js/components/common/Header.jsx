@@ -25,8 +25,8 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                 <button className={itemClass('brewing-guide')} onClick={() => navigate('brewing-guide')}>Guide</button>
                 {role === 'customer' && (
                     <>
-                        <button className={itemClass('user-dashboard')} onClick={() => navigate('user-dashboard')}>Dashboard</button>
                         <button className={itemClass('orders')} onClick={() => navigate('orders')}>Order</button>
+                        <button className={itemClass('account-settings')} onClick={() => navigate('account-settings')}>Akun</button>
                     </>
                 )}
                 {(!role || role === 'customer') && (
@@ -89,8 +89,9 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                             </div>
                         )}
                         {role === 'customer' && (
-                            <button className={`${itemClass('cart')} cart-header-button`} title="Cart" aria-label="Cart" onClick={() => navigate('cart')}>
+                            <button className={`${itemClass('cart')} cart-header-button`} title="Cart" aria-label={`Cart ${cartCount || 0} item`} onClick={() => navigate('cart')}>
                                 <CartIcon />
+                                <span className="cart-button-label">Cart</span>
                                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                             </button>
                         )}
@@ -110,10 +111,11 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
 
 export function CartIcon() {
     return (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 6H6" />
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H6.1" />
+            <path d="M9 20h.01" />
+            <path d="M18 20h.01" />
+            <path d="M9.5 11h7" />
         </svg>
     );
 }

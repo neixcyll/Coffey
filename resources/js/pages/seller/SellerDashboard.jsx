@@ -24,10 +24,10 @@ export default function SellerDashboard({ token, navigate, setNotice }) {
             <p className="eyebrow">Seller dashboard</p>
             <h1>{data.seller.store_name}</h1>
             <div className="stats">
-                <Stat label="Total produk" value={data.total_products} />
-                <Stat label="Order masuk" value={data.total_orders} />
-                <Stat label="Order pending" value={data.pending_orders} />
                 <Stat label="Revenue" value={formatPrice(data.total_revenue)} />
+                <Stat label="Orders" value={data.total_orders} />
+                <Stat label="Products" value={data.total_products} />
+                <Stat label="Rating" value={data.average_rating ? Number(data.average_rating).toLocaleString('id-ID', { maximumFractionDigits: 1 }) : '-'} />
             </div>
             <div className="panel revenue-panel">
                 <div className="section-head">

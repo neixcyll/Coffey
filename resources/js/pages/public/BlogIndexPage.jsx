@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { CATEGORY_ROUTE_MAP } from '../../constants/options.js';
 import ArticleCard from '../../components/article/ArticleCard.jsx';
-import ArticleImage from '../../components/article/ArticleImage.jsx';
+import CategoryChips from '../../components/article/CategoryChips.jsx';
+import ContentHero from '../../components/article/ContentHero.jsx';
+import EmptyState from '../../components/public/EmptyState.jsx';
+import { CATEGORY_ROUTE_MAP } from '../../constants/options.js';
 import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
 
@@ -26,6 +28,7 @@ export default function BlogIndexPage({ categorySlug = '', navigate, setNotice }
         const query = new URLSearchParams();
         if (selectedCategory) query.set('category', selectedCategory);
         if (search) query.set('search', search);
+        query.set('per_page', '100');
         setLoading(true);
         apiRequest(`/articles?${query}`)
             .then((response) => setArticles(rowsFrom(response)))
@@ -34,6 +37,12 @@ export default function BlogIndexPage({ categorySlug = '', navigate, setNotice }
     }, [selectedCategory, search, setNotice]);
 
     function openCategory(category) {
+        if (!category.slug) {
+            setSelectedCategory('');
+            navigate('blog');
+            return;
+        }
+
         const route = CATEGORY_ROUTE_MAP[category.slug];
         if (route) {
             navigate(route);
@@ -43,60 +52,81 @@ export default function BlogIndexPage({ categorySlug = '', navigate, setNotice }
         setSelectedCategory(category.slug);
     }
 
-    const activeCategory = categories.find((category) => category.slug === selectedCategory);
-    const title = activeCategory ? activeCategory.name : 'Coffee Journal';
+    const title = pageTitle(categories, selectedCategory);
     const featured = articles[0];
     const rest = featured ? articles.slice(1) : articles;
 
     return (
-        <section className="content-page">
-            <div className="content-hero">
-                <div>
-                    <p className="eyebrow">Content layer</p>
-                    <h1>{title}</h1>
-                    <p className="muted">Review, brewing guide, comparison, dan rekomendasi produk yang terhubung langsung ke marketplace.</p>
-                </div>
-                <div className="content-search">
-                    <input placeholder="Cari artikel kopi" value={search} onChange={(event) => setSearch(event.target.value)} />
-                </div>
-            </div>
+        <section className="content-page explore-page">
+            <ContentHero title={title} search={search} setSearch={setSearch} navigate={navigate} />
+            <CategoryChips categories={categories} selectedCategory={selectedCategory} onSelect={openCategory} />
 
-            <div className="category-tabs">
-                <button className={!selectedCategory ? 'active' : ''} onClick={() => { setSelectedCategory(''); navigate('blog'); }}>Semua</button>
-                {categories.map((category) => (
-                    <button key={category.id} className={selectedCategory === category.slug ? 'active' : ''} onClick={() => openCategory(category)}>
-                        {category.name}
-                    </button>
-                ))}
-            </div>
-
-            {loading ? <p className="muted">Memuat artikel...</p> : (
-                <>
-                    {featured && (
-                        <article className="featured-article">
-                            <ArticleImage article={featured} />
-                            <div className="featured-copy">
-                                <span className="tag">{featured.category?.name}</span>
-                                <h2>{featured.title}</h2>
-                                <p className="muted">{featured.excerpt}</p>
-                                <div className="row">
-                                    <button className="btn primary" onClick={() => navigate('blog-detail', featured.slug)}>Baca artikel</button>
-                                    {featured.author?.creator_profile?.username && (
-                                        <button className="btn ghost" onClick={() => navigate('creator', featured.author.creator_profile.username)}>
-                                            {featured.author.creator_profile.display_name}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </article>
-                    )}
-
-                    <div className="article-grid">
-                        {rest.map((article) => <ArticleCard key={article.id} article={article} navigate={navigate} />)}
+            {loading ? (
+                <ArticleSkeleton />
+            ) : (
+                <div className="explore-layout" id="explore-articles">
+                    <div className="explore-main">
+                        {featured && <ArticleCard article={featured} navigate={navigate} featured />}
+                        <div className="article-grid">
+                            {rest.map((article) => <ArticleCard key={article.id} article={article} navigate={navigate} />)}
+                        </div>
+                        {articles.length === 0 && (
+                            <EmptyState
+                                eyebrow="Artikel"
+                                title="Belum ada artikel published untuk kategori ini."
+                                message="Kategori ini belum punya konten aktif. Lihat semua artikel untuk rekomendasi kopi lainnya."
+                                actionLabel="Lihat semua artikel"
+                                onAction={() => openCategory({ slug: '' })}
+                            />
+                        )}
                     </div>
-                    {articles.length === 0 && <p className="muted">Belum ada artikel published untuk kategori ini.</p>}
-                </>
+
+                    <aside className="explore-sidebar">
+                        <div className="panel">
+                            <p className="eyebrow">Trending Topics</p>
+                            <h2>Topik kopi</h2>
+                            <div className="topic-list">
+                                {categories.filter((category) => Number(category.articles_count || 0) > 0).slice(0, 8).map((category) => (
+                                    <button key={category.id} type="button" onClick={() => openCategory(category)}>
+                                        <span>{category.name}</span>
+                                        <small>{category.articles_count} artikel</small>
+                                    </button>
+                                ))}
+                                {categories.length === 0 && <p className="muted">Kategori artikel belum tersedia.</p>}
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             )}
         </section>
+    );
+}
+
+function pageTitle(categories, selectedCategory) {
+    if (!selectedCategory) return 'Explore Coffee Journal';
+
+    const category = categories.find((item) => item.slug === selectedCategory);
+    if (category) return category.name;
+
+    return selectedCategory
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
+function ArticleSkeleton() {
+    return (
+        <div className="article-grid">
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div className="article-card skeleton-card" key={index}>
+                    <div className="skeleton-image" />
+                    <div className="article-card-body">
+                        <span />
+                        <strong />
+                        <p />
+                    </div>
+                </div>
+            ))}
+        </div>
     );
 }

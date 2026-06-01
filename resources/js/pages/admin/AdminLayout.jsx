@@ -22,7 +22,6 @@ export default function AdminLayout({ current, navigate, user, logout, notice, c
                     onMenuClick={() => setSidebarOpen(true)}
                 />
                 <main className="admin-content">
-                    {notice && <div className="notice admin-notice">{notice}</div>}
                     {children}
                 </main>
             </div>

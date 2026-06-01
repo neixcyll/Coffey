@@ -29,11 +29,13 @@ export function parsePathRoute() {
         reports: 'admin-reports',
     };
 
-    if (path === 'blog') return { view: 'blog' };
+    if (path === 'blog' || path === 'explore') return { view: 'blog' };
+    if (path === 'about') return { view: 'about' };
     if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
     if (path === 'review') return { view: 'review' };
     if (path === 'brewing-guide') return { view: 'brewing-guide' };
     if (path === 'compare') return { view: 'compare' };
+    if (path === 'deals') return { view: 'deals' };
     if (parts[0] === 'creator' && parts[1]) return { view: 'creator', id: parts[1] };
     if (parts[0] === 'product' && parts[1]) return { view: 'product', id: parts[1] };
     if (path === 'seller' || path === 'seller/dashboard') return { view: 'seller-dashboard' };
@@ -84,7 +86,7 @@ export function canOpenAfterLogin(view, user) {
     const role = roleName(user);
 
     if (!view) return false;
-    if (['affiliate-dashboard', 'affiliate-content', 'cart', 'checkout', 'orders', 'user-dashboard'].includes(view)) return role === 'customer';
+    if (['affiliate-dashboard', 'affiliate-content-upload', 'affiliate-my-content', 'account-settings', 'cart', 'checkout', 'orders', 'user-dashboard'].includes(view)) return role === 'customer';
     if (view.startsWith('seller-')) return role === 'seller';
     if (view.startsWith('admin-')) return role === 'admin';
 

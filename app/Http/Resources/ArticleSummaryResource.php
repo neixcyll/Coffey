@@ -18,6 +18,8 @@ class ArticleSummaryResource extends JsonResource
             'published_at' => $this->published_at,
             'views_count' => $this->whenCounted('views'),
             'clicks_count' => $this->whenCounted('clicks'),
+            'recommended_products_count' => (int) ($this->article_products_count ?? 0),
+            'has_recommended_products' => (int) ($this->article_products_count ?? 0) > 0,
             'category' => $this->whenLoaded('category', fn () => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,
@@ -32,6 +34,7 @@ class ArticleSummaryResource extends JsonResource
                     'avatar_url' => $this->author->creatorProfile->avatar_url,
                 ] : null,
             ]),
+            'recommended_products' => ArticleProductResource::collection($this->whenLoaded('articleProducts')),
         ];
     }
 }

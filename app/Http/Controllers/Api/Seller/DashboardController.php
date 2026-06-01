@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
+use App\Models\ProductReview;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,6 +35,10 @@ class DashboardController extends Controller
                     ->where('orders.status', 'pending')
                     ->distinct('order_items.order_id')
                     ->count('order_items.order_id'),
+                'average_rating' => round((float) ProductReview::query()
+                    ->where('status', 'published')
+                    ->whereHas('product', fn ($query) => $query->where('seller_id', $seller->id))
+                    ->avg('rating'), 1),
                 'revenue_traffic' => $this->revenueTraffic($seller->id, $paidStatuses),
             ],
         ]);

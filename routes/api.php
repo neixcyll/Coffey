@@ -73,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/affiliate/content/articles', [AffiliateContentController::class, 'index']);
         Route::post('/affiliate/content/articles', [AffiliateContentController::class, 'store']);
         Route::get('/affiliate/content/articles/{article}', [AffiliateContentController::class, 'show']);
-        Route::match(['put', 'patch'], '/affiliate/content/articles/{article}', [AffiliateContentController::class, 'update']);
+        Route::match(['put', 'patch', 'post'], '/affiliate/content/articles/{article}', [AffiliateContentController::class, 'update']);
     });
 
     Route::prefix('seller')->middleware('role:seller')->group(function () {

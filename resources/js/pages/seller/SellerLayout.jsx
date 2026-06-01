@@ -35,7 +35,6 @@ export default function SellerLayout({
                     onMenuClick={() => setSidebarOpen(true)}
                 />
                 <main className="seller-content">
-                    {notice && <div className="notice seller-notice">{notice}</div>}
                     {children}
                 </main>
             </div>

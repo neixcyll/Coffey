@@ -9,10 +9,14 @@ export const CATEGORY_ROUTE_MAP = {
     review: 'review',
     'brewing-guide': 'brewing-guide',
     comparison: 'compare',
+    deals: 'deals',
 };
 
 export const PUBLIC_ROUTE_MAP = {
-    blog: '/blog',
+    products: '/',
+    blog: '/explore',
+    about: '/about',
+    deals: '/deals',
     review: '/review',
     'brewing-guide': '/brewing-guide',
     compare: '/compare',
