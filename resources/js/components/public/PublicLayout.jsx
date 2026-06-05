@@ -9,9 +9,13 @@ export default function PublicLayout({
     logout,
     currentView,
     cartCount,
+    userNotifications,
+    unreadNotifications,
     notice,
     setNotice,
     refreshCartCount,
+    markNotificationRead,
+    markAllNotificationsRead,
     children,
 }) {
     const [cartOpen, setCartOpen] = useState(false);
@@ -29,6 +33,10 @@ export default function PublicLayout({
                 logout={logout}
                 currentView={currentView}
                 cartCount={cartCount}
+                userNotifications={userNotifications}
+                unreadNotifications={unreadNotifications}
+                markNotificationRead={markNotificationRead}
+                markAllNotificationsRead={markAllNotificationsRead}
                 onCartClick={() => setCartOpen(true)}
             />
             <main className={`page public-page ${isAuthPage ? 'auth-public-page' : ''}`}>{children}</main>

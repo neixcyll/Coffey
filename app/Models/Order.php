@@ -15,18 +15,28 @@ class Order extends Model
         'affiliate_click_id',
         'affiliate_code',
         'order_number',
+        'shipping_rate_id',
+        'subtotal_amount',
         'total_amount',
         'status',
         'customer_name',
         'customer_phone',
         'shipping_address',
+        'courier',
+        'shipping_service',
+        'shipping_cost',
+        'shipping_estimated_days',
+        'origin_city',
+        'destination_city',
         'notes',
     ];
 
     protected function casts(): array
     {
         return [
+            'subtotal_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
+            'shipping_cost' => 'decimal:2',
         ];
     }
 
@@ -43,6 +53,11 @@ class Order extends Model
     public function productReviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 
     public function payment(): HasOne

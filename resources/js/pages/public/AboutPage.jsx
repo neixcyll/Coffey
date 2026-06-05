@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 const steps = [
     {
         label: 'Customer',
@@ -25,7 +27,15 @@ const features = [
     'Consistent dashboards for operations',
 ];
 
-export default function AboutPage({ navigate }) {
+export default function AboutPage({ navigate, focusContact = false }) {
+    useEffect(() => {
+        if (!focusContact) return;
+
+        window.requestAnimationFrame(() => {
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }, [focusContact]);
+
     return (
         <section className="about-page">
             <header className="about-hero">
@@ -94,7 +104,7 @@ export default function AboutPage({ navigate }) {
                 </div>
             </section>
 
-            <section className="contact-grid">
+            <section className="contact-grid" id="contact">
                 <div>
                     <p className="eyebrow">Contact</p>
                     <h2>Talk to Marketplace Kopi</h2>

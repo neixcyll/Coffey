@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Services\AffiliateService;
 use App\Services\MidtransService;
+use App\Services\ShippingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ use Throwable;
 
 class CheckoutController extends Controller
 {
-    public function store(CheckoutRequest $request, MidtransService $midtrans, AffiliateService $affiliates): JsonResponse
+    public function store(CheckoutRequest $request, MidtransService $midtrans, AffiliateService $affiliates, ShippingService $shipping): JsonResponse
     {
         $data = $request->validated();
         $user = $request->user();
@@ -45,10 +46,11 @@ class CheckoutController extends Controller
             return response()->json(['message' => 'Cart masih kosong.'], 422);
         }
 
-        $order = DB::transaction(function () use ($cart, $data, $user, $affiliateProfile, $affiliateClick) {
+        $order = DB::transaction(function () use ($cart, $data, $user, $affiliateProfile, $affiliateClick, $shipping) {
             $items = $cart->items()->get();
             $orderItems = [];
-            $totalAmount = 0;
+            $subtotalAmount = 0;
+            $sellers = collect();
 
             foreach ($items as $cartItem) {
                 $variant = ProductVariant::query()
@@ -71,7 +73,8 @@ class CheckoutController extends Controller
                 }
 
                 $subtotal = (float) $variant->price * $cartItem->quantity;
-                $totalAmount += $subtotal;
+                $subtotalAmount += $subtotal;
+                $sellers->push($product->seller);
 
                 $orderItems[] = [
                     'product_id' => $product->id,
@@ -88,17 +91,30 @@ class CheckoutController extends Controller
                 ];
             }
 
+            $originCity = $shipping->originCityForSellers($sellers);
+            $shippingRate = $shipping->selectedRate((int) $data['shipping_rate_id'], $originCity, $data['destination_city']);
+            $shippingCost = (float) $shippingRate->cost;
+            $totalAmount = $subtotalAmount + $shippingCost;
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'affiliate_profile_id' => $affiliateProfile?->id,
                 'affiliate_click_id' => $affiliateClick?->id,
                 'affiliate_code' => $affiliateProfile?->code,
                 'order_number' => $this->makeOrderNumber(),
+                'shipping_rate_id' => $shippingRate->id,
+                'subtotal_amount' => $subtotalAmount,
                 'total_amount' => $totalAmount,
                 'status' => 'pending',
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'],
                 'shipping_address' => $data['shipping_address'],
+                'courier' => $shippingRate->courier,
+                'shipping_service' => $shippingRate->service,
+                'shipping_cost' => $shippingCost,
+                'shipping_estimated_days' => $shippingRate->estimated_days,
+                'origin_city' => $originCity,
+                'destination_city' => trim($data['destination_city']),
                 'notes' => $data['notes'] ?? null,
             ]);
 

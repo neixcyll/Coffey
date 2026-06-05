@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Role;
 use App\Models\SellerProfile;
+use App\Models\ShippingRate;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -63,10 +64,29 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'kopi-nusantara-roastery',
                 'phone' => '081234567890',
                 'address' => 'Jl. Kopi No. 10, Bandung',
+                'origin_city' => 'Bandung',
                 'description' => 'Roastery kecil yang fokus pada kopi single origin Indonesia.',
                 'status' => 'active',
             ],
         );
+
+        $shippingRates = [
+            ['origin_city' => 'Bandung', 'destination_city' => 'Bandung', 'courier' => 'JNE', 'service' => 'REG', 'cost' => 10000, 'estimated_days' => '1-2 hari'],
+            ['origin_city' => 'Bandung', 'destination_city' => 'Jakarta', 'courier' => 'J&T', 'service' => 'EZ', 'cost' => 16000, 'estimated_days' => '2-3 hari'],
+            ['origin_city' => 'Bandung', 'destination_city' => 'Jakarta', 'courier' => 'JNE', 'service' => 'REG', 'cost' => 18000, 'estimated_days' => '2-3 hari'],
+            ['origin_city' => 'Bandung', 'destination_city' => 'Surabaya', 'courier' => 'JNE', 'service' => 'REG', 'cost' => 28000, 'estimated_days' => '3-4 hari'],
+            ['origin_city' => 'Bandung', 'destination_city' => 'Yogyakarta', 'courier' => 'SiCepat', 'service' => 'REG', 'cost' => 22000, 'estimated_days' => '2-3 hari'],
+            ['origin_city' => 'Jakarta', 'destination_city' => 'Bandung', 'courier' => 'JNE', 'service' => 'REG', 'cost' => 18000, 'estimated_days' => '2-3 hari'],
+            ['origin_city' => 'Jakarta', 'destination_city' => 'Jakarta', 'courier' => 'J&T', 'service' => 'EZ', 'cost' => 10000, 'estimated_days' => '1-2 hari'],
+            ['origin_city' => 'Jakarta', 'destination_city' => 'Surabaya', 'courier' => 'SiCepat', 'service' => 'REG', 'cost' => 26000, 'estimated_days' => '3-4 hari'],
+        ];
+
+        foreach ($shippingRates as $shippingRate) {
+            ShippingRate::updateOrCreate(
+                collect($shippingRate)->only(['origin_city', 'destination_city', 'courier', 'service'])->all(),
+                $shippingRate,
+            );
+        }
 
         $categories = collect([
             ['name' => 'Arabica', 'description' => 'Kopi arabica single origin dan specialty.'],

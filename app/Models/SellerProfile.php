@@ -14,6 +14,7 @@ class SellerProfile extends Model
         'slug',
         'phone',
         'address',
+        'origin_city',
         'description',
         'status',
     ];

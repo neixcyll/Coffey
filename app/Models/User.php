@@ -75,6 +75,11 @@ class User extends Authenticatable
         return $this->hasMany(ProductReview::class);
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     public function hasRole(string|array $roles): bool
     {
         $roles = (array) $roles;

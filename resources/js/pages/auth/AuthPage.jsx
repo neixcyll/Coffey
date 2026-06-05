@@ -13,6 +13,7 @@ export default function AuthPage({ mode, saveSession, navigate, notice, setNotic
         store_name: '',
         phone: '',
         address: '',
+        origin_city: '',
         description: '',
     });
     const [loading, setLoading] = useState(false);

@@ -58,6 +58,7 @@ class AuthController extends Controller
                 'slug' => $this->uniqueSellerSlug($data['store_name']),
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
+                'origin_city' => $data['origin_city'],
                 'description' => $data['description'] ?? null,
                 'status' => 'pending',
             ]);

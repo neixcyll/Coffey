@@ -32,6 +32,7 @@ import ProductDetail from './pages/public/ProductDetail.jsx';
 import SellerDashboard from './pages/seller/SellerDashboard.jsx';
 import SellerLayout from './pages/seller/SellerLayout.jsx';
 import SellerOrders from './pages/seller/SellerOrders.jsx';
+import SellerOrderPrint from './pages/seller/SellerOrderPrint.jsx';
 import SellerProfile from './pages/seller/SellerProfile.jsx';
 import SellerProducts from './pages/seller/SellerProducts.jsx';
 import SellerReviews from './pages/seller/SellerReviews.jsx';
@@ -41,6 +42,7 @@ const SELLER_VIEWS = [
     'seller-profile',
     'seller-products',
     'seller-orders',
+    'seller-order-print',
     'seller-reviews',
 ];
 
@@ -78,6 +80,8 @@ export default function App() {
     const [notice, setNotice] = useState('');
     const [cartCount, setCartCount] = useState(0);
     const [sellerNotifications, setSellerNotifications] = useState({ count: 0, orders: [] });
+    const [userNotifications, setUserNotifications] = useState([]);
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
     const isSellerRoute = SELLER_VIEWS.includes(route.view);
     const isAdminRoute = ADMIN_VIEWS.includes(route.view);
     const isCustomerRoute = CUSTOMER_VIEWS.includes(route.view);
@@ -133,10 +137,16 @@ export default function App() {
     useEffect(() => {
         if (!token || roleName(user) !== 'customer') {
             setCartCount(0);
+            setUserNotifications([]);
+            setUnreadNotifications(0);
             return;
         }
 
         refreshCartCount();
+        refreshUserNotifications();
+        const timer = window.setInterval(refreshUserNotifications, 30000);
+
+        return () => window.clearInterval(timer);
     }, [token, user?.role?.name]);
 
     useEffect(() => {
@@ -244,6 +254,8 @@ export default function App() {
         setUser(null);
         setCartCount(0);
         setSellerNotifications({ count: 0, orders: [] });
+        setUserNotifications([]);
+        setUnreadNotifications(0);
         localStorage.removeItem('kopi_token');
         localStorage.removeItem('kopi_user');
         navigate('products');
@@ -264,6 +276,34 @@ export default function App() {
         setSellerNotifications(response?.data || { count: 0, orders: [] });
     }
 
+    async function refreshUserNotifications() {
+        if (!token) return;
+
+        const [notificationsResponse, countResponse] = await Promise.all([
+            apiRequest('/notifications', { token }).catch(() => null),
+            apiRequest('/notifications/unread-count', { token }).catch(() => null),
+        ]);
+
+        setUserNotifications(notificationsResponse?.data || []);
+        setUnreadNotifications(Number(countResponse?.data?.count || 0));
+    }
+
+    async function markNotificationRead(notification) {
+        if (!token || !notification?.id) return;
+
+        if (!notification.is_read) {
+            await apiRequest(`/notifications/${notification.id}/read`, { method: 'PATCH', token }).catch((error) => setNotice(error.message));
+            await refreshUserNotifications();
+        }
+    }
+
+    async function markAllNotificationsRead() {
+        if (!token) return;
+
+        await apiRequest('/notifications/read-all', { method: 'PATCH', token }).catch((error) => setNotice(error.message));
+        await refreshUserNotifications();
+    }
+
     const dismissNotice = useCallback((message) => {
         setNotice((current) => current === message ? '' : current);
     }, []);
@@ -278,6 +318,9 @@ export default function App() {
         logout,
         refreshCartCount,
         refreshSellerNotifications,
+        refreshUserNotifications,
+        markNotificationRead,
+        markAllNotificationsRead,
         updateCurrentUser,
     };
 
@@ -297,6 +340,7 @@ export default function App() {
         if (route.view === 'seller-profile') return <SellerProfile {...context} />;
         if (route.view === 'seller-products') return <SellerProducts {...context} />;
         if (route.view === 'seller-orders') return <SellerOrders {...context} />;
+        if (route.view === 'seller-order-print') return <SellerOrderPrint orderId={route.id} {...context} />;
         if (route.view === 'seller-reviews') return <SellerReviews {...context} />;
 
         return <SellerDashboard {...context} />;
@@ -346,7 +390,7 @@ export default function App() {
         if (route.view === 'affiliate-my-content') return <CustomerAffiliatePanel section="content" {...context} />;
         if (route.view === 'account-settings') return <CustomerAccountSettings {...context} />;
 
-        return <CustomerOrders {...context} />;
+        return <CustomerOrders selectedOrderId={route.id} {...context} />;
     }
 
     return (
@@ -357,6 +401,7 @@ export default function App() {
                     navigate={navigate}
                     user={user}
                     logout={logout}
+
                     sellerNotifications={sellerNotifications}
                     notice={notice}
                 >
@@ -370,6 +415,10 @@ export default function App() {
                     navigate={navigate}
                     user={user}
                     logout={logout}
+                    notifications={userNotifications}
+                    unreadNotifications={unreadNotifications}
+                    markNotificationRead={markNotificationRead}
+                    markAllNotificationsRead={markAllNotificationsRead}
                     notice={notice}
                 >
                     {renderCustomerPage()}
@@ -382,9 +431,13 @@ export default function App() {
                     logout={logout}
                     currentView={route.view}
                     cartCount={cartCount}
+                    userNotifications={userNotifications}
+                    unreadNotifications={unreadNotifications}
                     notice={notice}
                     setNotice={setNotice}
                     refreshCartCount={refreshCartCount}
+                    markNotificationRead={markNotificationRead}
+                    markAllNotificationsRead={markAllNotificationsRead}
                 >
                         {route.view === 'login' && <AuthPage mode="login" {...context} />}
                         {route.view === 'register' && <AuthPage mode="register" {...context} />}
@@ -394,6 +447,7 @@ export default function App() {
                         {route.view === 'brewing-guide' && <BlogIndexPage categorySlug="brewing-guide" {...context} />}
                         {route.view === 'compare' && <BlogIndexPage categorySlug="comparison" {...context} />}
                         {route.view === 'about' && <AboutPage navigate={navigate} />}
+                        {route.view === 'contact' && <AboutPage navigate={navigate} focusContact />}
                         {route.view === 'blog-detail' && <BlogArticlePage slug={route.id} {...context} />}
                         {route.view === 'creator' && <CreatorPage username={route.id} {...context} />}
                         {route.view === 'product' && <ProductDetail productId={route.id} {...context} />}
@@ -408,6 +462,7 @@ export default function App() {
                             'brewing-guide',
                             'compare',
                             'about',
+                            'contact',
                             'blog-detail',
                             'creator',
                             'product',

@@ -51,6 +51,7 @@ class MidtransService
                     'first_name' => $order->customer_name,
                     'phone' => $order->customer_phone,
                     'address' => $order->shipping_address,
+                    'city' => $order->destination_city,
                 ],
             ],
             'item_details' => $order->items->map(fn ($item) => [
@@ -58,7 +59,12 @@ class MidtransService
                 'price' => (int) round((float) $item->price),
                 'quantity' => $item->quantity,
                 'name' => mb_substr(trim($item->product_name.' '.$item->variant_label), 0, 50),
-            ])->values()->all(),
+            ])->when((float) $order->shipping_cost > 0, fn ($items) => $items->push([
+                'id' => 'SHIPPING',
+                'price' => (int) round((float) $order->shipping_cost),
+                'quantity' => 1,
+                'name' => mb_substr(trim("Ongkir {$order->courier} {$order->shipping_service}"), 0, 50),
+            ]))->values()->all(),
         ];
 
         return Snap::createTransaction($params);

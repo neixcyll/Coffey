@@ -8,6 +8,7 @@ const emptyProfile = {
     store_name: '',
     phone: '',
     address: '',
+    origin_city: '',
     description: '',
     status: '',
 };
@@ -56,6 +57,7 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
                     store_name: form.store_name,
                     phone: form.phone,
                     address: form.address,
+                    origin_city: form.origin_city,
                     description: form.description,
                 },
             });
@@ -97,6 +99,7 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
                     <TextInput label="Nama Toko" value={form.store_name || ''} onChange={(value) => update('store_name', value)} />
                     <TextInput label="Telepon" value={form.phone || ''} onChange={(value) => update('phone', value)} required={false} />
                     <TextArea label="Alamat Toko" value={form.address || ''} onChange={(value) => update('address', value)} />
+                    <TextInput label="Kota Asal Pengiriman" value={form.origin_city || ''} helper="Dipakai untuk mencari tarif ongkir saat customer checkout." placeholder="Contoh: Bandung" onChange={(value) => update('origin_city', value)} />
                     <TextArea label="Deskripsi Toko" value={form.description || ''} onChange={(value) => update('description', value)} />
                     <button className="btn primary" disabled={saving || loading}>{saving ? 'Menyimpan...' : 'Simpan Profil'}</button>
                 </form>
@@ -116,6 +119,10 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
                         <div>
                             <dt>Alamat</dt>
                             <dd>{form.address || '-'}</dd>
+                        </div>
+                        <div>
+                            <dt>Kota asal pengiriman</dt>
+                            <dd>{form.origin_city || '-'}</dd>
                         </div>
                         <div>
                             <dt>Status</dt>

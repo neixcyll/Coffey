@@ -31,6 +31,7 @@ export function parsePathRoute() {
 
     if (path === 'blog' || path === 'explore') return { view: 'blog' };
     if (path === 'about') return { view: 'about' };
+    if (path === 'contact') return { view: 'contact' };
     if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
     if (path === 'review') return { view: 'review' };
     if (path === 'brewing-guide') return { view: 'brewing-guide' };
@@ -39,6 +40,7 @@ export function parsePathRoute() {
     if (parts[0] === 'creator' && parts[1]) return { view: 'creator', id: parts[1] };
     if (parts[0] === 'product' && parts[1]) return { view: 'product', id: parts[1] };
     if (path === 'seller' || path === 'seller/dashboard') return { view: 'seller-dashboard' };
+    if (parts[0] === 'seller' && parts[1] === 'orders' && parts[2] && parts[3] === 'print') return { view: 'seller-order-print', id: parts[2] };
     if (parts[0] === 'seller' && sellerPathMap[parts[1]]) return { view: sellerPathMap[parts[1]] };
     if (path === 'admin-dashboard') return { view: 'admin-dashboard' };
     if (parts[0] === 'admin' && adminPathMap[parts[1]]) return { view: adminPathMap[parts[1]] };
@@ -57,6 +59,7 @@ export function publicPathFor(view, id) {
     if (view === 'blog-detail' && id) return `/blog/${id}`;
     if (view === 'creator' && id) return `/creator/${id}`;
     if (view === 'product' && id) return `/product/${id}`;
+    if (view === 'seller-order-print' && id) return `/seller/orders/${id}/print`;
 
     return null;
 }

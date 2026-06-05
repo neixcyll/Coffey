@@ -3,7 +3,7 @@ import NeedLogin from '../../components/common/NeedLogin.jsx';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice } from '../../utils/format.js';
 
-export default function CustomerOrders({ token, navigate, setNotice }) {
+export default function CustomerOrders({ token, navigate, setNotice, selectedOrderId }) {
     const [orders, setOrders] = useState([]);
     const [expandedId, setExpandedId] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,6 +17,13 @@ export default function CustomerOrders({ token, navigate, setNotice }) {
             .catch((error) => setNotice(error.message))
             .finally(() => setLoading(false));
     }, [token, setNotice]);
+
+    useEffect(() => {
+        if (!selectedOrderId || orders.length === 0) return;
+
+        const selected = orders.find((order) => String(order.id) === String(selectedOrderId));
+        if (selected) setExpandedId(selected.id);
+    }, [orders, selectedOrderId]);
 
     if (!token) return <NeedLogin navigate={navigate} />;
 

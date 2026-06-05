@@ -1,10 +1,22 @@
+import UserNotificationMenu from '../../components/common/UserNotificationMenu.jsx';
+
 const customerNavItems = [
     { view: 'orders', label: 'Order Saya', description: 'Pantau pesanan', icon: ReceiptIcon },
     { view: 'affiliate-dashboard', label: 'Affiliate Panel', description: 'Kelola komisi', icon: NetworkIcon },
     { view: 'account-settings', label: 'Pengaturan Akun', description: 'Perbarui profil', icon: AccountIcon },
 ];
 
-export default function CustomerHub({ current, navigate, user, logout, notice, children }) {
+export default function CustomerHub({
+    current,
+    navigate,
+    user,
+    logout,
+    notifications,
+    unreadNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    children,
+}) {
     const activeView = current === 'affiliate-dashboard' || current === 'affiliate-content-upload' || current === 'affiliate-my-content'
         ? 'affiliate-dashboard'
         : current === 'account-settings'
@@ -27,6 +39,14 @@ export default function CustomerHub({ current, navigate, user, logout, notice, c
 
                 <div className="customer-hub-actions">
                     <button className="btn ghost customer-hub-shop" type="button" onClick={() => navigate('blog')}>Shop</button>
+                    <UserNotificationMenu
+                        notifications={notifications}
+                        unreadCount={unreadNotifications}
+                        navigate={navigate}
+                        onMarkRead={markNotificationRead}
+                        onMarkAllRead={markAllNotificationsRead}
+                        buttonClassName="seller-icon-button customer-notification-button"
+                    />
                     <div className="customer-hub-profile">
                         <span>{initials(user?.name)}</span>
                         <div>

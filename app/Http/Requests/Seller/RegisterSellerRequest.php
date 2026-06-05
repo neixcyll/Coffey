@@ -20,6 +20,7 @@ class RegisterSellerRequest extends FormRequest
             'store_name' => ['required', 'string', 'max:255', 'unique:seller_profiles,store_name'],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:2000'],
+            'origin_city' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
         ];
     }

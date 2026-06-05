@@ -18,9 +18,11 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\MidtransNotificationController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
+use App\Http\Controllers\Api\ShippingRateController;
 use App\Http\Controllers\Api\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Api\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Api\Seller\ProfileController as SellerProfileController;
@@ -50,6 +52,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'me']);
     Route::patch('/user', [AuthController::class, 'updateProfile']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
 
     Route::middleware('role:customer')->group(function () {
         Route::get('/cart', [CartController::class, 'index']);
@@ -58,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 
         Route::post('/checkout', [CheckoutController::class, 'store']);
+        Route::get('/shipping-rates', [ShippingRateController::class, 'index']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders/{order}/sync-payment', [OrderController::class, 'syncPayment']);

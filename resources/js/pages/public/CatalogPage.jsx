@@ -60,6 +60,28 @@ export default function CatalogPage({ navigate, setNotice }) {
             <section className="market-section">
                 <div className="section-head">
                     <div>
+                        <p className="eyebrow">How It Works</p>
+                        <h2>From discovery to checkout in three focused steps</h2>
+                    </div>
+                </div>
+                <div className="how-grid">
+                    {[
+                        ['01', 'Explore coffee', 'Browse curated beans by origin, roast, seller, and brewing style.'],
+                        ['02', 'Choose variants', 'Pick weight, grind size, stock-ready options, and checkout with a clear order summary.'],
+                        ['03', 'Share recommendations', 'Turn product picks into affiliate links and content that tracks clicks and commission.'],
+                    ].map(([number, title, body]) => (
+                        <article className="how-card" key={title}>
+                            <span>{number}</span>
+                            <h3>{title}</h3>
+                            <p className="muted">{body}</p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section className="market-section">
+                <div className="section-head">
+                    <div>
                         <p className="eyebrow">Featured Products</p>
                         <h2>Selected coffee worth discovering</h2>
                     </div>
@@ -134,13 +156,18 @@ export default function CatalogPage({ navigate, setNotice }) {
 
             <section className="affiliate-home-band">
                 <div>
-                    <p className="eyebrow">Affiliate Opportunity</p>
-                    <h2>Share coffee you trust and earn from every conversion.</h2>
-                    <p>Creator dan customer bisa membagikan produk, menulis konten, dan melacak komisi dari dashboard affiliate.</p>
+                    <p className="eyebrow">Affiliate Content</p>
+                    <h2>Editorial recommendations built into the marketplace.</h2>
+                    <p>Creator dan customer bisa membaca postingan affiliate publik, membagikan produk, dan melacak komisi dari dashboard affiliate.</p>
                 </div>
-                <button className="btn primary" type="button" onClick={() => navigate('affiliate-dashboard')}>
-                    Start affiliate
-                </button>
+                <div className="affiliate-home-actions">
+                    <button className="btn primary" type="button" onClick={() => navigate('affiliate-content')}>
+                        View content
+                    </button>
+                    <button className="btn ghost" type="button" onClick={() => navigate('affiliate-dashboard')}>
+                        Join affiliate
+                    </button>
+                </div>
             </section>
         </section>
     );
@@ -157,14 +184,14 @@ function HomeHero({ navigate, product }) {
             <div className="home-hero-shade" />
             <div className="home-hero-copy">
                 <p className="eyebrow">Specialty coffee marketplace</p>
-                <h1>Discover Specialty Coffee From Local Roasters</h1>
-                <p>Belanja beans, pilih varian, dan temukan seller lokal terpercaya dalam pengalaman ecommerce yang cepat dan fokus.</p>
+                <h1>Specialty Coffee, Curated for Modern Shopping</h1>
+                <p>Belanja beans dari roaster lokal, pilih varian dengan jelas, dan temukan rekomendasi affiliate dalam satu marketplace yang clean.</p>
                 <div className="home-hero-actions">
                     <button className="btn primary" type="button" onClick={() => navigate('blog')}>
-                        Explore coffee
+                        Explore Coffee
                     </button>
                     <button className="btn ghost" type="button" onClick={() => navigate('affiliate-dashboard')}>
-                        Join affiliate
+                        Join Affiliate
                     </button>
                 </div>
                 <div className="home-hero-stats" aria-label="Platform highlights">

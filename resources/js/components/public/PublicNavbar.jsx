@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import { roleName } from '../../utils/route.js';
 import { CartIcon } from '../common/Header.jsx';
+import UserNotificationMenu from '../common/UserNotificationMenu.jsx';
 
-export default function PublicNavbar({ user, navigate, logout, currentView, cartCount, onCartClick }) {
+export default function PublicNavbar({
+    user,
+    navigate,
+    logout,
+    currentView,
+    cartCount,
+    userNotifications,
+    unreadNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    onCartClick,
+}) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [accountOpen, setAccountOpen] = useState(false);
     const role = roleName(user);
@@ -22,9 +34,10 @@ export default function PublicNavbar({ user, navigate, logout, currentView, cart
 
     const navItems = [
         { view: 'products', label: 'Home', icon: <HomeIcon />, active: currentView === 'products' },
-        { view: 'blog', label: 'Shop', icon: <ShopIcon />, active: ['blog', 'product', 'review', 'brewing-guide', 'compare', 'blog-detail', 'creator'].includes(currentView) },
-        { view: 'affiliate-content', label: 'Content Layer', icon: <LayersIcon />, active: currentView === 'affiliate-content', featured: true },
+        { view: 'blog', label: 'Explore', icon: <ShopIcon />, active: ['blog', 'product', 'review', 'brewing-guide', 'compare', 'blog-detail', 'creator'].includes(currentView) },
+        { view: 'affiliate-content', label: 'Content', icon: <LayersIcon />, active: currentView === 'affiliate-content', featured: true },
         { view: 'about', label: 'About', icon: <AboutIcon />, active: currentView === 'about' },
+        { view: 'contact', label: 'Contact', icon: <ContactIcon />, active: currentView === 'contact' },
     ];
     const canUseCart = !user || isCustomer;
 
@@ -39,6 +52,16 @@ export default function PublicNavbar({ user, navigate, logout, currentView, cart
             </button>
 
             <div className="public-navbar-mobile-actions">
+                {isCustomer && (
+                    <UserNotificationMenu
+                        notifications={userNotifications}
+                        unreadCount={unreadNotifications}
+                        navigate={navigate}
+                        onMarkRead={markNotificationRead}
+                        onMarkAllRead={markAllNotificationsRead}
+                        buttonClassName="cart-header-button public-notification-button"
+                    />
+                )}
                 {canUseCart && <CartButton className="public-mobile-cart-button" cartCount={cartCount} onClick={openCart} />}
                 <button className="public-menu-button" type="button" aria-label="Buka menu" onClick={() => setMobileOpen((current) => !current)}>
                     <MenuIcon />
@@ -61,6 +84,16 @@ export default function PublicNavbar({ user, navigate, logout, currentView, cart
                 </nav>
 
                 <div className="public-account">
+                    {isCustomer && (
+                        <UserNotificationMenu
+                            notifications={userNotifications}
+                            unreadCount={unreadNotifications}
+                            navigate={navigate}
+                            onMarkRead={markNotificationRead}
+                            onMarkAllRead={markAllNotificationsRead}
+                            buttonClassName="cart-header-button public-notification-button public-desktop-notification-button"
+                        />
+                    )}
                     {canUseCart && <CartButton className="public-desktop-cart-button" cartCount={cartCount} onClick={openCart} />}
 
                     {user ? (
@@ -200,6 +233,15 @@ function AboutIcon() {
             <circle cx="12" cy="12" r="9" />
             <path d="M12 11v5" />
             <path d="M12 8h.01" />
+        </svg>
+    );
+}
+
+function ContactIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5h16v14H4z" />
+            <path d="m4 7 8 6 8-6" />
         </svg>
     );
 }

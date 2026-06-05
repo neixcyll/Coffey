@@ -25,6 +25,7 @@ class ProfileController extends Controller
             'store_name' => ['required', 'string', 'max:255', Rule::unique('seller_profiles', 'store_name')->ignore($seller->id)],
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:1000'],
+            'origin_city' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1500'],
         ]);
 

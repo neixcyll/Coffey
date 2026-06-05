@@ -16,6 +16,7 @@ export const PUBLIC_ROUTE_MAP = {
     products: '/',
     blog: '/explore',
     about: '/about',
+    contact: '/contact',
     deals: '/deals',
     review: '/review',
     'brewing-guide': '/brewing-guide',

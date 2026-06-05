@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
-import { Coffee, Eye, EyeOff, LoaderCircle, Store, UserRound } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, ShoppingBag, Store, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +17,7 @@ interface AuthForm {
     store_name: string;
     phone: string;
     address: string;
+    origin_city: string;
     description: string;
 }
 
@@ -305,7 +306,7 @@ function LoginPage({
             <aside className={cn("coffee-auth-visual", !isLogin && isSeller && "seller-register")}>
                 <div className="coffee-auth-overlay" />
                 <div className="coffee-auth-brand">
-                    <span><Coffee size={18} /></span>
+                    <span><ShoppingBag size={18} /></span>
                     <div>
                         <strong>Marketplace Kopi</strong>
                     </div>
@@ -313,7 +314,7 @@ function LoginPage({
 
                 <div className="coffee-auth-story">
                     <p className="eyebrow">Marketplace Kopi</p>
-                    <h1>Kopi pilihan, satu tempat.</h1>
+                    <h1>A modern coffee marketplace.</h1>
                 </div>
 
                 <AnimatedCoffeeCharacters hidePassword={passwordFocused && form.password.length > 0} showPassword={showPassword} />
@@ -321,7 +322,7 @@ function LoginPage({
 
             <div className="coffee-auth-form-side">
                 <div className="coffee-auth-mobile-brand">
-                    <Coffee size={18} />
+                    <ShoppingBag size={18} />
                     <span>Marketplace Kopi</span>
                 </div>
 
@@ -330,7 +331,7 @@ function LoginPage({
                         <p className="eyebrow">
                             {isLogin ? "Selamat datang" : isSeller ? `Daftar seller · ${sellerStep}/2` : "Daftar akun"}
                         </p>
-                        <h2>{isLogin ? "Masuk ke akun" : isSellerStoreStep ? "Lengkapi toko" : "Buat akun kopi"}</h2>
+                        <h2>{isLogin ? "Masuk ke akun" : isSellerStoreStep ? "Lengkapi toko" : "Buat akun marketplace"}</h2>
                     </div>
 
                     <form className="coffee-auth-form" onSubmit={onSubmit} ref={formRef}>
@@ -393,6 +394,7 @@ function LoginPage({
                             <div className="coffee-auth-seller-fields">
                                 <Field id="store_name" label="Nama toko" onChange={(value) => onUpdate("store_name", value)} placeholder="Nama toko" value={form.store_name} />
                                 <Field id="phone" label="Telepon" onChange={(value) => onUpdate("phone", value)} placeholder="Nomor telepon" required={false} value={form.phone} />
+                                <Field id="origin_city" label="Kota asal pengiriman" onChange={(value) => onUpdate("origin_city", value)} placeholder="Contoh: Bandung" value={form.origin_city} />
                                 <label className="space-y-2">
                                     <span>Alamat toko</span>
                                     <textarea onChange={(event) => onUpdate("address", event.target.value)} placeholder="Alamat toko" rows={3} value={form.address} />

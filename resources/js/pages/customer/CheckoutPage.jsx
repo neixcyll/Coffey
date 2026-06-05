@@ -7,13 +7,20 @@ import { apiRequest } from '../../services/api.js';
 import { formatPrice, formatWeight } from '../../utils/format.js';
 
 export default function CheckoutPage({ token, user, navigate, setNotice, refreshCartCount }) {
-    const [form, setForm] = useState({ customer_name: user?.name || '', customer_phone: '', shipping_address: '', notes: '' });
+    const [form, setForm] = useState({ customer_name: user?.name || '', customer_phone: '', shipping_address: '', destination_city: '', notes: '' });
     const [loading, setLoading] = useState(false);
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [shippingOptions, setShippingOptions] = useState([]);
+    const [shippingMessage, setShippingMessage] = useState('');
+    const [shippingMeta, setShippingMeta] = useState(null);
+    const [selectedShippingRateId, setSelectedShippingRateId] = useState('');
     const [cart, setCart] = useState(null);
     const [touched, setTouched] = useState({});
-    const errors = checkoutErrors(form);
+    const errors = checkoutErrors(form, selectedShippingRateId);
     const items = cart?.items || [];
     const totalItems = useMemo(() => items.reduce((total, item) => total + Number(item.quantity || 0), 0), [items]);
+    const selectedShipping = shippingOptions.find((rate) => String(rate.id) === String(selectedShippingRateId));
+    const totalPayment = Number(cart?.total_amount || 0) + Number(selectedShipping?.cost || 0);
 
     useEffect(() => {
         if (!token) return;
@@ -31,10 +38,44 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
 
     function update(field, value) {
         setForm((current) => ({ ...current, [field]: value }));
+
+        if (field === 'destination_city') {
+            setSelectedShippingRateId('');
+            setShippingOptions([]);
+            setShippingMessage('');
+            setShippingMeta(null);
+        }
     }
 
     function markTouched(field) {
         setTouched((current) => ({ ...current, [field]: true }));
+    }
+
+    async function loadShippingRates() {
+        const destinationCity = form.destination_city.trim();
+        setTouched((current) => ({ ...current, destination_city: true, shipping_rate_id: true }));
+
+        if (!destinationCity) {
+            setShippingOptions([]);
+            setShippingMessage('Isi kota tujuan sebelum mengecek ongkir.');
+            return;
+        }
+
+        setShippingLoading(true);
+        setSelectedShippingRateId('');
+
+        try {
+            const response = await apiRequest(`/shipping-rates?destination_city=${encodeURIComponent(destinationCity)}`, { token });
+            setShippingOptions(response.data?.rates || []);
+            setShippingMeta(response.data || null);
+            setShippingMessage(response.message || '');
+        } catch (error) {
+            setShippingOptions([]);
+            setShippingMeta(null);
+            setShippingMessage(error.message);
+        } finally {
+            setShippingLoading(false);
+        }
     }
 
     async function submit(event) {
@@ -42,8 +83,8 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
         const invalidFields = Object.keys(errors);
 
         if (invalidFields.length > 0) {
-            setTouched({ customer_name: true, customer_phone: true, shipping_address: true });
-            setNotice('Lengkapi data penerima dan alamat pengiriman sebelum melanjutkan pembayaran.');
+            setTouched({ customer_name: true, customer_phone: true, shipping_address: true, destination_city: true, shipping_rate_id: true });
+            setNotice('Lengkapi alamat tujuan dan pilih ongkir sebelum melanjutkan pembayaran.');
             return;
         }
 
@@ -58,6 +99,7 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                 token,
                 body: {
                     ...form,
+                    shipping_rate_id: Number(selectedShippingRateId),
                     affiliate_code: affiliateCode || undefined,
                     affiliate_click_id: affiliateClickId || undefined,
                 },
@@ -124,10 +166,55 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                             onBlur={() => markTouched('shipping_address')}
                             onChange={(value) => update('shipping_address', value)}
                         />
+                        <div className="checkout-destination-row">
+                            <TextInput
+                                label="Kota tujuan"
+                                value={form.destination_city}
+                                placeholder="Contoh: Jakarta"
+                                helper="Kota tujuan dipakai untuk mencari tarif dari kota asal seller."
+                                error={touched.destination_city ? errors.destination_city : ''}
+                                onBlur={() => markTouched('destination_city')}
+                                onChange={(value) => update('destination_city', value)}
+                            />
+                            <button className="btn ghost checkout-rate-button" type="button" disabled={shippingLoading || items.length === 0} onClick={loadShippingRates}>
+                                {shippingLoading ? 'Mencari...' : 'Cek ongkir'}
+                            </button>
+                        </div>
                     </section>
 
                     <section className="checkout-form-card">
-                        <CheckoutCardHeading step="03" title="Catatan pesanan" description="Opsional. Tambahkan instruksi khusus untuk seller atau kurir." />
+                        <CheckoutCardHeading step="03" title="Pilih pengiriman" description="Pilih layanan kurir sebelum melanjutkan ke pembayaran." />
+                        {shippingMeta?.origin_city && (
+                            <p className="checkout-origin-note">Dikirim dari <strong>{shippingMeta.origin_city}</strong> ke <strong>{shippingMeta.destination_city}</strong>.</p>
+                        )}
+                        <div className="checkout-shipping-options">
+                            {shippingOptions.map((rate) => (
+                                <label className={`checkout-shipping-option ${String(rate.id) === String(selectedShippingRateId) ? 'selected' : ''}`} key={rate.id}>
+                                    <input
+                                        checked={String(rate.id) === String(selectedShippingRateId)}
+                                        name="shipping_rate_id"
+                                        type="radio"
+                                        value={rate.id}
+                                        onChange={() => {
+                                            setSelectedShippingRateId(String(rate.id));
+                                            setTouched((current) => ({ ...current, shipping_rate_id: true }));
+                                        }}
+                                    />
+                                    <span>
+                                        <strong>{rate.courier} <small>{rate.service}</small></strong>
+                                        <small>Estimasi sampai {rate.estimated_days}</small>
+                                    </span>
+                                    <strong>{formatPrice(rate.cost)}</strong>
+                                </label>
+                            ))}
+                            {shippingMessage && <p className={`checkout-shipping-message ${shippingOptions.length ? '' : 'unavailable'}`}>{shippingMessage}</p>}
+                            {!shippingMessage && shippingOptions.length === 0 && <p className="checkout-shipping-message">Isi kota tujuan lalu klik Cek ongkir untuk melihat pilihan layanan.</p>}
+                            {touched.shipping_rate_id && errors.shipping_rate_id && <small className="field-error">{errors.shipping_rate_id}</small>}
+                        </div>
+                    </section>
+
+                    <section className="checkout-form-card">
+                        <CheckoutCardHeading step="04" title="Catatan pesanan" description="Opsional. Tambahkan instruksi khusus untuk seller atau kurir." />
                         <TextArea
                             label="Catatan"
                             value={form.notes}
@@ -162,12 +249,16 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                             <strong>{formatPrice(cart?.total_amount)}</strong>
                         </div>
                         <div>
+                            <span>Ongkir{selectedShipping ? ` (${selectedShipping.courier} ${selectedShipping.service})` : ''}</span>
+                            <strong>{selectedShipping ? formatPrice(selectedShipping.cost) : '-'}</strong>
+                        </div>
+                        <div>
                             <span>Total pembayaran</span>
-                            <strong>{formatPrice(cart?.total_amount)}</strong>
+                            <strong>{formatPrice(totalPayment)}</strong>
                         </div>
                     </div>
 
-                    <button className="btn primary checkout-pay-button" type="submit" form="checkout-order-form" disabled={loading || items.length === 0}>
+                    <button className="btn primary checkout-pay-button" type="submit" form="checkout-order-form" disabled={loading || items.length === 0 || !selectedShippingRateId}>
                         {loading ? 'Membuat order...' : 'Bayar dengan Snap'}
                     </button>
                     <p className="checkout-payment-note">Pembayaran diproses aman melalui Midtrans. Stock dikurangi setelah status pembayaran berhasil dikonfirmasi.</p>
@@ -212,12 +303,14 @@ function CheckoutSummaryLoading() {
     );
 }
 
-function checkoutErrors(form) {
+function checkoutErrors(form, shippingRateId) {
     const errors = {};
 
     if (!form.customer_name.trim()) errors.customer_name = 'Nama penerima wajib diisi.';
     if (!form.customer_phone.trim()) errors.customer_phone = 'Nomor telepon wajib diisi.';
     if (!form.shipping_address.trim()) errors.shipping_address = 'Alamat pengiriman wajib diisi.';
+    if (!form.destination_city.trim()) errors.destination_city = 'Kota tujuan wajib diisi.';
+    if (!shippingRateId) errors.shipping_rate_id = 'Pilih salah satu layanan ongkir.';
 
     return errors;
 }
