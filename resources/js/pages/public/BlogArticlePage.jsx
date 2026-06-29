@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ArticleCard from '../../components/article/ArticleCard.jsx';
+import { applyFallbackImage, fallbackArticleImage, fallbackProductImage } from '../../constants/images.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice } from '../../utils/format.js';
 import { applyArticleSeo } from '../../utils/seo.js';
@@ -57,6 +58,7 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
 
     const authorProfile = article.author?.creator_profile;
     const paragraphs = (article.content || '').split(/\n{2,}/).filter(Boolean);
+    const articleFallback = fallbackArticleImage(article);
 
     return (
         <article className="article-layout">
@@ -71,7 +73,12 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
                 </div>
             </header>
 
-            {article.featured_image_url && <img className="article-cover" src={article.featured_image_url} alt={article.title} />}
+            <img
+                className="article-cover"
+                src={article.featured_image_url || articleFallback}
+                alt={article.title}
+                onError={(event) => applyFallbackImage(event, articleFallback)}
+            />
 
             <div className="article-body">
                 {paragraphs.map((paragraph, index) => <p key={`${article.id}-p-${index}`}>{paragraph}</p>)}
@@ -88,7 +95,11 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
                     <div className="recommended-grid">
                         {article.recommended_products.map((item) => (
                             <div className="recommended-card" key={item.id}>
-                                {item.image_url ? <img src={item.image_url} alt={item.title} /> : <div className="product-image small placeholder">{item.title?.slice(0, 1) || 'K'}</div>}
+                                <img
+                                    src={item.image_url || fallbackProductImage(item.product || item)}
+                                    alt={item.title}
+                                    onError={(event) => applyFallbackImage(event, fallbackProductImage(item.product || item))}
+                                />
                                 <div>
                                     <span className="tag">{item.internal_available ? 'Marketplace' : item.external_platform || 'External'}</span>
                                     <h3>{item.title}</h3>

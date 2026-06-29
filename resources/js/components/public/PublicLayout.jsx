@@ -20,6 +20,7 @@ export default function PublicLayout({
 }) {
     const [cartOpen, setCartOpen] = useState(false);
     const isAuthPage = ['login', 'register'].includes(currentView);
+    const isCatalogPage = currentView === 'products';
 
     useEffect(() => {
         if (currentView === 'cart') setCartOpen(true);
@@ -39,7 +40,8 @@ export default function PublicLayout({
                 markAllNotificationsRead={markAllNotificationsRead}
                 onCartClick={() => setCartOpen(true)}
             />
-            <main className={`page public-page ${isAuthPage ? 'auth-public-page' : ''}`}>{children}</main>
+            <main className={`page public-page ${isAuthPage ? 'auth-public-page' : ''} ${isCatalogPage ? 'catalog-public-page' : ''}`}>{children}</main>
+            {!isAuthPage && <PublicFooter navigate={navigate} />}
             <CartDrawer
                 open={cartOpen}
                 onClose={() => setCartOpen(false)}
@@ -50,5 +52,34 @@ export default function PublicLayout({
                 refreshCartCount={refreshCartCount}
             />
         </div>
+    );
+}
+
+function PublicFooter({ navigate }) {
+    const links = [
+        ['Shop', 'blog'],
+        ['Content', 'affiliate-content'],
+        ['About', 'about'],
+        ['Contact', 'contact'],
+    ];
+
+    return (
+        <footer className="public-footer">
+            <div>
+                <button className="public-footer-brand" type="button" onClick={() => navigate('products')}>
+                    <span className="brand-mark">K</span>
+                    <strong>Coffey</strong>
+                </button>
+                <p>Modern coffee marketplace for products, sellers, and creator recommendations.</p>
+            </div>
+            <nav aria-label="Footer navigation">
+                {links.map(([label, view]) => (
+                    <button key={view} type="button" onClick={() => navigate(view)}>
+                        {label}
+                    </button>
+                ))}
+            </nav>
+            <span>Copyright {new Date().getFullYear()} Coffey</span>
+        </footer>
     );
 }

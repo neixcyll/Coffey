@@ -12,10 +12,17 @@ export default function ExplorePage({ navigate, setNotice }) {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [sort, setSort] = useState('recommended');
     const [filters, setFilters] = useState(() => {
+        const search = sessionStorage.getItem('explore_search') || '';
         const category = sessionStorage.getItem('explore_category') || '';
+        const roastLevel = sessionStorage.getItem('explore_roast_level') || '';
+        const origin = sessionStorage.getItem('explore_origin') || '';
+        sessionStorage.removeItem('explore_search');
         sessionStorage.removeItem('explore_category');
-        return { ...emptyFilters, category };
+        sessionStorage.removeItem('explore_roast_level');
+        sessionStorage.removeItem('explore_origin');
+        return { ...emptyFilters, search, category, roast_level: roastLevel, origin };
     });
 
     useEffect(() => {
@@ -34,6 +41,7 @@ export default function ExplorePage({ navigate, setNotice }) {
             .finally(() => setLoading(false));
     }, [filters, setNotice]);
 
+    const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
     const sections = useMemo(() => {
         const byRating = [...products].sort((a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0) || Number(b.reviews_count || 0) - Number(a.reviews_count || 0));
         const byReviews = [...products].sort((a, b) => Number(b.reviews_count || 0) - Number(a.reviews_count || 0));
@@ -64,7 +72,6 @@ export default function ExplorePage({ navigate, setNotice }) {
                 <div>
                     <p className="eyebrow">Explore Coffee</p>
                     <h1>Find the right beans faster.</h1>
-                    <p>Search by product, roaster, origin, or flavor direction, then refine only when you need to.</p>
                 </div>
                 <div className="explore-search-row">
                     <input
@@ -77,6 +84,16 @@ export default function ExplorePage({ navigate, setNotice }) {
                         <FilterIcon />
                         <span>Filter</span>
                     </button>
+                    <label className="explore-sort-control">
+                        <span>Sort</span>
+                        <select value={sort} onChange={(event) => setSort(event.target.value)}>
+                            <option value="recommended">Recommended</option>
+                            <option value="newest">Newest</option>
+                            <option value="rating">Top rated</option>
+                            <option value="price-low">Price low</option>
+                            <option value="price-high">Price high</option>
+                        </select>
+                    </label>
                 </div>
                 {chips.length > 0 && (
                     <div className="active-filter-row">
@@ -108,11 +125,11 @@ export default function ExplorePage({ navigate, setNotice }) {
                     <div className="section-head">
                         <div>
                             <p className="eyebrow">Results</p>
-                            <h2>{products.length} products found</h2>
+                            <h2>{sortedProducts.length} products found</h2>
                         </div>
                     </div>
                     <div className="product-grid marketplace-product-grid">
-                        {products.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
+                        {sortedProducts.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
                     </div>
                 </section>
             ) : (
@@ -224,6 +241,20 @@ function activeChips(categories, filters) {
     if (filters.origin) chips.push({ key: 'origin', label: `Origin: ${filters.origin}` });
 
     return chips;
+}
+
+function sortProducts(products, sort) {
+    const price = (product) => Number(product.min_price ?? product.price ?? 0);
+    const rating = (product) => Number(product.avg_rating || 0);
+
+    return [...products].sort((a, b) => {
+        if (sort === 'newest') return Number(b.id || 0) - Number(a.id || 0);
+        if (sort === 'rating') return rating(b) - rating(a) || Number(b.reviews_count || 0) - Number(a.reviews_count || 0);
+        if (sort === 'price-low') return price(a) - price(b);
+        if (sort === 'price-high') return price(b) - price(a);
+
+        return Number(b.stock || 0) - Number(a.stock || 0) || rating(b) - rating(a);
+    });
 }
 
 function FilterIcon() {

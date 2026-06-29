@@ -36,6 +36,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/categories', [ProductController::class, 'categories']);
 Route::get('/brewing-methods', [ProductController::class, 'brewingMethods']);
+Route::get('/sellers', [ProductController::class, 'sellers']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}/reviews', [ProductReviewController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);

@@ -6,6 +6,7 @@ import ProductImage from './ProductImage.jsx';
 export default function ProductCard({ product, navigate }) {
     const reviewsCount = Number(product.reviews_count || 0);
     const verified = product.seller?.status === 'active';
+    const brewMethod = (product.brewing_methods || [])[0]?.name;
 
     return (
         <article className="market-product-card">
@@ -34,11 +35,12 @@ export default function ProductCard({ product, navigate }) {
                 <div className="market-product-meta">
                     <span>{product.origin || 'Origin belum diisi'}</span>
                     <span>{optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level)}</span>
+                    {brewMethod && <span>{brewMethod}</span>}
                 </div>
                 <strong className="market-product-price">{priceLabel(product)}</strong>
                 <div className="market-product-actions">
-                    <button className="btn ghost" type="button" onClick={() => navigate('product', product.slug || product.id)}>Detail</button>
-                    <button className="btn primary" type="button" onClick={() => navigate('product', product.slug || product.id)}>Pilih Varian</button>
+                    <button className="btn ghost" type="button" onClick={() => navigate('product', product.slug || product.id)}>View</button>
+                    <button className="btn primary" type="button" onClick={() => navigate('product', product.slug || product.id)}>Choose</button>
                 </div>
             </div>
         </article>

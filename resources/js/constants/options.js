@@ -15,6 +15,8 @@ export const CATEGORY_ROUTE_MAP = {
 export const PUBLIC_ROUTE_MAP = {
     products: '/',
     blog: '/explore',
+    login: '/login',
+    register: '/register',
     about: '/about',
     contact: '/contact',
     deals: '/deals',

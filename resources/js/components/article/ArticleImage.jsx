@@ -1,7 +1,8 @@
+import { applyFallbackImage, fallbackArticleImage } from '../../constants/images.js';
+
 export default function ArticleImage({ article }) {
-    const src = article.featured_image_url || article.featured_image;
+    const fallback = fallbackArticleImage(article);
+    const src = article.featured_image_url || article.featured_image || fallback;
 
-    if (src) return <img className="article-image" src={src} alt={article.title} />;
-
-    return <div className="article-image placeholder">{article.title?.slice(0, 1) || 'K'}</div>;
+    return <img className="article-image" src={src} alt={article.title || 'Coffee article'} onError={(event) => applyFallbackImage(event, fallback)} />;
 }

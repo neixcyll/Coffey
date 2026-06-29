@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import EmptyState from '../../components/public/EmptyState.jsx';
+import { applyFallbackImage, fallbackArticleImage, fallbackProductImage } from '../../constants/images.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 
@@ -126,7 +127,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
     async function shareArticle(article) {
         const url = `${window.location.origin}/blog/${article.slug}`;
         await navigator.clipboard?.writeText(url);
-        setNotice('Link postingan disalin.');
+        setNotice('Link affiliate content disalin.');
     }
 
     return (
@@ -134,14 +135,11 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
             <header className="content-community-hero">
                 <div>
                     <p className="eyebrow">Content Layer</p>
-                    <h1>Rekomendasi kopi dari affiliate dan creator.</h1>
-                    <p>
-                        Baca review, brewing tips, cerita pengalaman, dan rekomendasi produk kopi dari seluruh creator marketplace.
-                    </p>
+                    <h1>Recommended coffee and affiliate stories.</h1>
                 </div>
                 <div className="content-community-search">
                     <input
-                        placeholder="Cari artikel, creator, produk, atau brewing tips"
+                        placeholder="Search article, creator, product..."
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
                     />
@@ -191,11 +189,16 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
 
 function CommunityPostCard({ article, state, onRead, onProductClick, onToggle, onShare }) {
     const products = article.recommended_products || [];
+    const articleFallback = fallbackArticleImage(article);
 
     return (
         <article className="community-post-card">
             <button className="community-post-cover" type="button" onClick={onRead}>
-                {article.featured_image_url ? <img src={article.featured_image_url} alt={article.title} /> : <span>{article.title?.slice(0, 1) || 'C'}</span>}
+                <img
+                    src={article.featured_image_url || articleFallback}
+                    alt={article.title}
+                    onError={(event) => applyFallbackImage(event, articleFallback)}
+                />
             </button>
             <div className="community-post-body">
                 <div className="market-product-topline">
@@ -212,7 +215,11 @@ function CommunityPostCard({ article, state, onRead, onProductClick, onToggle, o
                     <div className="community-product-strip">
                         {products.slice(0, 3).map((item) => (
                             <button key={item.id} type="button" onClick={() => onProductClick(item)}>
-                                {item.image_url ? <img src={item.image_url} alt={item.title} /> : <span>{item.title?.slice(0, 1) || 'P'}</span>}
+                                <img
+                                    src={item.image_url || fallbackProductImage(item.product || item)}
+                                    alt={item.title}
+                                    onError={(event) => applyFallbackImage(event, fallbackProductImage(item.product || item))}
+                                />
                                 <small>{item.title}</small>
                             </button>
                         ))}
@@ -235,6 +242,7 @@ function CommunityPostCard({ article, state, onRead, onProductClick, onToggle, o
 function ContentDetailDrawer({ article, state, loading, onClose, onProductClick, onToggle, onShare, onComment }) {
     const [comment, setComment] = useState('');
     const products = article.recommended_products || [];
+    const articleFallback = fallbackArticleImage(article);
 
     function submitComment(event) {
         event.preventDefault();
@@ -256,7 +264,12 @@ function ContentDetailDrawer({ article, state, loading, onClose, onProductClick,
                     </button>
                 </header>
                 <div className="content-detail-scroll">
-                    {article.featured_image_url && <img className="content-detail-cover" src={article.featured_image_url} alt={article.title} />}
+                    <img
+                        className="content-detail-cover"
+                        src={article.featured_image_url || articleFallback}
+                        alt={article.title}
+                        onError={(event) => applyFallbackImage(event, articleFallback)}
+                    />
                     <div className="creator-chip">
                         <span>{creatorInitials(article)}</span>
                         <strong>{creatorName(article)}</strong>
@@ -269,7 +282,11 @@ function ContentDetailDrawer({ article, state, loading, onClose, onProductClick,
                             <p className="eyebrow">Recommended Products</p>
                             {products.map((item) => (
                                 <button key={item.id} type="button" onClick={() => onProductClick(item)}>
-                                    {item.image_url ? <img src={item.image_url} alt={item.title} /> : <span>{item.title?.slice(0, 1) || 'P'}</span>}
+                                    <img
+                                        src={item.image_url || fallbackProductImage(item.product || item)}
+                                        alt={item.title}
+                                        onError={(event) => applyFallbackImage(event, fallbackProductImage(item.product || item))}
+                                    />
                                     <span>
                                         <strong>{item.title}</strong>
                                         <small>{item.product ? formatPrice(item.product.price || item.price) : item.price_label || item.external_platform || 'Affiliate link'}</small>
@@ -314,8 +331,8 @@ function SocialActions({ liked, saved, commentsCount, onLike, onSave, onShare, o
         <div className="content-social-actions">
             <button className={liked ? 'active' : ''} type="button" onClick={onLike}>Like</button>
             <button className={saved ? 'active' : ''} type="button" onClick={onSave}>Save</button>
-            <button type="button" onClick={onShare}>Share</button>
-            <button type="button" onClick={onDiscuss}>Discuss {commentsCount > 0 ? commentsCount : ''}</button>
+            <button type="button" onClick={onShare}>Copy link</button>
+            <button type="button" onClick={onDiscuss}>Comment {commentsCount > 0 ? commentsCount : ''}</button>
         </div>
     );
 }

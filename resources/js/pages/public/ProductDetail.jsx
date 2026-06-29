@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
+import ProductCard from '../../components/product/ProductCard.jsx';
 import ProductImage from '../../components/product/ProductImage.jsx';
 import ReviewForm from '../../components/review/ReviewForm.jsx';
 import StarRating from '../../components/review/StarRating.jsx';
+import { applyFallbackImage, fallbackProductImage } from '../../constants/images.js';
 import { apiRequest } from '../../services/api.js';
-import { formatPrice, formatWeight, optionLabel } from '../../utils/format.js';
+import { formatPrice, formatWeight, optionLabel, rowsFrom } from '../../utils/format.js';
 import { roleName } from '../../utils/route.js';
 
 export default function ProductDetail({ productId, token, user, navigate, setNotice, refreshCartCount }) {
@@ -17,11 +19,13 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const [selectedGrind, setSelectedGrind] = useState('');
     const [selectedImage, setSelectedImage] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [relatedProducts, setRelatedProducts] = useState([]);
 
     useEffect(() => {
         setProduct(null);
         setEligibility(null);
         setShowReviewForm(false);
+        setRelatedProducts([]);
         apiRequest(`/products/${productId}`)
             .then((data) => {
                 setProduct(data.data);
@@ -29,6 +33,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                 const firstVariant = preferredVariant(data.data?.variants || []);
                 setSelectedWeight(firstVariant ? String(firstVariant.weight_grams) : '');
                 setSelectedGrind(firstVariant?.grind_size || '');
+                loadRelatedProducts(data.data);
             })
             .catch((error) => setNotice(error.message));
         loadReviews();
@@ -52,6 +57,28 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
         });
         setReviews(response.data || []);
         setReviewMeta(response.meta || { avg_rating: null, reviews_count: 0 });
+    }
+
+    async function loadRelatedProducts(currentProduct) {
+        const category = currentProduct?.category?.slug;
+        const query = new URLSearchParams({ per_page: '8' });
+
+        if (category) query.set('category', category);
+
+        const categoryResponse = await apiRequest(`/products?${query}`).catch(() => null);
+        let nextProducts = rowsFrom(categoryResponse)
+            .filter((item) => String(item.id) !== String(currentProduct?.id))
+            .slice(0, 4);
+
+        if (nextProducts.length < 4) {
+            const fallbackResponse = await apiRequest('/products?per_page=8').catch(() => null);
+            const fallbackProducts = rowsFrom(fallbackResponse)
+                .filter((item) => String(item.id) !== String(currentProduct?.id))
+                .filter((item) => !nextProducts.some((related) => String(related.id) === String(item.id)));
+            nextProducts = [...nextProducts, ...fallbackProducts].slice(0, 4);
+        }
+
+        setRelatedProducts(nextProducts);
     }
 
     async function addToCart({ checkout = false } = {}) {
@@ -335,6 +362,20 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                     {reviews.length === 0 && <div className="panel empty-state">Belum ada review untuk produk ini.</div>}
                 </div>
             </section>
+
+            {relatedProducts.length > 0 && (
+                <section className="pdp-related-section">
+                    <div className="section-head">
+                        <div>
+                            <p className="eyebrow">Related Products</p>
+                            <h2>More coffee from this category</h2>
+                        </div>
+                    </div>
+                    <div className="featured-product-grid">
+                        {relatedProducts.map((item) => <ProductCard key={item.id} product={item} navigate={navigate} />)}
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
@@ -359,12 +400,13 @@ function BrewingMethods({ methods = [] }) {
 }
 
 function ProductGallery({ product, images, selectedImage, setSelectedImage }) {
-    const currentImage = selectedImage || images[0]?.url || product.image_url || product.image;
+    const fallback = fallbackProductImage(product);
+    const currentImage = selectedImage || images[0]?.url || product.image_url || product.image || fallback;
 
     return (
         <div className="product-gallery">
             {currentImage ? (
-                <img className="product-image large" src={currentImage} alt={product.name} />
+                <img className="product-image large" src={currentImage} alt={product.name} onError={(event) => applyFallbackImage(event, fallback)} />
             ) : (
                 <ProductImage product={product} large />
             )}
@@ -378,7 +420,7 @@ function ProductGallery({ product, images, selectedImage, setSelectedImage }) {
                             onClick={() => setSelectedImage(image.url)}
                             aria-label={`Lihat gambar ${image.label}`}
                         >
-                            <img src={image.url} alt={image.label} />
+                            <img src={image.url} alt={image.label} onError={(event) => applyFallbackImage(event, fallback)} />
                         </button>
                     ))}
                 </div>

@@ -25,6 +25,7 @@ import AboutPage from './pages/public/AboutPage.jsx';
 import BlogArticlePage from './pages/public/BlogArticlePage.jsx';
 import BlogIndexPage from './pages/public/BlogIndexPage.jsx';
 import CatalogPage from './pages/public/CatalogPage.jsx';
+import ContactPage from './pages/public/ContactPage.jsx';
 import ContentLayerPage from './pages/public/ContentLayerPage.jsx';
 import CreatorPage from './pages/public/CreatorPage.jsx';
 import ExplorePage from './pages/public/ExplorePage.jsx';
@@ -447,7 +448,7 @@ export default function App() {
                         {route.view === 'brewing-guide' && <BlogIndexPage categorySlug="brewing-guide" {...context} />}
                         {route.view === 'compare' && <BlogIndexPage categorySlug="comparison" {...context} />}
                         {route.view === 'about' && <AboutPage navigate={navigate} />}
-                        {route.view === 'contact' && <AboutPage navigate={navigate} focusContact />}
+                        {route.view === 'contact' && <ContactPage setNotice={setNotice} />}
                         {route.view === 'blog-detail' && <BlogArticlePage slug={route.id} {...context} />}
                         {route.view === 'creator' && <CreatorPage username={route.id} {...context} />}
                         {route.view === 'product' && <ProductDetail productId={route.id} {...context} />}
@@ -487,7 +488,7 @@ export default function App() {
             )}
             <NotificationToast
                 message={notice}
-                enabled={!['login', 'register'].includes(route.view)}
+                enabled
                 onDismiss={dismissNotice}
             />
         </div>

@@ -308,30 +308,40 @@ function LoginPage({
                 <div className="coffee-auth-brand">
                     <span><ShoppingBag size={18} /></span>
                     <div>
-                        <strong>Marketplace Kopi</strong>
+                        <strong>Coffey</strong>
                     </div>
                 </div>
 
                 <div className="coffee-auth-story">
-                    <p className="eyebrow">Marketplace Kopi</p>
-                    <h1>A modern coffee marketplace.</h1>
+                    <p className="eyebrow">Modern coffee marketplace</p>
+                    <h1>Clean access for buyers, sellers, and creators.</h1>
+                    <div className="coffee-auth-points">
+                        <span>Customer checkout</span>
+                        <span>Seller dashboard</span>
+                        <span>Affiliate content</span>
+                    </div>
                 </div>
 
-                <AnimatedCoffeeCharacters hidePassword={passwordFocused && form.password.length > 0} showPassword={showPassword} />
+                <div className="coffee-auth-visual-grid" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                </div>
             </aside>
 
             <div className="coffee-auth-form-side">
                 <div className="coffee-auth-mobile-brand">
                     <ShoppingBag size={18} />
-                    <span>Marketplace Kopi</span>
+                    <span>Coffey</span>
                 </div>
 
                 <div className="coffee-auth-form-shell">
                     <div className="coffee-auth-heading">
                         <p className="eyebrow">
-                            {isLogin ? "Selamat datang" : isSeller ? `Daftar seller · ${sellerStep}/2` : "Daftar akun"}
+                            {isLogin ? "Welcome back" : isSeller ? `Seller signup ${sellerStep}/2` : "Create account"}
                         </p>
-                        <h2>{isLogin ? "Masuk ke akun" : isSellerStoreStep ? "Lengkapi toko" : "Buat akun marketplace"}</h2>
+                        <h2>{isLogin ? "Sign in" : isSellerStoreStep ? "Complete your store" : "Join the marketplace"}</h2>
                     </div>
 
                     <form className="coffee-auth-form" onSubmit={onSubmit} ref={formRef}>
@@ -412,8 +422,6 @@ function LoginPage({
                                 <span>Ingat saya</span>
                             </label>
                         )}
-
-                        {notice && <div className="coffee-auth-alert">{notice}</div>}
 
                         {isSellerAccountStep ? (
                             <Button className="h-12 w-full text-base" size="lg" type="button" onClick={continueSellerRegistration}>

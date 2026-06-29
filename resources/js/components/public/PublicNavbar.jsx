@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { roleName } from '../../utils/route.js';
 import { CartIcon } from '../common/Header.jsx';
 import UserNotificationMenu from '../common/UserNotificationMenu.jsx';
@@ -17,8 +17,21 @@ export default function PublicNavbar({
 }) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [accountOpen, setAccountOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const [scrolled, setScrolled] = useState(false);
     const role = roleName(user);
     const isCustomer = role === 'customer';
+
+    useEffect(() => {
+        function updateScrollState() {
+            setScrolled(window.scrollY > 28);
+        }
+
+        updateScrollState();
+        window.addEventListener('scroll', updateScrollState, { passive: true });
+
+        return () => window.removeEventListener('scroll', updateScrollState);
+    }, []);
 
     function go(view, id) {
         navigate(view, id);
@@ -32,22 +45,39 @@ export default function PublicNavbar({
         onCartClick();
     }
 
+    function submitSearch(event) {
+        event.preventDefault();
+        const keyword = search.trim();
+
+        if (keyword) sessionStorage.setItem('explore_search', keyword);
+
+        go('blog');
+    }
+
+    function scrollToHomeSection(id) {
+        setMobileOpen(false);
+        setAccountOpen(false);
+        navigate('products');
+        window.setTimeout(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+    }
+
     const navItems = [
-        { view: 'products', label: 'Home', icon: <HomeIcon />, active: currentView === 'products' },
-        { view: 'blog', label: 'Explore', icon: <ShopIcon />, active: ['blog', 'product', 'review', 'brewing-guide', 'compare', 'blog-detail', 'creator'].includes(currentView) },
-        { view: 'affiliate-content', label: 'Content', icon: <LayersIcon />, active: currentView === 'affiliate-content', featured: true },
-        { view: 'about', label: 'About', icon: <AboutIcon />, active: currentView === 'about' },
-        { view: 'contact', label: 'Contact', icon: <ContactIcon />, active: currentView === 'contact' },
+        { key: 'home', view: 'products', label: 'Home', icon: <HomeIcon />, active: currentView === 'products' },
+        { key: 'shop', view: 'blog', label: 'Shop', icon: <ShopIcon />, active: ['blog', 'product', 'review', 'brewing-guide', 'compare', 'blog-detail', 'creator'].includes(currentView) },
+        { key: 'roasters', label: 'Roasters', icon: <RoasterIcon />, active: false, onClick: () => scrollToHomeSection('home-roasters') },
+        { key: 'content', view: 'affiliate-content', label: 'Content', icon: <LayersIcon />, active: currentView === 'affiliate-content' },
+        { key: 'about', view: 'about', label: 'About', icon: <AboutIcon />, active: currentView === 'about' },
     ];
     const canUseCart = !user || isCustomer;
 
     return (
-        <header className="public-navbar">
+        <header className={`public-navbar ${scrolled ? 'scrolled' : ''}`}>
             <button className="public-brand" type="button" onClick={() => go('products')}>
                 <span className="brand-mark">K</span>
                 <span className="public-brand-copy">
-                    <strong>Marketplace Kopi</strong>
-                    <small>Curated coffee market</small>
+                    <strong>Coffey</strong>
                 </span>
             </button>
 
@@ -72,16 +102,26 @@ export default function PublicNavbar({
                 <nav className="public-nav" aria-label="Navigasi utama">
                     {navItems.map((item) => (
                         <button
-                            key={item.view}
+                            key={item.key}
                             className={`public-nav-item ${item.featured ? 'featured' : ''} ${item.active ? 'active' : ''}`}
                             type="button"
-                            onClick={() => go(item.view)}
+                            onClick={() => item.onClick ? item.onClick() : go(item.view)}
                         >
                             {item.icon}
                             <span>{item.label}</span>
                         </button>
                     ))}
                 </nav>
+
+                <form className="public-nav-search" role="search" onSubmit={submitSearch}>
+                    <SearchIcon />
+                    <input
+                        aria-label="Search coffee products"
+                        placeholder="Search coffee"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                </form>
 
                 <div className="public-account">
                     {isCustomer && (
@@ -217,6 +257,17 @@ function ShopIcon() {
     );
 }
 
+function RoasterIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 10h16" />
+            <path d="M6 10v10h12V10" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+            <path d="M9 15h6" />
+        </svg>
+    );
+}
+
 function LayersIcon() {
     return (
         <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -242,6 +293,15 @@ function ContactIcon() {
         <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 5h16v14H4z" />
             <path d="m4 7 8 6 8-6" />
+        </svg>
+    );
+}
+
+function SearchIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
         </svg>
     );
 }

@@ -18,6 +18,7 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
     const [touched, setTouched] = useState({});
     const errors = checkoutErrors(form, selectedShippingRateId);
     const items = cart?.items || [];
+    const affiliateCode = typeof window !== 'undefined' ? localStorage.getItem('affiliate_ref') : '';
     const totalItems = useMemo(() => items.reduce((total, item) => total + Number(item.quantity || 0), 0), [items]);
     const selectedShipping = shippingOptions.find((rate) => String(rate.id) === String(selectedShippingRateId));
     const totalPayment = Number(cart?.total_amount || 0) + Number(selectedShipping?.cost || 0);
@@ -214,7 +215,15 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                     </section>
 
                     <section className="checkout-form-card">
-                        <CheckoutCardHeading step="04" title="Catatan pesanan" description="Opsional. Tambahkan instruksi khusus untuk seller atau kurir." />
+                        <CheckoutCardHeading step="04" title="Payment method" description="Pembayaran diproses setelah order berhasil dibuat." />
+                        <div className="checkout-payment-method">
+                            <span>Midtrans Snap</span>
+                            <strong>Cards, bank transfer, e-wallet, and retail payment</strong>
+                        </div>
+                    </section>
+
+                    <section className="checkout-form-card">
+                        <CheckoutCardHeading step="05" title="Catatan pesanan" description="Opsional. Tambahkan instruksi khusus untuk seller atau kurir." />
                         <TextArea
                             label="Catatan"
                             value={form.notes}
@@ -256,6 +265,11 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                             <span>Total pembayaran</span>
                             <strong>{formatPrice(totalPayment)}</strong>
                         </div>
+                    </div>
+
+                    <div className="checkout-affiliate-note">
+                        <span>Voucher / affiliate code</span>
+                        <strong>{affiliateCode || 'Not applied'}</strong>
                     </div>
 
                     <button className="btn primary checkout-pay-button" type="submit" form="checkout-order-form" disabled={loading || items.length === 0 || !selectedShippingRateId}>

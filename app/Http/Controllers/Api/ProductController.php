@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BrewingMethod;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SellerProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,6 +23,37 @@ class ProductController extends Controller
     {
         return response()->json([
             'data' => BrewingMethod::query()->orderBy('name')->get(),
+        ]);
+    }
+
+    public function sellers(Request $request): JsonResponse
+    {
+        $sellers = SellerProfile::query()
+            ->with([
+                'products' => fn ($query) => $query
+                    ->with(['images', 'category'])
+                    ->latest(),
+            ])
+            ->withCount('products')
+            ->where('status', 'active')
+            ->latest()
+            ->limit($request->integer('limit', 12))
+            ->get()
+            ->map(fn (SellerProfile $seller) => [
+                'id' => $seller->id,
+                'name' => $seller->store_name,
+                'store_name' => $seller->store_name,
+                'logo' => null,
+                'banner' => $this->sellerBanner($seller),
+                'city' => $seller->origin_city,
+                'description' => $seller->description,
+                'slug' => $seller->slug,
+                'products_count' => $seller->products_count,
+                'badge' => $this->sellerBadge($seller),
+            ]);
+
+        return response()->json([
+            'data' => $sellers,
         ]);
     }
 
@@ -74,5 +106,31 @@ class ProductController extends Controller
         return response()->json([
             'data' => $product,
         ]);
+    }
+
+    private function sellerBanner(SellerProfile $seller): ?string
+    {
+        $product = $seller->products->firstWhere('image_url');
+
+        if ($product?->image_url) {
+            return $product->image_url;
+        }
+
+        $productWithGallery = $seller->products->first(fn (Product $product) => $product->images->isNotEmpty());
+        $image = $productWithGallery?->images->first();
+
+        return $image?->url ?? $image?->path;
+    }
+
+    private function sellerBadge(SellerProfile $seller): string
+    {
+        $labels = ['Specialty Coffee', 'Arabica Expert', 'Light Roast', 'Single Origin'];
+
+        $category = $seller->products
+            ->pluck('category.name')
+            ->filter()
+            ->first();
+
+        return $category ?: $labels[$seller->id % count($labels)];
     }
 }

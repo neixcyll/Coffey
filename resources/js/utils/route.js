@@ -30,6 +30,8 @@ export function parsePathRoute() {
     };
 
     if (path === 'blog' || path === 'explore') return { view: 'blog' };
+    if (path === 'login') return { view: 'login' };
+    if (path === 'register') return { view: 'register' };
     if (path === 'about') return { view: 'about' };
     if (path === 'contact') return { view: 'contact' };
     if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
