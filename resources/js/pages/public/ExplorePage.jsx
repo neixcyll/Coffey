@@ -84,16 +84,16 @@ export default function ExplorePage({ navigate, setNotice }) {
                         <FilterIcon />
                         <span>Filter</span>
                     </button>
-                    <label className="explore-sort-control">
-                        <span>Sort</span>
+                    <div className="explore-sort-control">
+                        <SortIcon />
                         <select value={sort} onChange={(event) => setSort(event.target.value)}>
                             <option value="recommended">Recommended</option>
                             <option value="newest">Newest</option>
                             <option value="rating">Top rated</option>
-                            <option value="price-low">Price low</option>
-                            <option value="price-high">Price high</option>
+                            <option value="price-low">Price: Low → High</option>
+                            <option value="price-high">Price: High → Low</option>
                         </select>
-                    </label>
+                    </div>
                 </div>
                 {chips.length > 0 && (
                     <div className="active-filter-row">
@@ -272,6 +272,18 @@ function CloseIcon() {
         <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M6 6l12 12" />
             <path d="M18 6L6 18" />
+        </svg>
+    );
+}
+
+function SortIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5h10" />
+            <path d="M11 9h7" />
+            <path d="M11 13h4" />
+            <path d="M3 17l3 3 3-3" />
+            <path d="M6 18V4" />
         </svg>
     );
 }

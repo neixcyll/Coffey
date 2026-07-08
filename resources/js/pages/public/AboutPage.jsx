@@ -16,15 +16,6 @@ const steps = [
     },
 ];
 
-const features = [
-    'Clean coffee product discovery',
-    'Variant-aware cart',
-    'Checkout with shipping rates',
-    'Verified purchase reviews',
-    'Affiliate content layer',
-    'Role-based dashboards',
-];
-
 export default function AboutPage({ navigate }) {
     return (
         <section className="about-page">
@@ -72,18 +63,6 @@ export default function AboutPage({ navigate }) {
                             <h3>{step.title}</h3>
                             <p className="muted">{step.body}</p>
                         </article>
-                    ))}
-                </div>
-            </section>
-
-            <section className="about-feature-grid">
-                <div>
-                    <p className="eyebrow">Core Value</p>
-                    <h2>Premium UI around practical commerce workflows</h2>
-                </div>
-                <div className="feature-list">
-                    {features.map((feature) => (
-                        <span key={feature}>{feature}</span>
                     ))}
                 </div>
             </section>

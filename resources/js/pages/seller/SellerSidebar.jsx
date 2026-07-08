@@ -13,39 +13,46 @@ export default function SellerSidebar({ current, navigate, storeName, open, onCl
     }
 
     return (
-        <aside className={`seller-sidebar ${open ? 'open' : ''}`}>
-            <div className="seller-sidebar-brand">
-                <button className="seller-logo" onClick={() => go('seller-dashboard')} aria-label="Dashboard Seller">
-                    <span className="seller-logo-mark">K</span>
-                    <span>
-                        <strong>Marketplace Kopi</strong>
-                        <small>Seller Panel</small>
+        <aside className={`seller-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-4.5 overflow-y-auto p-5 text-[#fdf8f0] bg-[#2b1b13] shadow-[18px_0_48px_rgba(38,28,21,0.18)]`}>
+            <div className="seller-sidebar-brand grid gap-3">
+                <button className="seller-logo inline-flex items-center gap-2.5 border-0 p-0 text-left bg-transparent cursor-pointer" onClick={() => go('seller-dashboard')} aria-label="Dashboard Seller">
+                    <img className="seller-logo-mark w-[38px] h-[38px] object-contain" src="/logo.png" alt="Seller Logo" style={{ background: 'transparent' }} />
+                    <span className="flex flex-col text-left">
+                        <strong className="block text-[#fffdfa] font-extrabold leading-tight">Marketplace Kopi</strong>
+                        <small className="block text-[#a08a75] text-xs">Seller Panel</small>
                     </span>
                 </button>
-                <span className="seller-panel-badge">Seller Panel</span>
+                <span className="seller-panel-badge self-start bg-[#5b3825] text-white text-[0.74rem] font-bold px-2 py-0.5 rounded-full">Seller Panel</span>
             </div>
 
-            <div className="seller-store-card">
-                <span className="seller-store-avatar">{initials(storeName)}</span>
-                <span>
-                    <small>Nama toko</small>
-                    <strong>{storeName || 'Seller Kopi'}</strong>
+            <div className="seller-store-card flex items-center gap-3 border border-[rgba(255,253,250,0.12)] rounded-xl p-3 bg-[rgba(255,253,250,0.04)]">
+                <span className="seller-store-avatar w-10 h-10 rounded-lg flex items-center justify-center bg-[#5b3825] text-white font-extrabold text-sm flex-shrink-0">{initials(storeName)}</span>
+                <span className="flex flex-col text-xs text-left">
+                    <small className="text-[#a08a75]">Nama toko</small>
+                    <strong className="text-white text-sm font-extrabold truncate max-w-[150px]">{storeName || 'Seller Kopi'}</strong>
                 </span>
             </div>
 
-            <nav className="seller-nav" aria-label="Menu seller">
-                {sellerNavItems.map(({ view, label, icon: Icon }) => (
-                    <button
-                        key={view}
-                        type="button"
-                        className={current === view ? 'active' : ''}
-                        aria-current={current === view ? 'page' : undefined}
-                        onClick={() => go(view)}
-                    >
-                        <Icon />
-                        <span>{label}</span>
-                    </button>
-                ))}
+            <nav className="seller-nav grid gap-1 mt-2" aria-label="Menu seller">
+                {sellerNavItems.map(({ view, label, icon: Icon }) => {
+                    const isActive = current === view;
+                    return (
+                        <button
+                            key={view}
+                            type="button"
+                            className={`flex items-center gap-3 w-full text-left p-2.5 rounded-lg font-bold text-sm bg-transparent border-0 cursor-pointer transition-colors ${
+                                isActive 
+                                    ? 'active bg-[#5b3825] text-[#fff]' 
+                                    : 'text-[#d7c4b4] hover:bg-[rgba(255,253,250,0.06)] hover:text-[#fff]'
+                            }`}
+                            aria-current={isActive ? 'page' : undefined}
+                            onClick={() => go(view)}
+                        >
+                            <span className="w-5 h-5 flex items-center justify-center text-inherit"><Icon /></span>
+                            <span>{label}</span>
+                        </button>
+                    );
+                })}
             </nav>
         </aside>
     );

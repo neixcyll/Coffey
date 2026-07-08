@@ -19,31 +19,38 @@ export default function AdminSidebar({ current, navigate, open, onClose }) {
     }
 
     return (
-        <aside className={`admin-sidebar ${open ? 'open' : ''}`}>
-            <div className="admin-sidebar-brand">
-                <button className="admin-logo" type="button" onClick={() => go('admin-dashboard')} aria-label="Dashboard Admin">
-                    <span className="admin-logo-mark">K</span>
-                    <span>
-                        <strong>Marketplace Kopi</strong>
-                        <small>Admin Panel</small>
+        <aside className={`admin-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-4.5 overflow-y-auto p-5 text-[#fdf8f0] bg-[#2b1b13] shadow-[18px_0_48px_rgba(38,28,21,0.18)]`}>
+            <div className="admin-sidebar-brand grid gap-3">
+                <button className="admin-logo inline-flex items-center gap-2.5 border-0 p-0 text-left bg-transparent cursor-pointer" type="button" onClick={() => go('admin-dashboard')} aria-label="Dashboard Admin">
+                    <img className="admin-logo-mark w-[38px] h-[38px] object-contain" src="/logo.png" alt="Admin Logo" style={{ background: 'transparent' }} />
+                    <span className="flex flex-col text-left">
+                        <strong className="block text-[#fffdfa] font-extrabold leading-tight">Marketplace Kopi</strong>
+                        <small className="block text-[#a08a75] text-xs">Admin Panel</small>
                     </span>
                 </button>
-                <span className="admin-panel-badge">Admin Panel</span>
+                <span className="admin-panel-badge self-start bg-[#5b3825] text-white text-[0.74rem] font-bold px-2 py-0.5 rounded-full">Admin Panel</span>
             </div>
 
-            <nav className="admin-nav" aria-label="Menu admin">
-                {adminNavItems.map(({ view, label, icon: Icon }) => (
-                    <button
-                        key={view}
-                        type="button"
-                        className={current === view ? 'active' : ''}
-                        aria-current={current === view ? 'page' : undefined}
-                        onClick={() => go(view)}
-                    >
-                        <Icon />
-                        <span>{label}</span>
-                    </button>
-                ))}
+            <nav className="admin-nav grid gap-1 mt-2" aria-label="Menu admin">
+                {adminNavItems.map(({ view, label, icon: Icon }) => {
+                    const isActive = current === view;
+                    return (
+                        <button
+                            key={view}
+                            type="button"
+                            className={`flex items-center gap-3 w-full text-left p-2.5 rounded-lg font-bold text-sm bg-transparent border-0 cursor-pointer transition-colors ${
+                                isActive 
+                                    ? 'active bg-[#5b3825] text-[#fff]' 
+                                    : 'text-[#d7c4b4] hover:bg-[rgba(255,253,250,0.06)] hover:text-[#fff]'
+                            }`}
+                            aria-current={isActive ? 'page' : undefined}
+                            onClick={() => go(view)}
+                        >
+                            <span className="w-5 h-5 flex items-center justify-center text-inherit"><Icon /></span>
+                            <span>{label}</span>
+                        </button>
+                    );
+                })}
             </nav>
         </aside>
     );

@@ -5,20 +5,20 @@ import { roleName } from '../../utils/route.js';
 export default function Header({ user, navigate, logout, currentView, cartCount, sellerNotifications }) {
     const role = roleName(user);
     const [showNotifications, setShowNotifications] = useState(false);
-    const itemClass = (view) => (currentView === view ? 'nav-item active' : 'nav-item');
+    const itemClass = (view) => (currentView === view ? 'nav-item active border border-[#d7c4b4] bg-[#fffaf2] font-bold px-3.5 py-2 rounded-lg text-[#38291e]' : 'nav-item text-[#38291e] font-bold hover:border hover:border-[#d7c4b4] hover:bg-[#fffaf2] px-3.5 py-2 rounded-lg transition-all border border-transparent');
     const notificationOrders = sellerNotifications?.orders || [];
 
     return (
-        <header className="topbar">
-            <button className="brand" onClick={() => navigate('products')}>
-                <span className="brand-mark">K</span>
+        <header className="topbar sticky top-0 z-10 grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-4 items-center px-7 py-3.5 border-b border-[#e4d7c8] bg-[rgba(255,252,247,0.92)] backdrop-blur-md">
+            <button className="brand inline-flex items-center gap-2.5 text-left bg-transparent border-0 cursor-pointer" onClick={() => navigate('products')}>
+                <img className="brand-mark w-[38px] h-[38px] object-contain" src="/logo.png" alt="Marketplace Kopi Logo" style={{ background: 'transparent' }} />
                 <span>
-                    <strong>Marketplace Kopi</strong>
-                    <small>Core ecommerce</small>
+                    <strong className="block text-[#38291e] font-extrabold leading-tight">Marketplace Kopi</strong>
+                    <small className="block text-[#75695d] text-xs">Core ecommerce</small>
                 </span>
             </button>
 
-            <nav className="nav">
+            <nav className="nav flex flex-wrap gap-1.5 items-center justify-center">
                 <button className={itemClass('products')} onClick={() => navigate('products')}>Produk</button>
                 <button className={itemClass('blog')} onClick={() => navigate('blog')}>Blog</button>
                 <button className={itemClass('review')} onClick={() => navigate('review')}>Review</button>
@@ -48,13 +48,13 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                 )}
             </nav>
 
-            <div className="account">
+            <div className="account flex flex-wrap gap-3 items-center justify-end text-sm text-[#38291e]">
                 {user ? (
                     <>
                         {role === 'seller' && (
-                            <div className="notification-wrap">
+                            <div className="notification-wrap relative inline-flex items-center justify-center">
                                 <button
-                                    className={`${itemClass('seller-orders')} notification-button`}
+                                    className={`${itemClass('seller-orders')} notification-button cursor-pointer`}
                                     title="Notifikasi order masuk"
                                     aria-label="Notifikasi order masuk"
                                     onClick={() => setShowNotifications((current) => !current)}
@@ -63,39 +63,39 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                                     {Number(sellerNotifications?.count || 0) > 0 && <span className="cart-badge">{sellerNotifications.count}</span>}
                                 </button>
                                 {showNotifications && (
-                                    <div className="notification-popover">
-                                        <div className="row between">
-                                            <strong>Order masuk</strong>
+                                    <div className="notification-popover absolute top-[calc(100%+10px)] right-0 z-30 grid w-[min(360px,calc(100vw-32px))] gap-3 border border-[#eadfd4] rounded-lg p-3.5 bg-[#ffffff] shadow-[0_24px_70px_rgba(17,17,17,0.12)]">
+                                        <div className="row between flex justify-between items-center gap-2 pb-2 border-b border-gray-100">
+                                            <strong className="text-gray-900 font-bold">Order masuk</strong>
                                             <button className="btn ghost compact-btn" onClick={() => { setShowNotifications(false); navigate('seller-orders'); }}>Lihat semua</button>
                                         </div>
-                                        <div className="notification-list">
+                                        <div className="notification-list grid gap-2 max-h-[320px] overflow-y-auto">
                                             {notificationOrders.map((order) => (
                                                 <button
                                                     key={order.id}
-                                                    className="notification-item"
+                                                    className="notification-item flex flex-col gap-1 w-full text-left p-2.5 border-b border-gray-50 rounded-lg hover:bg-gray-50 transition-colors bg-transparent"
                                                     onClick={() => { setShowNotifications(false); navigate('seller-orders'); }}
                                                 >
-                                                    <span>
-                                                        <strong>{order.order_number}</strong>
-                                                        <small>{order.customer_name} - {formatPrice(order.seller_total)}</small>
+                                                    <span className="flex flex-col gap-0.5">
+                                                        <strong className="text-gray-900 font-bold">{order.order_number}</strong>
+                                                        <small className="text-gray-600 text-xs">{order.customer_name} - {formatPrice(order.seller_total)}</small>
                                                     </span>
-                                                    <small>{new Date(order.created_at).toLocaleString('id-ID')}</small>
+                                                    <small className="text-gray-400 text-[0.72rem] mt-0.5">{new Date(order.created_at).toLocaleString('id-ID')}</small>
                                                 </button>
                                             ))}
-                                            {notificationOrders.length === 0 && <p className="muted">Belum ada order baru yang perlu diproses.</p>}
+                                            {notificationOrders.length === 0 && <p className="muted text-gray-500 text-sm text-center py-4">Belum ada order baru yang perlu diproses.</p>}
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
                         {role === 'customer' && (
-                            <button className={`${itemClass('cart')} cart-header-button`} title="Cart" aria-label={`Cart ${cartCount || 0} item`} onClick={() => navigate('cart')}>
+                            <button className={`${itemClass('cart')} cart-header-button cursor-pointer`} title="Cart" aria-label={`Cart ${cartCount || 0} item`} onClick={() => navigate('cart')}>
                                 <CartIcon />
                                 <span className="cart-button-label">Cart</span>
                                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                             </button>
                         )}
-                        <span>{user.name}</span>
+                        <span className="font-semibold text-gray-700">{user.name}</span>
                         <button className="btn ghost" onClick={() => logout()}>Logout</button>
                     </>
                 ) : (

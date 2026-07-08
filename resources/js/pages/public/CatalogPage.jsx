@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import EmptyState from '../../components/public/EmptyState.jsx';
 import ProductCard from '../../components/product/ProductCard.jsx';
 import { ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
-import { applyFallbackImage, fallbackArticleImage, fallbackRoasterImage } from '../../constants/images.js';
+import { applyFallbackImage, fallbackArticleImage, fallbackProductImage, fallbackRoasterImage } from '../../constants/images.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 
-const SHOP_VISUALS = {
+const COLLECTION_VISUALS = {
     roast: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=900&q=85',
     origin: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=85',
     brew: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=900&q=85',
@@ -54,7 +54,13 @@ export default function CatalogPage({ navigate, setNotice }) {
     const featuredProducts = useMemo(() => {
         return [...products]
             .sort((a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0) || Number(b.reviews_count || 0) - Number(a.reviews_count || 0))
-            .slice(0, 4);
+            .slice(0, 12);
+    }, [products]);
+
+    const trendingProducts = useMemo(() => {
+        return [...products]
+            .sort((a, b) => Number(b.reviews_count || 0) - Number(a.reviews_count || 0))
+            .slice(0, 6);
     }, [products]);
 
     const heroProducts = featuredProducts.length ? featuredProducts : products.slice(0, 3);
@@ -68,13 +74,11 @@ export default function CatalogPage({ navigate, setNotice }) {
 
     return (
         <section className="home-page trade-home">
-            <HomeHero products={heroProducts} navigate={navigate} />
-            <QuickActionStrip navigate={navigate} />
-            <MarketplaceDifference />
-            <HowItWorks />
+            <HomeHero products={heroProducts} sellers={sellers} navigate={navigate} />
             <FeaturedCoffee loading={loading} products={featuredProducts} navigate={navigate} />
+            <TrendingNow loading={loading} products={trendingProducts} navigate={navigate} />
+            <CoffeeCollections categories={categories} products={products} openExplore={openExplore} />
             <RoasterSpotlight loading={sellersLoading} sellers={sellers} navigate={navigate} />
-            <MoreWaysToShop categories={categories} products={products} openExplore={openExplore} />
             <CommunityPicks loading={articlesLoading} articles={articles} navigate={navigate} />
             <Testimonials />
             <FinalCta navigate={navigate} />
@@ -82,18 +86,32 @@ export default function CatalogPage({ navigate, setNotice }) {
     );
 }
 
-function HomeHero({ products, navigate }) {
-    const primaryProduct = products[0];
+function HomeHero({ products, sellers, navigate }) {
 
     return (
         <section className="trade-hero trade-commerce-hero">
             <div className="trade-commerce-panel fade-up-section">
                 <div className="trade-commerce-bar">
                     <strong>Kopi Marketplace</strong>
+                    <div className="hero-stats-row">
+                        <span className="hero-stat-chip">
+                            <strong>{sellers.length > 0 ? `${sellers.length}+` : '—'}</strong>
+                            <small>Local Roasters</small>
+                        </span>
+                        <span className="hero-stat-chip">
+                            <strong>{products.length > 0 ? `${products.length}+` : '—'}</strong>
+                            <small>Coffee Products</small>
+                        </span>
+                        <span className="hero-stat-chip">
+                            <strong>Specialty</strong>
+                            <small>Grade Beans</small>
+                        </span>
+                    </div>
                 </div>
                 <div className="trade-commerce-copy">
                     <p className="eyebrow">Specialty Coffee</p>
                     <h1>Find coffee that fits your taste.</h1>
+                    <p>Explore curated beans, trusted local roasters, and creator picks in one calm marketplace.</p>
                     <div className="trade-hero-actions">
                         <button className="btn primary" type="button" onClick={() => navigate('blog')}>
                             Shop Coffee
@@ -103,94 +121,7 @@ function HomeHero({ products, navigate }) {
                         </button>
                     </div>
                 </div>
-                {primaryProduct && (
-                    <button className="trade-commerce-feature" type="button" onClick={() => navigate('product', primaryProduct.slug || primaryProduct.id)}>
-                        <span>
-                            <small>Featured today</small>
-                            <strong>{primaryProduct.name}</strong>
-                            <small>{priceLabel(primaryProduct)}</small>
-                        </span>
-                        <ArrowIcon />
-                    </button>
-                )}
-            </div>
-        </section>
-    );
-}
 
-function ArrowIcon() {
-    return (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 17 17 7" />
-            <path d="M9 7h8v8" />
-        </svg>
-    );
-}
-
-function QuickActionStrip({ navigate }) {
-    const items = [
-        ['Coffee', ShopIcon, () => navigate('blog')],
-        ['Roasters', StoreIcon, () => navigate('blog')],
-        ['Stories', ContentIcon, () => navigate('affiliate-content')],
-    ];
-
-    return (
-        <section className="trade-quick-strip" aria-label="Quick actions">
-            {items.map(([title, Icon, onClick]) => (
-                <button className="trade-quick-card fade-up-section" key={title} type="button" onClick={onClick}>
-                    <span><Icon /></span>
-                    <strong>{title}</strong>
-                </button>
-            ))}
-        </section>
-    );
-}
-
-function MarketplaceDifference() {
-    const items = [
-        ['Local roasters', StoreIcon],
-        ['Curated coffee', BagIcon],
-        ['Creator stories', ContentIcon],
-    ];
-
-    return (
-        <section className="trade-section trade-difference">
-            <div className="trade-section-heading centered fade-up-section">
-                <p className="eyebrow">Marketplace</p>
-                <h2>Coffee, roasters, stories.</h2>
-            </div>
-            <div className="trade-difference-grid">
-                {items.map(([title, Icon]) => (
-                    <article className="trade-difference-card fade-up-section" key={title}>
-                        <span><Icon /></span>
-                        <h3>{title}</h3>
-                    </article>
-                ))}
-            </div>
-        </section>
-    );
-}
-
-function HowItWorks() {
-    const steps = [
-        ['01', 'Browse'],
-        ['02', 'Choose'],
-        ['03', 'Brew'],
-    ];
-
-    return (
-        <section className="trade-section trade-how">
-            <div className="trade-section-heading fade-up-section">
-                <p className="eyebrow">Flow</p>
-                <h2>Browse. Choose. Brew.</h2>
-            </div>
-            <div className="trade-how-grid">
-                {steps.map(([number, title]) => (
-                    <article className="trade-how-card fade-up-section" key={title}>
-                        <span>{number}</span>
-                        <h3>{title}</h3>
-                    </article>
-                ))}
             </div>
         </section>
     );
@@ -202,14 +133,14 @@ function FeaturedCoffee({ loading, products, navigate }) {
             <div className="trade-section-heading row-heading fade-up-section">
                 <div>
                     <p className="eyebrow">Featured Coffee</p>
-                    <h2>Fresh picks.</h2>
+                    <h2>Top-rated coffee to start with.</h2>
                 </div>
                 <button className="btn ghost" type="button" onClick={() => navigate('blog')}>
                     Explore all
                 </button>
             </div>
             {loading ? (
-                <ProductSkeleton count={4} />
+                <ProductSkeleton count={12} />
             ) : products.length > 0 ? (
                 <div className="trade-featured-grid">
                     {products.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
@@ -217,6 +148,132 @@ function FeaturedCoffee({ loading, products, navigate }) {
             ) : (
                 <EmptyState eyebrow="Produk" title="Belum ada produk aktif." message="Produk dari seller aktif akan tampil di sini." />
             )}
+        </section>
+    );
+}
+
+function TrendingNow({ loading, products, navigate }) {
+    const trackRef = useRef(null);
+    const drag = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
+
+    function beginDrag(event) {
+        const track = trackRef.current;
+        if (!track) return;
+        drag.current = { active: true, moved: false, startX: event.clientX, scrollLeft: track.scrollLeft };
+        track.classList.add('is-dragging');
+        track.setPointerCapture?.(event.pointerId);
+    }
+
+    function moveDrag(event) {
+        const track = trackRef.current;
+        if (!track || !drag.current.active) return;
+        const delta = event.clientX - drag.current.startX;
+        if (Math.abs(delta) > 4) drag.current.moved = true;
+        track.scrollLeft = drag.current.scrollLeft - delta;
+    }
+
+    function endDrag(event) {
+        const track = trackRef.current;
+        if (!track) return;
+        drag.current.active = false;
+        track.classList.remove('is-dragging');
+        track.releasePointerCapture?.(event.pointerId);
+    }
+
+    if (!loading && products.length === 0) return null;
+
+    return (
+        <section className="trade-section trade-trending">
+            <div className="trade-section-heading row-heading fade-up-section">
+                <div>
+                    <p className="eyebrow">Trending Now</p>
+                    <h2>Most reviewed by customers.</h2>
+                </div>
+                <button className="btn ghost" type="button" onClick={() => navigate('blog')}>
+                    See all
+                </button>
+            </div>
+            <div
+                className="trending-strip"
+                ref={trackRef}
+                onPointerDown={beginDrag}
+                onPointerMove={moveDrag}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+                onPointerLeave={(event) => drag.current.active && endDrag(event)}
+            >
+                {loading
+                    ? Array.from({ length: 6 }).map((_, index) => (
+                        <div className="trending-card skeleton-card" key={index}>
+                            <div className="trending-card-image skeleton-image" />
+                            <div className="trending-card-body">
+                                <span />
+                                <strong />
+                                <small />
+                            </div>
+                        </div>
+                    ))
+                    : products.map((product, index) => (
+                        <button
+                            className="trending-card"
+                            key={product.id}
+                            type="button"
+                            onClick={() => {
+                                if (drag.current.moved) { drag.current.moved = false; return; }
+                                navigate('product', product.slug || product.id);
+                            }}
+                        >
+                            <span className="trending-rank">#{index + 1}</span>
+                            <div className="trending-card-image">
+                                <img
+                                    src={product.image_url || product.image || fallbackProductImage(product)}
+                                    alt={product.name}
+                                    draggable="false"
+                                    onError={(e) => applyFallbackImage(e, fallbackProductImage(product))}
+                                />
+                            </div>
+                            <div className="trending-card-body">
+                                <span className="tag">{product.category?.name || 'Coffee'}</span>
+                                <strong>{product.name}</strong>
+                                <small>{product.seller?.store_name || 'Coffee Seller'}</small>
+                                <b>{priceLabel(product)}</b>
+                            </div>
+                        </button>
+                    ))
+                }
+            </div>
+        </section>
+    );
+}
+
+function CoffeeCollections({ categories, products, openExplore }) {
+    const roast = ROAST_LEVEL_OPTIONS[1] || ROAST_LEVEL_OPTIONS[0];
+    const originCategory = categories[0];
+    const origin = products.find((product) => product.origin)?.origin;
+    const cards = [
+        ['Shop by Roast Level', 'From light and bright to bold espresso profiles.', COLLECTION_VISUALS.roast, () => openExplore({ roast_level: roast?.value })],
+        ['Shop by Origin', 'Regional character, acidity, and body.', COLLECTION_VISUALS.origin, () => openExplore(origin ? { origin } : originCategory?.slug ? { category: originCategory.slug } : {})],
+        ['Shop by Brewing Method', 'Coffee that fits manual brew, espresso, or daily cups.', COLLECTION_VISUALS.brew, () => openExplore({})],
+    ];
+
+    return (
+        <section className="trade-section">
+            <div className="trade-section-heading fade-up-section">
+                <p className="eyebrow">Coffee Collections</p>
+                <h2>Shop by the way you brew.</h2>
+            </div>
+            <div className="trade-shop-grid">
+                {cards.map(([title, body, image, onClick]) => (
+                    <button className="trade-shop-card fade-up-section" key={title} type="button" onClick={onClick}>
+                        <img src={image} alt="" loading="lazy" />
+                        <span>
+                            <strong>{title}</strong>
+                            <small>{body}</small>
+                            <b>Explore</b>
+                        </span>
+                    </button>
+                ))}
+            </div>
         </section>
     );
 }
@@ -343,45 +400,13 @@ function RoasterCard({ seller, index, onOpen }) {
     );
 }
 
-function MoreWaysToShop({ categories, products, openExplore }) {
-    const roast = ROAST_LEVEL_OPTIONS[1] || ROAST_LEVEL_OPTIONS[0];
-    const originCategory = categories[0];
-    const origin = products.find((product) => product.origin)?.origin;
-    const cards = [
-        ['Shop by Roast Level', 'Move from light and bright to bold espresso profiles.', SHOP_VISUALS.roast, () => openExplore({ roast_level: roast?.value })],
-        ['Shop by Origin', 'Start with regional character, acidity, and body.', SHOP_VISUALS.origin, () => openExplore(origin ? { origin } : originCategory?.slug ? { category: originCategory.slug } : {})],
-        ['Shop by Brewing Method', 'Find coffee that fits manual brew, espresso, or daily cups.', SHOP_VISUALS.brew, () => openExplore({})],
-    ];
-
-    return (
-        <section className="trade-section">
-            <div className="trade-section-heading fade-up-section">
-                <p className="eyebrow">More Ways To Shop</p>
-                <h2>Choose the path that matches the way you brew.</h2>
-            </div>
-            <div className="trade-shop-grid">
-                {cards.map(([title, body, image, onClick]) => (
-                    <button className="trade-shop-card fade-up-section" key={title} type="button" onClick={onClick}>
-                        <img src={image} alt="" loading="lazy" />
-                        <span>
-                            <strong>{title}</strong>
-                            <small>{body}</small>
-                            <b>Explore</b>
-                        </span>
-                    </button>
-                ))}
-            </div>
-        </section>
-    );
-}
-
 function CommunityPicks({ loading, articles, navigate }) {
     return (
         <section className="trade-section trade-community">
             <div className="trade-section-heading row-heading fade-up-section">
                 <div>
                     <p className="eyebrow">Community Picks</p>
-                    <h2>Explore coffee stories from our affiliate creators.</h2>
+                    <h2>Coffee stories from affiliate creators.</h2>
                 </div>
                 <button className="btn ghost" type="button" onClick={() => navigate('affiliate-content')}>
                     Explore Content
@@ -522,35 +547,11 @@ function initials(value) {
         .toUpperCase();
 }
 
-function ShopIcon() {
-    return <IconPath paths={['M3 9h18', 'm5 9 1-5h12l1 5', 'M5 9v11h14V9', 'M9 20v-6h6v6']} />;
-}
-
-function StoreIcon() {
-    return <IconPath paths={['M4 10h16', 'm6 10 1-6h10l1 6', 'M6 10v10h12V10', 'M9 20v-6h6v6']} />;
-}
-
-function ContentIcon() {
-    return <IconPath paths={['m12 3 9 5-9 5-9-5 9-5Z', 'm3 12 9 5 9-5', 'm3 16 9 5 9-5']} />;
-}
-
-function BagIcon() {
-    return <IconPath paths={['M6 8h12l-1 12H7L6 8Z', 'M9 8a3 3 0 0 1 6 0']} />;
-}
-
 function LocationIcon() {
     return (
         <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
             <circle cx="12" cy="10" r="3" />
-        </svg>
-    );
-}
-
-function IconPath({ paths }) {
-    return (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {paths.map((path) => <path d={path} key={path} />)}
         </svg>
     );
 }

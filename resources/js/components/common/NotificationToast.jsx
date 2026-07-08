@@ -11,16 +11,31 @@ export default function NotificationToast({ message, enabled = true, onDismiss, 
 
     if (!enabled || !message) return null;
 
+    const isError = toastType(message) === 'error';
+
     return (
-        <div className={`notification-toast ${toastType(message)}`} role="status" aria-live="polite">
-            <span className="notification-toast-icon">
+        <div 
+            className={`notification-toast fixed top-[78px] right-[18px] z-[180] grid grid-cols-[34px_minmax(0,1fr)_28px] gap-2.5 w-[min(380px,calc(100vw-28px))] items-start border rounded-xl p-3 text-white bg-[rgba(31,26,23,0.97)] shadow-[0_22px_60px_rgba(0,0,0,0.38)] backdrop-blur-md animate-[notification-toast-in_180ms_ease-out] ${
+                isError ? 'border-[rgba(198,124,109,0.6)]' : 'border-[rgba(124,154,130,0.5)]'
+            }`} 
+            role="status" 
+            aria-live="polite"
+        >
+            <span className={`notification-toast-icon grid w-[34px] h-[34px] place-items-center rounded-full ${
+                isError ? 'text-[#ffd8d1] bg-[rgba(198,124,109,0.18)]' : 'text-[#d8eadb] bg-[rgba(124,154,130,0.18)]'
+            }`}>
                 <CheckIcon />
             </span>
             <div>
-                <strong>{toastTitle(message)}</strong>
-                <p>{message}</p>
+                <strong className="block mt-0.5 text-white text-[0.86rem] font-bold">{toastTitle(message)}</strong>
+                <p className="margin-0 mt-1 text-gray-300 text-[0.78rem] leading-relaxed">{message}</p>
             </div>
-            <button type="button" aria-label="Tutup notifikasi" onClick={() => onDismiss(message)}>
+            <button 
+                type="button" 
+                aria-label="Tutup notifikasi" 
+                onClick={() => onDismiss(message)}
+                className="grid w-7 h-7 place-items-center border-0 rounded bg-transparent text-gray-400 hover:text-white hover:bg-[rgba(233,215,195,0.08)] transition-all cursor-pointer"
+            >
                 <CloseIcon />
             </button>
         </div>
