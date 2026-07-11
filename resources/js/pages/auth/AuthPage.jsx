@@ -1,3 +1,4 @@
+import '../../../css/auth.css';
 import { useState } from 'react';
 import { Component as AnimatedCharactersLoginPage } from '../../components/ui/animated-characters-login-page.tsx';
 import { apiRequest } from '../../services/api.js';

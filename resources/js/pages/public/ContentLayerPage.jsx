@@ -8,7 +8,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
     const [articles, setArticles] = useState([]);
     const [activeArticle, setActiveArticle] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [detailLoading, setDetailLoading] = useState(false);
+    const [detailLoading, setDetailsLoading] = useState(false);
     const [query, setQuery] = useState('');
     const [socialState, setSocialState] = useState(() => readSocialState());
 
@@ -69,7 +69,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
 
     async function openArticle(article) {
         setActiveArticle(article);
-        setDetailLoading(true);
+        setDetailsLoading(true);
 
         try {
             const response = await apiRequest(`/articles/${article.slug}`, { token });
@@ -77,7 +77,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
         } catch (error) {
             setNotice(error.message);
         } finally {
-            setDetailLoading(false);
+            setDetailsLoading(false);
         }
     }
 
@@ -172,7 +172,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
             )}
 
             {activeArticle && (
-                <ContentDetailDrawer
+                <ContentDetailsDrawer
                     article={activeArticle}
                     state={socialState[activeArticle.id] || {}}
                     loading={detailLoading}
@@ -239,7 +239,7 @@ function CommunityPostCard({ article, state, onRead, onProductClick, onToggle, o
     );
 }
 
-function ContentDetailDrawer({ article, state, loading, onClose, onProductClick, onToggle, onShare, onComment }) {
+function ContentDetailsDrawer({ article, state, loading, onClose, onProductClick, onToggle, onShare, onComment }) {
     const [comment, setComment] = useState('');
     const products = article.recommended_products || [];
     const articleFallback = fallbackArticleImage(article);
@@ -256,7 +256,7 @@ function ContentDetailDrawer({ article, state, loading, onClose, onProductClick,
             <article className="content-detail-drawer">
                 <header className="cart-drawer-header">
                     <div>
-                        <p className="eyebrow">{article.category?.name || 'Content Detail'}</p>
+                        <p className="eyebrow">{article.category?.name || 'Content Details'}</p>
                         <h2>{article.title}</h2>
                     </div>
                     <button className="icon-button" type="button" aria-label="Tutup detail content" onClick={onClose}>

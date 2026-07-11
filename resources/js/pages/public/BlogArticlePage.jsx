@@ -56,7 +56,7 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
 
     if (!article) return <p className="muted">Memuat artikel...</p>;
 
-    const authorProfile = article.author?.creator_profile;
+    const authorProfilee = article.author?.creator_profile;
     const paragraphs = (article.content || '').split(/\n{2,}/).filter(Boolean);
     const articleFallback = fallbackArticleImage(article);
 
@@ -67,7 +67,7 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
                 <h1>{article.title}</h1>
                 <p className="article-excerpt">{article.excerpt}</p>
                 <div className="article-meta">
-                    <span>{authorProfile?.display_name || article.author?.name}</span>
+                    <span>{authorProfilee?.display_name || article.author?.name}</span>
                     <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID') : '-'}</span>
                     <span>{article.views_count || 0} views</span>
                 </div>
@@ -89,7 +89,7 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
                     <div className="section-head">
                         <div>
                             <p className="eyebrow">Recommended Products</p>
-                            <h2>Produk yang disebut di artikel</h2>
+                            <h2>Products yang disebut di artikel</h2>
                         </div>
                     </div>
                     <div className="recommended-grid">
@@ -116,12 +116,12 @@ export default function BlogArticlePage({ slug, token, navigate, setNotice }) {
             )}
 
             <section className="author-box">
-                <div className="author-avatar">{(authorProfile?.display_name || article.author?.name || 'K').slice(0, 1)}</div>
+                <div className="author-avatar">{(authorProfilee?.display_name || article.author?.name || 'K').slice(0, 1)}</div>
                 <div>
                     <p className="eyebrow">Author</p>
-                    <h2>{authorProfile?.display_name || article.author?.name}</h2>
-                    <p className="muted">{authorProfile?.bio || 'Creator dan reviewer kopi di Marketplace Kopi.'}</p>
-                    {authorProfile?.username && <button className="btn ghost" onClick={() => navigate('creator', authorProfile.username)}>Lihat profil creator</button>}
+                    <h2>{authorProfilee?.display_name || article.author?.name}</h2>
+                    <p className="muted">{authorProfilee?.bio || 'Creator dan reviewer kopi di Marketplace Kopi.'}</p>
+                    {authorProfilee?.username && <button className="btn ghost" onClick={() => navigate('creator', authorProfilee.username)}>Lihat profil creator</button>}
                 </div>
             </section>
 

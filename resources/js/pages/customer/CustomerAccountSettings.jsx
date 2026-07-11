@@ -53,8 +53,8 @@ export default function CustomerAccountSettings({ token, user, navigate, setNoti
         <section className="customer-account-page">
             <div className="customer-section-head">
                 <div>
-                    <p className="eyebrow">Pengaturan Akun</p>
-                    <h2>Profil customer</h2>
+                    <p className="eyebrow">Settings Akun</p>
+                    <h2>Profile customer</h2>
                     <p className="muted">Perbarui identitas akun dan password login kamu.</p>
                 </div>
             </div>
@@ -66,7 +66,7 @@ export default function CustomerAccountSettings({ token, user, navigate, setNoti
                         <h3>Data utama</h3>
                     </div>
                     <div className="form-grid">
-                        <TextInput label="Nama" value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
+                        <TextInput label="Name" value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
                         <TextInput label="Email" type="email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} />
                     </div>
                 </div>
@@ -79,12 +79,12 @@ export default function CustomerAccountSettings({ token, user, navigate, setNoti
                     </div>
                     <div className="form-grid">
                         <TextInput label="Password baru" type="password" value={form.password} onChange={(value) => setForm({ ...form, password: value })} required={false} />
-                        <TextInput label="Konfirmasi password" type="password" value={form.password_confirmation} onChange={(value) => setForm({ ...form, password_confirmation: value })} required={false} />
+                        <TextInput label="Confirm password" type="password" value={form.password_confirmation} onChange={(value) => setForm({ ...form, password_confirmation: value })} required={false} />
                     </div>
                 </div>
 
                 <button className="btn primary customer-account-save" disabled={saving}>
-                    {saving ? 'Menyimpan...' : 'Simpan Akun'}
+                    {saving ? 'Menyimpan...' : 'Save Akun'}
                 </button>
             </form>
         </section>

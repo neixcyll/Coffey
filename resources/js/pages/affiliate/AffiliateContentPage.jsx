@@ -188,7 +188,7 @@ export default function AffiliateContentPage({
                 body: payload,
                 isForm: true,
             });
-            setNotice(editingArticle ? 'Konten diperbarui dan menunggu review admin.' : 'Konten dibuat dan menunggu review admin.');
+            setNotice(editingArticle ? 'Content diperbarui dan menunggu review admin.' : 'Content dibuat dan menunggu review admin.');
             resetForm();
             await loadContent();
             navigate('affiliate-dashboard', 'content');
@@ -289,7 +289,7 @@ function AffiliateUploadForm({
                 </div>
 
                 <label>
-                    <span>Kategori konten</span>
+                    <span>Categories konten</span>
                     <select value={form.article_category_id} onChange={(event) => update('article_category_id', event.target.value)} required>
                         <option value="">Pilih kategori</option>
                         {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -331,7 +331,7 @@ function AffiliateUploadForm({
                 <div className="external-product-box">
                     <div>
                         <p className="eyebrow">External Affiliate Link</p>
-                        <h3>Tambahkan link produk dari platform lain</h3>
+                        <h3>Addkan link produk dari platform lain</h3>
                     </div>
                     <div className="grid-2">
                         <TextInput label="Nama produk" value={form.external_title} onChange={(value) => update('external_title', value)} required={false} />
@@ -358,7 +358,7 @@ function AffiliateContentLibrary({ summary, articles, statusFilter, setStatusFil
             <div className="section-head">
                 <div>
                     <p className="eyebrow">My Content</p>
-                    <h1>Konten affiliate saya</h1>
+                    <h1>Content affiliate saya</h1>
                 </div>
                 <button className="btn primary" type="button" onClick={() => navigate('affiliate-dashboard', 'upload')}>Upload Content</button>
             </div>

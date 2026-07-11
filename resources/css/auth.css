@@ -1,0 +1,427 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.coffee-auth-page {
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc; /* Light modern background */
+    color: #0f172a; /* Dark text for contrast */
+    overflow: hidden;
+}
+
+.coffee-auth-visual {
+    position: relative;
+    display: none;
+    flex: 1;
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+    overflow: hidden;
+    padding: 3.5rem;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+@media (min-width: 1024px) {
+    .coffee-auth-visual {
+        display: flex;
+    }
+}
+
+.coffee-auth-overlay {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=1000&auto=format&fit=crop') center/cover;
+    opacity: 0.08; /* Very subtle image */
+    mix-blend-mode: multiply;
+    transition: transform 15s ease-out;
+}
+
+.coffee-auth-visual:hover .coffee-auth-overlay {
+    transform: scale(1.05);
+}
+
+.coffee-auth-brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    z-index: 10;
+    color: #1e1b4b; /* Deep violet for brand */
+    font-weight: 800;
+}
+
+.coffee-auth-story {
+    position: relative;
+    z-index: 10;
+    max-width: 450px;
+}
+
+.coffee-auth-story .eyebrow {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #4338ca;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.coffee-auth-story h1 {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    font-weight: 800;
+    color: #1e1b4b;
+    letter-spacing: -0.02em;
+}
+
+.coffee-auth-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.coffee-auth-points span {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    padding: 0.6rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #312e81;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.coffee-auth-points span:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.coffee-auth-form-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    position: relative;
+    background: #f8fafc;
+    justify-content: center;
+    align-items: center;
+}
+
+.coffee-auth-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 1.5rem;
+    margin-bottom: 2.5rem;
+    color: #1e1b4b;
+}
+
+@media (min-width: 1024px) {
+    .coffee-auth-mobile-brand {
+        display: none;
+    }
+}
+
+.coffee-auth-form-shell {
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.02);
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.coffee-auth-heading {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.coffee-auth-heading .eyebrow {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.coffee-auth-heading h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.coffee-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.coffee-auth-role-switch {
+    display: flex;
+    background: #f1f5f9;
+    padding: 0.35rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.coffee-auth-role-switch button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.coffee-auth-role-switch button.active {
+    background: #ffffff;
+    color: #4f46e5;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.coffee-auth-password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+    display: flex;
+}
+
+.coffee-auth-password-toggle:hover {
+    color: #0f172a;
+}
+
+.coffee-auth-seller-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.coffee-auth-seller-fields textarea {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.coffee-auth-seller-fields textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.coffee-auth-remember {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.coffee-auth-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.coffee-auth-actions button {
+    flex: 1;
+}
+
+.coffee-auth-alt {
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.coffee-auth-alt button {
+    background: none;
+    border: none;
+    color: #4f46e5;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.35rem;
+    transition: color 0.2s;
+}
+
+.coffee-auth-alt button:hover {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+/* Character Animations & Styles */
+.coffee-character-stage {
+    position: relative;
+    height: 150px;
+    width: 100%;
+    margin-bottom: -1rem;
+    pointer-events: none;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    transform: scale(0.65) translateY(-30px);
+}
+
+.coffee-character {
+    position: absolute;
+    transition: transform 0.2s ease-out;
+}
+
+.coffee-character-face {
+    position: absolute;
+    display: flex;
+    gap: 4px;
+    transition: all 0.1s ease-out;
+}
+
+.coffee-character-eye {
+    background: #0f172a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: height 0.1s ease-in-out;
+}
+
+.coffee-character-eye i {
+    background: #ffffff;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.1s ease-out;
+}
+
+.coffee-character-tall {
+    width: 100px;
+    background: #a78bfa; /* Light purple */
+    border-radius: 50px 50px 10px 10px;
+    bottom: 0;
+    left: calc(50% - 110px);
+    box-shadow: -10px 10px 20px rgba(0,0,0,0.05) inset, 0 10px 15px -3px rgba(167, 139, 250, 0.3);
+}
+
+.coffee-character-dark {
+    width: 80px;
+    height: 120px;
+    background: #60a5fa; /* Light blue */
+    border-radius: 40px 40px 10px 10px;
+    bottom: 0;
+    left: calc(50% + 20px);
+    box-shadow: -8px 8px 16px rgba(0,0,0,0.05) inset, 0 10px 15px -3px rgba(96, 165, 250, 0.3);
+}
+
+.coffee-character-cup {
+    width: 120px;
+    height: 100px;
+    background: #f472b6; /* Light pink */
+    border-radius: 10px 10px 60px 60px;
+    bottom: 40px;
+    left: calc(50% - 60px);
+    box-shadow: -12px 12px 24px rgba(0,0,0,0.05) inset, 0 10px 15px -3px rgba(244, 114, 182, 0.3);
+}
+
+.coffee-character-bean {
+    width: 70px;
+    height: 90px;
+    background: #fbbf24; /* Warm yellow */
+    border-radius: 40px;
+    bottom: 10px;
+    left: calc(50% - 35px);
+    box-shadow: -6px 6px 12px rgba(0,0,0,0.05) inset, 0 10px 15px -3px rgba(251, 191, 36, 0.3);
+}
+
+.coffee-character-dot-face {
+    position: absolute;
+    display: flex;
+    gap: 8px;
+    transition: all 0.1s ease-out;
+}
+
+.coffee-character-dot-face i {
+    width: 8px;
+    height: 8px;
+    background: #0f172a;
+    border-radius: 50%;
+    display: block;
+}
+
+/* Inputs styling targeting shadcn Input in this context */
+.space-y-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.space-y-2 label {
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.space-y-2 input {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 0.5rem;
+    height: auto;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+.space-y-2 input::placeholder {
+    color: #94a3b8;
+}
+.space-y-2 input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Buttons in auth page context (if needed overrides) */
+.coffee-auth-form button[type="submit"] {
+    background-color: #4f46e5;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+}
+.coffee-auth-form button[type="submit"]:hover {
+    background-color: #4338ca;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}

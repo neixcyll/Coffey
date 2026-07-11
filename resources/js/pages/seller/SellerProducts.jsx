@@ -40,7 +40,7 @@ export default function SellerProducts({ token, navigate, setNotice }) {
             });
             setEditing(null);
             setFormOpen(false);
-            setNotice(productId ? 'Produk diperbarui.' : 'Produk dibuat.');
+            setNotice(productId ? 'Products diperbarui.' : 'Products dibuat.');
             loadProducts();
         } catch (error) {
             setFormError(error.message);
@@ -53,7 +53,7 @@ export default function SellerProducts({ token, navigate, setNotice }) {
 
         try {
             await apiRequest(`/seller/products/${deleting.id}`, { method: 'DELETE', token });
-            setNotice(`Produk "${deleting.name}" berhasil dihapus dari katalog.`);
+            setNotice(`Products "${deleting.name}" berhasil dihapus dari katalog.`);
             setDeleting(null);
             loadProducts();
         } catch (error) {
@@ -85,8 +85,8 @@ export default function SellerProducts({ token, navigate, setNotice }) {
             <section className="seller-products-page">
                 <div className="section-head">
                     <div>
-                        <p className="eyebrow">Produk seller</p>
-                        <h1>{editing ? 'Edit produk' : 'Tambah produk'}</h1>
+                        <p className="eyebrow">Products seller</p>
+                        <h1>{editing ? 'Edit produk' : 'Add produk'}</h1>
                     </div>
                     <button className="btn ghost" onClick={closeForm}>Kembali ke daftar</button>
                 </div>
@@ -107,10 +107,10 @@ export default function SellerProducts({ token, navigate, setNotice }) {
         <section className="seller-products-page">
             <div className="section-head">
                 <div>
-                    <p className="eyebrow">Produk seller</p>
+                    <p className="eyebrow">Products seller</p>
                     <h1>Manajemen produk</h1>
                 </div>
-                <button className="btn primary" onClick={openCreateForm}>Tambah produk</button>
+                <button className="btn primary" onClick={openCreateForm}>Add produk</button>
             </div>
             <div className="stack seller-product-list">
                 {products.map((product) => (
@@ -127,24 +127,24 @@ export default function SellerProducts({ token, navigate, setNotice }) {
                             </div>
                         </div>
                         <button className="btn ghost" onClick={() => openEditForm(product)}>Edit</button>
-                        <button className="btn danger" onClick={() => setDeleting(product)}>Hapus produk</button>
+                        <button className="btn danger" onClick={() => setDeleting(product)}>Delete produk</button>
                     </div>
                 ))}
                 {products.length === 0 && (
                     <div className="panel empty-state">
                         <p className="muted">Belum ada produk.</p>
-                        <button className="btn primary" onClick={openCreateForm}>Tambah produk</button>
+                        <button className="btn primary" onClick={openCreateForm}>Add produk</button>
                     </div>
                 )}
             </div>
             {deleting && (
                 <div className="modal-backdrop" role="presentation" onClick={() => setDeleting(null)}>
                     <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-product-title" onClick={(event) => event.stopPropagation()}>
-                        <h2 id="delete-product-title">Hapus Produk?</h2>
-                        <p className="muted">Produk yang dihapus tidak dapat dikembalikan.</p>
+                        <h2 id="delete-product-title">Delete Products?</h2>
+                        <p className="muted">Products yang dihapus tidak dapat dikembalikan.</p>
                         <div className="row end">
-                            <button className="btn ghost" onClick={() => setDeleting(null)}>Batal</button>
-                            <button className="btn danger" onClick={deleteProduct}>Hapus</button>
+                            <button className="btn ghost" onClick={() => setDeleting(null)}>Cancel</button>
+                            <button className="btn danger" onClick={deleteProduct}>Delete</button>
                         </div>
                     </div>
                 </div>

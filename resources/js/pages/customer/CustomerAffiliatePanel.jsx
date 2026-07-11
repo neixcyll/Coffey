@@ -83,7 +83,7 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
                 <div className="customer-section-head">
                     <div>
                         <p className="eyebrow">Affiliate Panel</p>
-                        <h2>{section === 'upload' ? 'Upload konten affiliate' : 'Konten affiliate saya'}</h2>
+                        <h2>{section === 'upload' ? 'Upload konten affiliate' : 'Content affiliate saya'}</h2>
                     </div>
                     <button className="btn ghost" type="button" onClick={() => navigate('affiliate-dashboard')}>Kembali ke ringkasan</button>
                 </div>
@@ -112,7 +112,7 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
                             <h3>Lengkapi informasi payout</h3>
                         </div>
                         <TextInput label="Nama affiliate" value={form.affiliate_name} onChange={(value) => setForm({ ...form, affiliate_name: value })} />
-                        <TextInput label="Telepon" value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} required={false} />
+                        <TextInput label="Phone" value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} required={false} />
                         <div className="grid-2">
                             <TextInput label="Bank payout" value={form.payout_bank} onChange={(value) => setForm({ ...form, payout_bank: value })} required={false} />
                             <TextInput label="Nomor rekening" value={form.payout_account_number} onChange={(value) => setForm({ ...form, payout_account_number: value })} required={false} />
@@ -121,7 +121,7 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
                         <TextArea label="Catatan" value={form.notes} onChange={(value) => setForm({ ...form, notes: value })} />
                         <div className="row">
                             <button className="btn primary" disabled={registering}>{registering ? 'Mendaftarkan...' : 'Daftar menjadi affiliate'}</button>
-                            <button className="btn ghost" type="button" onClick={() => setShowRegistration(false)}>Batal</button>
+                            <button className="btn ghost" type="button" onClick={() => setShowRegistration(false)}>Cancel</button>
                         </div>
                     </form>
                 )}
@@ -144,8 +144,8 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
 
             <div className="customer-affiliate-summary">
                 <Stat label="Total komisi" value={formatPrice(summary.total_commission)} />
-                <Stat label="Komisi pending" value={formatPrice(summary.pending_commission)} />
-                <Stat label="Komisi paid" value={formatPrice(summary.paid_commission)} />
+                <Stat label="Commissions pending" value={formatPrice(summary.pending_commission)} />
+                <Stat label="Commissions paid" value={formatPrice(summary.paid_commission)} />
             </div>
 
             <section className="panel customer-affiliate-link-card">
@@ -160,8 +160,8 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
             <div className="customer-affiliate-grid">
                 <section className="panel customer-affiliate-products">
                     <div>
-                        <p className="eyebrow">Produk yang dipromosikan</p>
-                        <h3>Produk terpantau dari link kamu</h3>
+                        <p className="eyebrow">Products yang dipromosikan</p>
+                        <h3>Products terpantau dari link kamu</h3>
                     </div>
                     <div className="customer-affiliate-product-list">
                         {promotedProducts.map((product) => (
@@ -200,7 +200,7 @@ export default function CustomerAffiliatePanel({ section = 'overview', token, us
                 </div>
                 <div className="table-wrap">
                     <table>
-                        <thead><tr><th>Order</th><th>Produk</th><th>Subtotal</th><th>Komisi</th><th>Status</th></tr></thead>
+                        <thead><tr><th>Order</th><th>Products</th><th>Subtotal</th><th>Commissions</th><th>Status</th></tr></thead>
                         <tbody>
                             {commissions.map((commission) => (
                                 <tr key={commission.id}>

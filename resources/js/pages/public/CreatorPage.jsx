@@ -3,14 +3,14 @@ import ArticleCard from '../../components/article/ArticleCard.jsx';
 import { apiRequest } from '../../services/api.js';
 
 export default function CreatorPage({ username, navigate, setNotice }) {
-    const [profile, setProfile] = useState(null);
+    const [profile, setProfilee] = useState(null);
     const [articles, setArticles] = useState([]);
 
     useEffect(() => {
         if (!username) return;
         apiRequest(`/creators/${username}`)
             .then((response) => {
-                setProfile(response.data.profile);
+                setProfilee(response.data.profile);
                 setArticles(response.data.articles?.data || []);
             })
             .catch((error) => setNotice(error.message));

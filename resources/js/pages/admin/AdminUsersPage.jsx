@@ -10,7 +10,7 @@ import AdminLayout from './AdminLayout.jsx';
 export default function AdminUsersPage({ token, navigate, setNotice, user, logout, notice }) {
     const [users, setUsers] = useState([]);
     const [filters, setFilters] = useState({ role: '', status: '' });
-    const [detail, setDetail] = useState(null);
+    const [detail, setDetails] = useState(null);
 
     useEffect(() => {
         if (!token) return;
@@ -41,7 +41,7 @@ export default function AdminUsersPage({ token, navigate, setNotice, user, logou
             setNotice(error.message);
             return null;
         });
-        if (response) setDetail(response.data);
+        if (response) setDetails(response.data);
     }
 
     if (!token) return <NeedLogin navigate={navigate} />;
@@ -77,7 +77,7 @@ export default function AdminUsersPage({ token, navigate, setNotice, user, logou
                                         {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
                                     </select>
                                 </td>
-                                <td><button className="btn ghost" onClick={() => showUser(user)}>Detail</button></td>
+                                <td><button className="btn ghost" onClick={() => showUser(user)}>Details</button></td>
                             </tr>
                         ))}
                     </tbody>

@@ -72,11 +72,11 @@ export default function SellerOrderPrint({ orderId, token, navigate, setNotice }
                 </section>
 
                 <section className="shipping-label-products">
-                    <h2>Daftar Produk</h2>
+                    <h2>Daftar Products</h2>
                     <table>
                         <thead>
                             <tr>
-                                <th>Produk</th>
+                                <th>Products</th>
                                 <th>Varian</th>
                                 <th>Qty</th>
                                 <th>Harga</th>

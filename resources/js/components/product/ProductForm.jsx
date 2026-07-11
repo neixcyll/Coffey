@@ -136,7 +136,7 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
                 <option value="">Pilih kategori</option>
                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
-            <TextInput label="Nama" value={form.name} onChange={(value) => update('name', value)} />
+            <TextInput label="Name" value={form.name} onChange={(value) => update('name', value)} />
             <TextArea label="Deskripsi" value={form.description} onChange={(value) => update('description', value)} required />
             <div className="grid-2">
                 <label>
@@ -169,7 +169,7 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
             <div className="variant-editor">
                 <div className="section-head compact-head">
                     <h3>Variant berat dan gilingan</h3>
-                    <button type="button" className="btn ghost compact-btn" onClick={addVariant}>Tambah variant</button>
+                    <button type="button" className="btn ghost compact-btn" onClick={addVariant}>Add variant</button>
                 </div>
                 <div className="variant-list">
                     {form.variants.map((variant, index) => (
@@ -200,7 +200,7 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
                                 <input type="number" min="0" value={variant.stock} onChange={(event) => updateVariant(index, 'stock', event.target.value)} required />
                             </label>
                             <button type="button" className="btn danger compact-btn" disabled={form.variants.length === 1} onClick={() => removeVariant(index)}>
-                                Hapus
+                                Delete
                             </button>
                         </div>
                     ))}
@@ -214,7 +214,7 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
                 </div>
             )}
             <button className="btn primary wide" disabled={processingImage || Boolean(fileError)}>
-                {processingImage ? 'Memproses gambar...' : product ? 'Simpan perubahan' : 'Tambah produk'}
+                {processingImage ? 'Memproses gambar...' : product ? 'Save perubahan' : 'Add produk'}
             </button>
         </form>
     );

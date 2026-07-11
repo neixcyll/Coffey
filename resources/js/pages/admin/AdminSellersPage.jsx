@@ -10,7 +10,7 @@ import AdminLayout from './AdminLayout.jsx';
 export default function AdminSellersPage({ token, navigate, setNotice, user, logout, notice }) {
     const [sellers, setSellers] = useState([]);
     const [status, setStatus] = useState('');
-    const [detail, setDetail] = useState(null);
+    const [detail, setDetails] = useState(null);
 
     useEffect(() => {
         if (!token) return;
@@ -41,7 +41,7 @@ export default function AdminSellersPage({ token, navigate, setNotice, user, log
             setNotice(error.message);
             return null;
         });
-        if (response) setDetail(response.data);
+        if (response) setDetails(response.data);
     }
 
     if (!token) return <NeedLogin navigate={navigate} />;
@@ -57,7 +57,7 @@ export default function AdminSellersPage({ token, navigate, setNotice, user, log
             </div>
             <div className="table-wrap">
                 <table>
-                    <thead><tr><th>Toko</th><th>User</th><th>Status</th><th>Produk</th><th>Order</th><th>Revenue</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Store</th><th>User</th><th>Status</th><th>Products</th><th>Order</th><th>Revenue</th><th>Aksi</th></tr></thead>
                     <tbody>
                         {sellers.map((seller) => (
                             <tr key={seller.id}>
@@ -68,7 +68,7 @@ export default function AdminSellersPage({ token, navigate, setNotice, user, log
                                 <td>{seller.total_orders}</td>
                                 <td>{formatPrice(seller.total_revenue)}</td>
                                 <td className="actions">
-                                    <button className="btn ghost" onClick={() => showSeller(seller)}>Detail</button>
+                                    <button className="btn ghost" onClick={() => showSeller(seller)}>Details</button>
                                     <button className="btn ghost" onClick={() => sellerAction(seller, 'approve')}>Approve</button>
                                     <button className="btn ghost" onClick={() => sellerAction(seller, 'reject')}>Reject</button>
                                     <button className="btn danger" onClick={() => sellerAction(seller, 'suspend')}>Suspend</button>

@@ -11,7 +11,7 @@ export default function HeroMarketplace({ navigate, product }) {
                 </p>
                 <div className="flex flex-wrap gap-2.5 mt-2">
                     <button className="btn primary" type="button" onClick={() => document.getElementById('marketplace-products')?.scrollIntoView({ behavior: 'smooth' })}>
-                        Lihat Produk
+                        Lihat Products
                     </button>
                     <button className="btn ghost" type="button" onClick={() => navigate('blog')}>
                         Explore Guide

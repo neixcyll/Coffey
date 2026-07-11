@@ -292,7 +292,7 @@ function LoginPage({
         const confirmation = formRef.current?.querySelector<HTMLInputElement>("#password_confirmation");
 
         if (confirmation && form.password !== form.password_confirmation) {
-            confirmation.setCustomValidity("Konfirmasi password tidak sama.");
+            confirmation.setCustomValidity("Password confirmation does not match.");
             confirmation.reportValidity();
             confirmation.setCustomValidity("");
             return;
@@ -346,7 +346,7 @@ function LoginPage({
 
                     <form className="coffee-auth-form" onSubmit={onSubmit} ref={formRef}>
                         {!isLogin && !isSellerStoreStep && (
-                            <div className="coffee-auth-role-switch" aria-label="Tipe akun">
+                            <div className="coffee-auth-role-switch" aria-label="Account type">
                                 <button className={cn(!isSeller && "active")} type="button" onClick={() => selectAccountType(false)}>
                                     <UserRound size={17} />
                                     Customer
@@ -358,7 +358,7 @@ function LoginPage({
                             </div>
                         )}
 
-                        {!isLogin && !isSellerStoreStep && <Field dataSellerAccountField={isSellerAccountStep} id="name" label="Nama" onChange={(value) => onUpdate("name", value)} placeholder="Nama lengkap" value={form.name} />}
+                        {!isLogin && !isSellerStoreStep && <Field dataSellerAccountField={isSellerAccountStep} id="name" label="Name" onChange={(value) => onUpdate("name", value)} placeholder="Full name" value={form.name} />}
                         {!isSellerStoreStep && <Field autoComplete="email" dataSellerAccountField={isSellerAccountStep} id="email" label="Email" onChange={(value) => onUpdate("email", value)} placeholder="nama@email.com" type="email" value={form.email} />}
 
                         {!isSellerStoreStep && <div className="space-y-2">
@@ -371,13 +371,13 @@ function LoginPage({
                                     onBlur={() => setPasswordFocused(false)}
                                     onChange={(event) => onUpdate("password", event.target.value)}
                                     onFocus={() => setPasswordFocused(true)}
-                                    placeholder="Minimal 8 karakter"
+                                    placeholder="Minimum 8 characters"
                                     required
                                     type={showPassword ? "text" : "password"}
                                     value={form.password}
                                 />
                                 <button
-                                    aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
                                     className="coffee-auth-password-toggle"
                                     type="button"
                                     onClick={() => setShowPassword((current) => !current)}
@@ -392,9 +392,9 @@ function LoginPage({
                                 autoComplete="new-password"
                                 dataSellerAccountField={isSellerAccountStep}
                                 id="password_confirmation"
-                                label="Konfirmasi password"
+                                label="Confirm password"
                                 onChange={(value) => onUpdate("password_confirmation", value)}
-                                placeholder="Ulangi password"
+                                placeholder="Repeat password"
                                 type="password"
                                 value={form.password_confirmation}
                             />
@@ -402,16 +402,16 @@ function LoginPage({
 
                         {isSellerStoreStep && (
                             <div className="coffee-auth-seller-fields">
-                                <Field id="store_name" label="Nama toko" onChange={(value) => onUpdate("store_name", value)} placeholder="Nama toko" value={form.store_name} />
-                                <Field id="phone" label="Telepon" onChange={(value) => onUpdate("phone", value)} placeholder="Nomor telepon" required={false} value={form.phone} />
-                                <Field id="origin_city" label="Kota asal pengiriman" onChange={(value) => onUpdate("origin_city", value)} placeholder="Contoh: Bandung" value={form.origin_city} />
+                                <Field id="store_name" label="Store name" onChange={(value) => onUpdate("store_name", value)} placeholder="Store name" value={form.store_name} />
+                                <Field id="phone" label="Phone" onChange={(value) => onUpdate("phone", value)} placeholder="Phone number" required={false} value={form.phone} />
+                                <Field id="origin_city" label="Shipping origin city" onChange={(value) => onUpdate("origin_city", value)} placeholder="Example: New York" value={form.origin_city} />
                                 <label className="space-y-2">
-                                    <span>Alamat toko</span>
-                                    <textarea onChange={(event) => onUpdate("address", event.target.value)} placeholder="Alamat toko" rows={3} value={form.address} />
+                                    <span>Store address</span>
+                                    <textarea onChange={(event) => onUpdate("address", event.target.value)} placeholder="Store address" rows={3} value={form.address} />
                                 </label>
                                 <label className="space-y-2">
-                                    <span>Deskripsi toko</span>
-                                    <textarea onChange={(event) => onUpdate("description", event.target.value)} placeholder="Deskripsi singkat" rows={3} value={form.description} />
+                                    <span>Store description</span>
+                                    <textarea onChange={(event) => onUpdate("description", event.target.value)} placeholder="Short description" rows={3} value={form.description} />
                                 </label>
                             </div>
                         )}
@@ -419,7 +419,7 @@ function LoginPage({
                         {isLogin && (
                             <label className="coffee-auth-remember">
                                 <Checkbox checked={remember} onCheckedChange={(checked) => onRememberChange(checked === true)} />
-                                <span>Ingat saya</span>
+                                <span>Remember me</span>
                             </label>
                         )}
 
@@ -434,21 +434,21 @@ function LoginPage({
                                 </Button>
                                 <Button className="h-12 text-base" disabled={loading} size="lg" type="submit">
                                     {loading && <LoaderCircle className="mr-2 animate-spin" size={18} />}
-                                    {loading ? "Memproses..." : "Daftar seller"}
+                                    {loading ? "Processing..." : "Register seller"}
                                 </Button>
                             </div>
                         ) : (
                             <Button className="h-12 w-full text-base" disabled={loading} size="lg" type="submit">
                                 {loading && <LoaderCircle className="mr-2 animate-spin" size={18} />}
-                                {loading ? "Memproses..." : isLogin ? "Masuk" : "Daftar akun"}
+                                {loading ? "Processing..." : isLogin ? "Sign in" : "Create account"}
                             </Button>
                         )}
                     </form>
 
                     <p className="coffee-auth-alt">
-                        {isLogin ? "Belum memiliki akun?" : "Sudah memiliki akun?"}
+                        {isLogin ? "Don't have an account?" : "Already have an account?"}
                         <button type="button" onClick={() => onNavigate(isLogin ? "register" : "login")}>
-                            {isLogin ? "Daftar sekarang" : "Masuk di sini"}
+                            {isLogin ? "Sign up now" : "Sign in here"}
                         </button>
                     </p>
                 </div>

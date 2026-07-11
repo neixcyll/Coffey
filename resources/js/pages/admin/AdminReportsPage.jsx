@@ -27,10 +27,10 @@ export default function AdminReportsPage({ token, navigate, setNotice, user, log
                         <Stat label="Revenue bulan ini" value={formatPrice(data.monthly_revenue)} />
                         <Stat label="Order bulan ini" value={data.monthly_orders} />
                         <Stat label="Customer baru" value={data.monthly_new_customers} />
-                        <Stat label="Komisi affiliate" value={formatPrice(data.monthly_affiliate_commission)} />
+                        <Stat label="Commissions affiliate" value={formatPrice(data.monthly_affiliate_commission)} />
                     </div>
                     <div className="admin-split">
-                        <ReportTable title="Produk terlaris" rows={data.best_selling_products} nameKey="product_name" />
+                        <ReportTable title="Products terlaris" rows={data.best_selling_products} nameKey="product_name" />
                         <ReportTable title="Seller top revenue" rows={data.top_sellers} nameKey="store_name" />
                         <ReportTable title="Affiliate top commission" rows={data.top_affiliates} nameKey="code" amountKey="total_commission" />
                     </div>

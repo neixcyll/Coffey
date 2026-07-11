@@ -11,6 +11,7 @@ export default function AdminCategoriesPage({ token, navigate, setNotice, user, 
     const [categories, setCategories] = useState([]);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({ name: '', description: '' });
+    const [deletingCategoryItem, setDeletingCategoryItem] = useState(null);
 
     useEffect(() => {
         if (!token) return;
@@ -37,7 +38,7 @@ export default function AdminCategoriesPage({ token, navigate, setNotice, user, 
 
         try {
             await apiRequest(path, { method, token, body: form });
-            setNotice(editing ? 'Kategori diperbarui.' : 'Kategori dibuat.');
+            setNotice(editing ? 'Categories diperbarui.' : 'Categories dibuat.');
             setEditing(null);
             setForm({ name: '', description: '' });
             loadCategories();
@@ -49,7 +50,7 @@ export default function AdminCategoriesPage({ token, navigate, setNotice, user, 
     async function deleteCategory(category) {
         await apiRequest(`/admin/categories/${category.id}`, { method: 'DELETE', token })
             .then(() => {
-                setNotice('Kategori dihapus.');
+                setNotice('Categories dihapus.');
                 loadCategories();
             })
             .catch((error) => setNotice(error.message));
@@ -59,15 +60,44 @@ export default function AdminCategoriesPage({ token, navigate, setNotice, user, 
 
     return (
         <AdminLayout current="admin-categories" navigate={navigate} user={user} logout={logout} notice={notice}>
+            {deletingCategoryItem && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[rgba(0,0,0,0.5)] backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-2xl max-w-[400px] w-full mx-4 flex flex-col gap-4 text-center">
+                        <h3 className="text-lg font-bold text-gray-900">Konfirmasi Hapus</h3>
+                        <p className="text-sm text-[#4d4035]">
+                            Apakah Anda yakin menghapus kategori <strong>{deletingCategoryItem.name}</strong>?
+                        </p>
+                        <div className="flex gap-3 justify-center mt-2">
+                            <button 
+                                type="button" 
+                                className="btn ghost border border-gray-300"
+                                onClick={() => setDeletingCategoryItem(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn danger"
+                                onClick={() => {
+                                    deleteCategory(deletingCategoryItem);
+                                    setDeletingCategoryItem(null);
+                                }}
+                            >
+                                Yes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <PageTitle eyebrow="Admin" title="Category management" />
             <form className="panel form-grid admin-form" onSubmit={saveCategory}>
                 <TextInput label="Nama kategori" value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
                 <TextArea label="Deskripsi" value={form.description} onChange={(value) => setForm({ ...form, description: value })} />
-                <button className="btn primary">{editing ? 'Simpan kategori' : 'Tambah kategori'}</button>
+                <button className="btn primary">{editing ? 'Save kategori' : 'Add kategori'}</button>
             </form>
             <div className="table-wrap">
                 <table>
-                    <thead><tr><th>Nama</th><th>Slug</th><th>Produk</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>Slug</th><th>Products</th><th>Aksi</th></tr></thead>
                     <tbody>
                         {categories.map((category) => (
                             <tr key={category.id}>
@@ -76,7 +106,7 @@ export default function AdminCategoriesPage({ token, navigate, setNotice, user, 
                                 <td>{category.products_count}</td>
                                 <td className="actions">
                                     <button className="btn ghost" onClick={() => editCategory(category)}>Edit</button>
-                                    <button className="btn danger" onClick={() => deleteCategory(category)}>Hapus</button>
+                                    <button className="btn danger" onClick={() => setDeletingCategoryItem(category)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

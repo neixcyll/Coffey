@@ -134,7 +134,7 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
         try {
             await apiRequest('/admin/content/categories', { method: 'POST', token, body: categoryForm });
             setCategoryForm({ name: '', description: '' });
-            setNotice('Kategori konten dibuat.');
+            setNotice('Categories konten dibuat.');
             loadContent();
         } catch (error) {
             setNotice(error.message);
@@ -164,7 +164,7 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                         <button type="button" className="btn ghost compact-btn" onClick={() => setEditingArticle(null)}>Tutup</button>
                     </div>
                     <label>
-                        <span>Kategori</span>
+                        <span>Categories</span>
                         <select value={form.article_category_id} onChange={(event) => update('article_category_id', event.target.value)} required>
                             {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                         </select>
@@ -193,7 +193,7 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                         <input type="checkbox" checked={form.is_featured} onChange={(event) => update('is_featured', event.target.checked)} />
                         <span>Featured content</span>
                     </label>
-                    <button className="btn primary">Simpan artikel</button>
+                    <button className="btn primary">Save artikel</button>
                 </form>
             )}
 
@@ -234,11 +234,11 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                 <form className="panel form-grid" onSubmit={createCategory}>
                     <div>
                         <p className="eyebrow">Manage Categories</p>
-                        <h2>Kategori artikel</h2>
+                        <h2>Categories artikel</h2>
                     </div>
                     <TextInput label="Nama kategori" value={categoryForm.name} onChange={(value) => setCategoryForm({ ...categoryForm, name: value })} />
                     <TextArea label="Deskripsi" value={categoryForm.description} onChange={(value) => setCategoryForm({ ...categoryForm, description: value })} />
-                    <button className="btn primary">Tambah kategori</button>
+                    <button className="btn primary">Add kategori</button>
                 </form>
                 <div className="panel">
                     <p className="eyebrow">Existing</p>

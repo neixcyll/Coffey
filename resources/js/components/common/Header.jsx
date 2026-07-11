@@ -19,7 +19,7 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
             </button>
 
             <nav className="nav flex flex-wrap gap-1.5 items-center justify-center">
-                <button className={itemClass('products')} onClick={() => navigate('products')}>Produk</button>
+                <button className={itemClass('products')} onClick={() => navigate('products')}>Products</button>
                 <button className={itemClass('blog')} onClick={() => navigate('blog')}>Blog</button>
                 <button className={itemClass('review')} onClick={() => navigate('review')}>Review</button>
                 <button className={itemClass('brewing-guide')} onClick={() => navigate('brewing-guide')}>Guide</button>
@@ -38,9 +38,9 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                 {role === 'seller' && (
                     <>
                         <button className={itemClass('seller-dashboard')} onClick={() => navigate('seller-dashboard')}>Seller</button>
-                        <button className={itemClass('seller-products')} onClick={() => navigate('seller-products')}>Produk Saya</button>
+                        <button className={itemClass('seller-products')} onClick={() => navigate('seller-products')}>Products Saya</button>
                         <button className={itemClass('seller-orders')} onClick={() => navigate('seller-orders')}>Order Masuk</button>
-                        <button className={itemClass('seller-reviews')} onClick={() => navigate('seller-reviews')}>Ulasan Produk</button>
+                        <button className={itemClass('seller-reviews')} onClick={() => navigate('seller-reviews')}>Ulasan Products</button>
                     </>
                 )}
                 {role === 'admin' && (

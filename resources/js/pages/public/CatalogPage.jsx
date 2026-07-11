@@ -146,7 +146,7 @@ function FeaturedCoffee({ loading, products, navigate }) {
                     {products.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
                 </div>
             ) : (
-                <EmptyState eyebrow="Produk" title="Belum ada produk aktif." message="Produk dari seller aktif akan tampil di sini." />
+                <EmptyState eyebrow="Products" title="Belum ada produk aktif." message="Products dari seller aktif akan tampil di sini." />
             )}
         </section>
     );

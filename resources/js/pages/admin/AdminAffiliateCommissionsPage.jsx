@@ -47,7 +47,7 @@ export default function AdminAffiliateCommissionsPage({ token, navigate, setNoti
             </div>
             <div className="table-wrap">
                 <table>
-                    <thead><tr><th>Affiliate</th><th>Order</th><th>Produk</th><th>Seller</th><th>Subtotal</th><th>Komisi</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Affiliate</th><th>Order</th><th>Products</th><th>Seller</th><th>Subtotal</th><th>Commissions</th><th>Status</th></tr></thead>
                     <tbody>
                         {commissions.map((commission) => (
                             <tr key={commission.id}>

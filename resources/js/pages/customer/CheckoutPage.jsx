@@ -58,7 +58,7 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
 
         if (!destinationCity) {
             setShippingOptions([]);
-            setShippingMessage('Isi kota tujuan sebelum mengecek ongkir.');
+            setShippingMessage('Please enter a destination city first.');
             return;
         }
 
@@ -85,7 +85,7 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
 
         if (invalidFields.length > 0) {
             setTouched({ customer_name: true, customer_phone: true, shipping_address: true, destination_city: true, shipping_rate_id: true });
-            setNotice('Lengkapi alamat tujuan dan pilih ongkir sebelum melanjutkan pembayaran.');
+            setNotice('Please complete shipping details and select a shipping method.');
             return;
         }
 
@@ -105,7 +105,7 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                     affiliate_click_id: affiliateClickId || undefined,
                 },
             });
-            setNotice('Order dibuat. Membuka Midtrans Snap.');
+            setNotice('Order created. Opening payment popup...');
             await refreshCartCount?.();
             await openSnap(data, token, setNotice, () => navigate('orders'));
         } catch (error) {
@@ -121,72 +121,69 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
         <section className="checkout-page">
             <header className="checkout-heading">
                 <p className="eyebrow">Checkout</p>
-                <h1>Selesaikan pesanan kopimu</h1>
-                <p>Isi detail pengiriman, periksa kembali produk, lalu lanjutkan pembayaran melalui Midtrans Snap.</p>
+                <h1>Complete your order</h1>
+                
             </header>
 
             <div className="checkout-layout">
                 <form id="checkout-order-form" className="checkout-form" noValidate onSubmit={submit}>
                     <section className="checkout-form-card">
-                        <CheckoutCardHeading step="01" title="Data penerima" description="Pastikan kurir dapat menghubungi penerima pesanan." />
+                        <CheckoutCardHeading step="01" title="Shipping Details" />
                         <div className="checkout-field-grid">
                             <TextInput
-                                label="Nama penerima"
+                                label="Recipient Name"
                                 value={form.customer_name}
-                                placeholder="Nama lengkap penerima"
+                                placeholder="Full Name"
                                 autoComplete="name"
-                                helper="Gunakan nama yang mudah dikenali saat paket diterima."
+                                
                                 error={touched.customer_name ? errors.customer_name : ''}
                                 onBlur={() => markTouched('customer_name')}
                                 onChange={(value) => update('customer_name', value)}
                             />
                             <TextInput
-                                label="Nomor telepon"
+                                label="Phone Number"
                                 value={form.customer_phone}
-                                placeholder="Contoh: 081234567890"
+                                placeholder="e.g. +6281234567890"
                                 autoComplete="tel"
                                 inputMode="tel"
-                                helper="Nomor aktif untuk konfirmasi pengiriman."
+                                
                                 error={touched.customer_phone ? errors.customer_phone : ''}
                                 onBlur={() => markTouched('customer_phone')}
                                 onChange={(value) => update('customer_phone', value)}
                             />
                         </div>
-                    </section>
 
-                    <section className="checkout-form-card">
-                        <CheckoutCardHeading step="02" title="Alamat pengiriman" description="Tulis alamat selengkap mungkin agar paket tiba tanpa kendala." />
                         <TextArea
-                            label="Alamat lengkap"
+                            label="Street Address"
                             value={form.shipping_address}
                             required
                             rows={5}
-                            placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota, dan kode pos"
-                            helper="Sertakan patokan lokasi bila alamat sulit ditemukan."
+                            placeholder="Street name, building/house number, district, postal code"
+                            
                             error={touched.shipping_address ? errors.shipping_address : ''}
                             onBlur={() => markTouched('shipping_address')}
                             onChange={(value) => update('shipping_address', value)}
                         />
                         <div className="checkout-destination-row">
                             <TextInput
-                                label="Kota tujuan"
+                                label="City"
                                 value={form.destination_city}
-                                placeholder="Contoh: Jakarta"
-                                helper="Kota tujuan dipakai untuk mencari tarif dari kota asal seller."
+                                placeholder="e.g. Jakarta"
+                                
                                 error={touched.destination_city ? errors.destination_city : ''}
                                 onBlur={() => markTouched('destination_city')}
                                 onChange={(value) => update('destination_city', value)}
                             />
                             <button className="btn ghost checkout-rate-button" type="button" disabled={shippingLoading || items.length === 0} onClick={loadShippingRates}>
-                                {shippingLoading ? 'Mencari...' : 'Cek ongkir'}
+                                {shippingLoading ? 'Loading...' : 'Check rates'}
                             </button>
                         </div>
                     </section>
 
                     <section className="checkout-form-card">
-                        <CheckoutCardHeading step="03" title="Pilih pengiriman" description="Pilih layanan kurir sebelum melanjutkan ke pembayaran." />
+                        <CheckoutCardHeading step="02" title="Shipping Service" />
                         {shippingMeta?.origin_city && (
-                            <p className="checkout-origin-note">Dikirim dari <strong>{shippingMeta.origin_city}</strong> ke <strong>{shippingMeta.destination_city}</strong>.</p>
+                            <p className="checkout-origin-note">Shipped from <strong>{shippingMeta.origin_city}</strong> ke <strong>{shippingMeta.destination_city}</strong>.</p>
                         )}
                         <div className="checkout-shipping-options">
                             {shippingOptions.map((rate) => (
@@ -203,34 +200,31 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
                                     />
                                     <span>
                                         <strong>{rate.courier} <small>{rate.service}</small></strong>
-                                        <small>Estimasi sampai {rate.estimated_days}</small>
+                                        <small>Est. delivery {rate.estimated_days}</small>
                                     </span>
                                     <strong>{formatPrice(rate.cost)}</strong>
                                 </label>
                             ))}
                             {shippingMessage && <p className={`checkout-shipping-message ${shippingOptions.length ? '' : 'unavailable'}`}>{shippingMessage}</p>}
-                            {!shippingMessage && shippingOptions.length === 0 && <p className="checkout-shipping-message">Isi kota tujuan lalu klik Cek ongkir untuk melihat pilihan layanan.</p>}
+                            {!shippingMessage && shippingOptions.length === 0 && <p className="checkout-shipping-message">Please enter city and click check rates to view available services.</p>}
                             {touched.shipping_rate_id && errors.shipping_rate_id && <small className="field-error">{errors.shipping_rate_id}</small>}
                         </div>
                     </section>
 
                     <section className="checkout-form-card">
-                        <CheckoutCardHeading step="04" title="Payment method" description="Pembayaran diproses setelah order berhasil dibuat." />
+                        <CheckoutCardHeading step="03" title="Payment & Notes" />
                         <div className="checkout-payment-method">
-                            <span>Midtrans Snap</span>
-                            <strong>Cards, bank transfer, e-wallet, and retail payment</strong>
+                            <span>Payment Method</span>
+                            <strong>Midtrans Snap (Cards, bank transfer, e-wallet)</strong>
                         </div>
-                    </section>
-
-                    <section className="checkout-form-card">
-                        <CheckoutCardHeading step="05" title="Catatan pesanan" description="Opsional. Tambahkan instruksi khusus untuk seller atau kurir." />
+ ``
                         <TextArea
-                            label="Catatan"
+                            label="Order Notes"
                             value={form.notes}
                             required={false}
                             rows={4}
-                            placeholder="Contoh: titip ke security jika tidak ada orang di rumah"
-                            helper="Kosongkan bila tidak ada catatan tambahan."
+                            placeholder="e.g. Leave package at security office"
+                            
                             onChange={(value) => update('notes', value)}
                         />
                     </section>
@@ -238,15 +232,15 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
 
                 <aside className="checkout-summary-card">
                     <div>
-                        <p className="eyebrow">Ringkasan pesanan</p>
-                        <h2>{totalItems} item di checkout</h2>
+                        <p className="eyebrow">Order Summary</p>
+                        <h2>{totalItems} {totalItems === 1 ? 'item' : 'items'}</h2>
                     </div>
 
                     <div className="checkout-product-list">
                         {cart === null ? (
                             <CheckoutSummaryLoading />
                         ) : items.length === 0 ? (
-                            <p className="muted">Cart masih kosong. Tambahkan produk sebelum checkout.</p>
+                            <p className="muted">Your cart is empty.</p>
                         ) : (
                             items.map((item) => <CheckoutLineItem item={item} key={item.id} />)
                         )}
@@ -254,41 +248,41 @@ export default function CheckoutPage({ token, user, navigate, setNotice, refresh
 
                     <div className="checkout-total-list">
                         <div>
-                            <span>Subtotal produk</span>
+                            <span>Subtotal</span>
                             <strong>{formatPrice(cart?.total_amount)}</strong>
                         </div>
                         <div>
-                            <span>Ongkir{selectedShipping ? ` (${selectedShipping.courier} ${selectedShipping.service})` : ''}</span>
+                            <span>Shipping{selectedShipping ? ` (${selectedShipping.courier} ${selectedShipping.service})` : ''}</span>
                             <strong>{selectedShipping ? formatPrice(selectedShipping.cost) : '-'}</strong>
                         </div>
                         <div>
-                            <span>Total pembayaran</span>
+                            <span>Total</span>
                             <strong>{formatPrice(totalPayment)}</strong>
                         </div>
                     </div>
 
                     <div className="checkout-affiliate-note">
-                        <span>Voucher / affiliate code</span>
+                        <span>Voucher / Affiliate</span>
                         <strong>{affiliateCode || 'Not applied'}</strong>
                     </div>
 
                     <button className="btn primary checkout-pay-button" type="submit" form="checkout-order-form" disabled={loading || items.length === 0 || !selectedShippingRateId}>
-                        {loading ? 'Membuat order...' : 'Bayar dengan Snap'}
+                        {loading ? 'Processing...' : 'Pay Now'}
                     </button>
-                    <p className="checkout-payment-note">Pembayaran diproses aman melalui Midtrans. Stock dikurangi setelah status pembayaran berhasil dikonfirmasi.</p>
+                    
                 </aside>
             </div>
         </section>
     );
 }
 
-function CheckoutCardHeading({ step, title, description }) {
+function CheckoutCardHeading({ step, title }) {
     return (
         <header className="checkout-card-heading">
             <span>{step}</span>
             <div>
                 <h2>{title}</h2>
-                <p>{description}</p>
+                
             </div>
         </header>
     );
@@ -320,11 +314,11 @@ function CheckoutSummaryLoading() {
 function checkoutErrors(form, shippingRateId) {
     const errors = {};
 
-    if (!form.customer_name.trim()) errors.customer_name = 'Nama penerima wajib diisi.';
-    if (!form.customer_phone.trim()) errors.customer_phone = 'Nomor telepon wajib diisi.';
-    if (!form.shipping_address.trim()) errors.shipping_address = 'Alamat pengiriman wajib diisi.';
-    if (!form.destination_city.trim()) errors.destination_city = 'Kota tujuan wajib diisi.';
-    if (!shippingRateId) errors.shipping_rate_id = 'Pilih salah satu layanan ongkir.';
+    if (!form.customer_name.trim()) errors.customer_name = 'Recipient name is required.';
+    if (!form.customer_phone.trim()) errors.customer_phone = 'Phone number is required.';
+    if (!form.shipping_address.trim()) errors.shipping_address = 'Shipping address is required.';
+    if (!form.destination_city.trim()) errors.destination_city = 'City is required.';
+    if (!shippingRateId) errors.shipping_rate_id = 'Please select a shipping method.';
 
     return errors;
 }
@@ -345,22 +339,22 @@ async function openSnap(data, token, setNotice, onDone) {
     }
 
     if (!window.snap) {
-        setNotice('snap.js gagal dimuat.');
+        setNotice('Failed to load Snap payment script.');
         return;
     }
 
     window.snap.pay(data.snap_token, {
         onSuccess: async (result) => {
             const synced = await syncPaymentAfterSnap(data, token, setNotice, result);
-            if (synced) setNotice('Pembayaran sukses. Status order sudah disinkronkan.');
+            if (synced) setNotice('Payment successful. Order status synchronized.');
             onDone();
         },
         onPending: () => {
-            setNotice('Pembayaran pending. Selesaikan pembayaran sesuai instruksi Midtrans.');
+            setNotice('Payment pending. Please complete your payment.');
             onDone();
         },
-        onError: () => setNotice('Pembayaran gagal.'),
-        onClose: () => setNotice('Popup Snap ditutup sebelum pembayaran selesai.'),
+        onError: () => setNotice('Payment failed.'),
+        onClose: () => setNotice('Payment popup closed.'),
     });
 }
 
@@ -390,6 +384,6 @@ async function syncPaymentAfterSnap(data, token, setNotice, snapResult = null) {
         await new Promise((resolve) => window.setTimeout(resolve, 1200 * (attempt + 1)));
     }
 
-    setNotice('Pembayaran diterima Snap, tetapi status order masih menunggu sinkronisasi Midtrans.');
+    setNotice('Payment received, waiting for synchronization.');
     return false;
 }

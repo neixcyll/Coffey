@@ -24,7 +24,7 @@ export default function PublicNavbar({
 
     useEffect(() => {
         function updateScrollState() {
-            setScrolled(window.scrollY > 28);
+            setScrolled((prev) => { if (!prev && window.scrollY > 80) return true; if (prev && window.scrollY < 20) return false; return prev; });
         }
 
         updateScrollState();
@@ -72,9 +72,11 @@ export default function PublicNavbar({
     const canUseCart = !user || isCustomer;
 
     return (
-        <header className={`public-navbar ${scrolled ? 'scrolled' : ''} sticky top-0 z-[100] grid grid-cols-[auto_1fr] gap-5 items-center w-full bg-[rgba(255,255,255,0.92)] backdrop-blur-md`}>
+        <>
+            <div className="navbar-spacer" aria-hidden="true" />
+        <header className={`public-navbar ${scrolled ? 'scrolled' : ''} fixed top-0 left-0 z-[100] grid grid-cols-[auto_1fr] gap-5 items-center w-full bg-[rgba(255,255,255,0.92)] backdrop-blur-md`}>
             <button className="public-brand inline-flex items-center gap-2.5 bg-transparent border-0 cursor-pointer text-left" type="button" onClick={() => go('products')}>
-                <img className="brand-mark w-9 h-9 object-contain" src="/logo.png" alt="CoffeS Logo" style={{ background: 'transparent' }} />
+                <img className="brand-mark w-14 h-14 object-contain" src="/logo.png" alt="CoffeS Logo" style={{ background: 'transparent' }} />
                 <span className="public-brand-copy">
                     <strong className="font-extrabold text-lg text-[#38291e]">CoffeS</strong>
                 </span>
@@ -176,6 +178,7 @@ export default function PublicNavbar({
                 </div>
             </div>
         </header>
+        </>
     );
 }
 
@@ -199,7 +202,7 @@ function accountLinks(role) {
     if (role === 'seller') {
         return [
             { view: 'seller-dashboard', label: 'Seller Panel' },
-            { view: 'seller-products', label: 'Produk Saya' },
+            { view: 'seller-products', label: 'Products Saya' },
             { view: 'seller-orders', label: 'Order Masuk' },
         ];
     }
@@ -207,7 +210,7 @@ function accountLinks(role) {
     return [
         { view: 'orders', label: 'Order Saya' },
         { view: 'affiliate-dashboard', label: 'Affiliate Panel' },
-        { view: 'account-settings', label: 'Pengaturan Akun' },
+        { view: 'account-settings', label: 'Settings Akun' },
     ];
 }
 

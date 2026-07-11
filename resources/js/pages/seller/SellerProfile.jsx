@@ -4,7 +4,7 @@ import TextArea from '../../components/common/TextArea.jsx';
 import TextInput from '../../components/common/TextInput.jsx';
 import { apiRequest } from '../../services/api.js';
 
-const emptyProfile = {
+const emptyProfilee = {
     store_name: '',
     phone: '',
     address: '',
@@ -14,18 +14,18 @@ const emptyProfile = {
 };
 
 export default function SellerProfile({ token, user, navigate, setNotice, updateCurrentUser }) {
-    const [profile, setProfile] = useState(() => sellerProfileFromUser(user));
-    const [form, setForm] = useState(() => ({ ...emptyProfile, ...sellerProfileFromUser(user) }));
+    const [profile, setProfilee] = useState(() => SellerProfileFromUser(user));
+    const [form, setForm] = useState(() => ({ ...emptyProfilee, ...SellerProfileFromUser(user) }));
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const nextProfile = sellerProfileFromUser(user);
-        if (nextProfile?.id) {
-            setProfile(nextProfile);
-            setForm({ ...emptyProfile, ...nextProfile });
+        const nextProfilee = SellerProfileFromUser(user);
+        if (nextProfilee?.id) {
+            setProfilee(nextProfilee);
+            setForm({ ...emptyProfilee, ...nextProfilee });
         }
-    }, [user?.seller_profile?.id, user?.sellerProfile?.id]);
+    }, [user?.seller_profile?.id, user?.SellerProfile?.id]);
 
     useEffect(() => {
         if (!token) return;
@@ -33,8 +33,8 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
         setLoading(true);
         apiRequest('/seller/profile', { token })
             .then((response) => {
-                setProfile(response.data);
-                setForm({ ...emptyProfile, ...response.data });
+                setProfilee(response.data);
+                setForm({ ...emptyProfilee, ...response.data });
             })
             .catch((error) => setNotice(error.message))
             .finally(() => setLoading(false));
@@ -61,17 +61,17 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
                     description: form.description,
                 },
             });
-            const nextProfile = response.data;
+            const nextProfilee = response.data;
             const nextUser = {
                 ...user,
-                seller_profile: nextProfile,
-                sellerProfile: nextProfile,
+                seller_profile: nextProfilee,
+                SellerProfile: nextProfilee,
             };
 
-            setProfile(nextProfile);
-            setForm({ ...emptyProfile, ...nextProfile });
+            setProfilee(nextProfilee);
+            setForm({ ...emptyProfilee, ...nextProfilee });
             updateCurrentUser?.(nextUser);
-            setNotice(response.message || 'Profil toko berhasil diperbarui.');
+            setNotice(response.message || 'Profile toko berhasil diperbarui.');
         } catch (error) {
             setNotice(error.message);
         } finally {
@@ -85,8 +85,8 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
         <section className="seller-profile-page">
             <div className="section-head seller-page-head">
                 <div>
-                    <p className="eyebrow">Profil toko</p>
-                    <h1>Profil Toko</h1>
+                    <p className="eyebrow">Profile toko</p>
+                    <h1>Profile Store</h1>
                     <p className="muted">Kelola identitas toko yang muncul di katalog marketplace.</p>
                 </div>
                 <span className={`badge ${profile?.status === 'active' ? 'verified' : ''}`}>
@@ -96,20 +96,20 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
 
             <div className="seller-profile-grid">
                 <form className="panel form-grid seller-profile-form" onSubmit={submit}>
-                    <TextInput label="Nama Toko" value={form.store_name || ''} onChange={(value) => update('store_name', value)} />
-                    <TextInput label="Telepon" value={form.phone || ''} onChange={(value) => update('phone', value)} required={false} />
-                    <TextArea label="Alamat Toko" value={form.address || ''} onChange={(value) => update('address', value)} />
-                    <TextInput label="Kota Asal Pengiriman" value={form.origin_city || ''} helper="Dipakai untuk mencari tarif ongkir saat customer checkout." placeholder="Contoh: Bandung" onChange={(value) => update('origin_city', value)} />
-                    <TextArea label="Deskripsi Toko" value={form.description || ''} onChange={(value) => update('description', value)} />
-                    <button className="btn primary" disabled={saving || loading}>{saving ? 'Menyimpan...' : 'Simpan Profil'}</button>
+                    <TextInput label="Nama Store" value={form.store_name || ''} onChange={(value) => update('store_name', value)} />
+                    <TextInput label="Phone" value={form.phone || ''} onChange={(value) => update('phone', value)} required={false} />
+                    <TextArea label="Alamat Store" value={form.address || ''} onChange={(value) => update('address', value)} />
+                    <TextInput label="Kota Asal Pengiriman" value={form.origin_city || ''} helper="Dipakai untuk mencari tarif ongkir saat customer checkout." placeholder="Example: New York" onChange={(value) => update('origin_city', value)} />
+                    <TextArea label="Deskripsi Store" value={form.description || ''} onChange={(value) => update('description', value)} />
+                    <button className="btn primary" disabled={saving || loading}>{saving ? 'Menyimpan...' : 'Save Profile'}</button>
                 </form>
 
                 <aside className="panel seller-profile-summary">
                     <span className="seller-summary-avatar">{initials(form.store_name || user?.name)}</span>
                     <div>
                         <p className="eyebrow">Preview toko</p>
-                        <h2>{form.store_name || 'Nama Toko'}</h2>
-                        <p className="muted">{form.description || 'Deskripsi toko belum diisi.'}</p>
+                        <h2>{form.store_name || 'Nama Store'}</h2>
+                        <p className="muted">{form.description || 'Store description belum diisi.'}</p>
                     </div>
                     <dl className="seller-profile-details">
                         <div>
@@ -135,8 +135,8 @@ export default function SellerProfile({ token, user, navigate, setNotice, update
     );
 }
 
-function sellerProfileFromUser(user) {
-    return user?.seller_profile || user?.sellerProfile || emptyProfile;
+function SellerProfileFromUser(user) {
+    return user?.seller_profile || user?.SellerProfile || emptyProfilee;
 }
 
 function initials(value) {

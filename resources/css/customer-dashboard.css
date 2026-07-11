@@ -1,0 +1,520 @@
+/* Humble, Clean, and Creative Minimalist Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.customer-app-shell, .customer-hub {
+    min-height: 100vh;
+    color: var(--coffee-text) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Main Content Spacing */
+.customer-hub-header, .customer-hub-nav, .customer-hub-content {
+    width: 100% !important;
+    max-width: 1240px !important; 
+    padding-inline: clamp(20px, 4vw, 40px) !important;
+    margin-inline: auto !important;
+}
+
+
+
+/* Header Integrated (No white block) */
+.customer-hub-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    padding-top: 40px !important;
+    padding-bottom: 24px !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.customer-hub-welcome {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+.customer-hub-welcome h1 {
+    font-weight: 700 !important;
+    color: #171717 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    font-size: 1.25rem !important;
+    margin: 0 !important;
+}
+
+.customer-hub-welcome p {
+    color: #737373 !important;
+    font-weight: 400 !important;
+    font-size: 0.85rem !important;
+    margin: 2px 0 0 !important;
+}
+.customer-hub-welcome p.eyebrow {
+    display: none !important; /* Hide eyebrow to make header neat */
+}
+
+/* ALL HEADER BUTTONS - EXACTLY 44px UNIFORM HEIGHT */
+.customer-hub-brand {
+    background: #171717 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06) !important;
+    cursor: pointer !important;
+}
+
+/* Header Actions */
+.customer-hub-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.customer-hub-profile {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #ffffff !important;
+    border: 1px solid #eaeaea !important;
+    border-radius: 8px !important;
+    height: 44px !important;
+    padding: 0 16px 0 6px !important;
+}
+
+.customer-hub-profile > span {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f5f5f5 !important;
+    color: #171717 !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.customer-hub-profile strong {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    display: block !important;
+}
+
+.customer-hub-profile small {
+    display: none !important; /* Hide email for a cleaner look */
+}
+
+.customer-hub-logout {
+    color: #525252 !important;
+    background: transparent !important;
+    border: 1px solid #eaeaea !important;
+    height: 44px !important;
+    padding: 0 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+    cursor: pointer !important;
+}
+.customer-hub-logout:hover {
+    background: #fff1f2 !important;
+    color: #e11d48 !important;
+    border-color: #fecdd3 !important;
+}
+
+/* Clean Tab Layout for Nav */
+.customer-hub-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-bottom: 1px solid #eaeaea !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 40px !important;
+}
+
+.customer-hub-nav button {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: #737373 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 12px 16px !important;
+    margin-bottom: -1px !important;
+    transition: all 0.2s ease !important;
+    min-height: auto !important;
+    cursor: pointer !important;
+}
+
+.customer-hub-nav button svg {
+    color: inherit !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.customer-hub-nav button:hover {
+    color: #171717 !important;
+    border-bottom-color: #d4d4d4 !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+.customer-hub-nav button.active {
+    color: #171717 !important;
+    border-bottom-color: #171717 !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+.customer-hub-nav button strong {
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+.customer-hub-nav button small {
+    display: none !important;
+}
+
+/* Cards and Panels */
+.customer-hub-content .panel, .customer-hub-content .stat, .customer-order-card {
+    background: #ffffff !important;
+    border: 1px solid #eaeaea !important;
+    color: #171717 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+    border-radius: 16px !important;
+}
+
+.customer-order-card {
+    padding: 24px !important;
+}
+
+.customer-section-head h2 {
+    font-weight: 700 !important;
+    color: #171717 !important;
+    text-transform: none !important;
+    letter-spacing: -0.01em !important;
+}
+.customer-section-head p.muted {
+    color: #737373 !important;
+}
+
+.customer-order-card-head {
+    border-bottom: 1px solid #f5f5f5 !important;
+}
+
+.customer-order-card small {
+    color: #a3a3a3 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 600 !important;
+}
+
+.customer-order-card-head > div:first-child span, .customer-order-card-body > div span {
+    color: #737373 !important;
+}
+
+.customer-order-total {
+    color: #171717 !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+}
+
+.customer-order-detail {
+    border-top: 1px solid #f5f5f5 !important;
+}
+
+/* New Product Layout inside Orders */
+.customer-order-product {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 12px;
+}
+
+.customer-order-product-main {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.customer-order-product-image {
+    width: 80px;
+    height: 80px;
+    background: var(--color-bg); /* Light neutral bg */
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.customer-order-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.customer-order-product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.customer-order-product-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.customer-order-product-name-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.customer-order-product-name-col strong {
+    display: block;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+.customer-order-product-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+
+.customer-order-product-actions {
+    flex-shrink: 0;
+}
+
+.customer-order-product-purchase-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+}
+
+.purchase-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.purchase-info-item small {
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.purchase-info-item span {
+    color: var(--color-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    .customer-order-product-purchase-info {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+@media (max-width: 500px) {
+    .customer-order-product-main {
+        grid-template-columns: 1fr;
+    }
+    .customer-order-product-image {
+        width: 100%;
+        height: 140px;
+    }
+}
+
+/* Empty State */
+.customer-empty-state {
+    background: #ffffff !important;
+    border: 1px dashed #d4d4d4 !important;
+    box-shadow: none !important;
+}
+.customer-empty-state > span {
+    background: #f5f5f5 !important;
+    color: #171717 !important;
+    border-radius: 12px !important;
+}
+
+/* Tables in Affiliate */
+.customer-referral-history table th {
+    background: #fafafa !important;
+    color: #737373 !important;
+    border-bottom: 1px solid #eaeaea !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+}
+.customer-referral-history table td {
+    border-bottom: 1px solid #f5f5f5 !important;
+    color: #171717 !important;
+}
+
+/* Stat */
+.stat {
+    background: #ffffff !important;
+    border: 1px solid #eaeaea !important;
+    border-radius: 16px !important;
+}
+.stat span {
+    color: #737373 !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+.stat strong {
+    color: #171717 !important;
+    font-weight: 700 !important;
+}
+
+/* Form overrides inside customer hub */
+.customer-account-form .space-y-2 label, .customer-affiliate-register label {
+    color: #404040 !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    font-size: 0.9rem !important;
+}
+
+.customer-account-form input, .customer-affiliate-register input, .customer-affiliate-register textarea {
+    background: #ffffff !important;
+    border: 1px solid #d4d4d4 !important;
+    color: #171717 !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s !important;
+}
+.customer-account-form input:focus, .customer-affiliate-register input:focus, .customer-affiliate-register textarea:focus {
+    border-color: #171717 !important;
+    box-shadow: 0 0 0 1px #171717 !important; 
+    outline: none !important;
+}
+
+/* Primary buttons in customer hub */
+.customer-hub-content button.btn.primary {
+    background: #171717 !important;
+    color: #ffffff !important;
+    border: 1px solid #171717 !important;
+    border-radius: 8px !important;
+    height: 40px !important;
+    padding: 0 20px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.customer-hub-content button.btn.primary:hover {
+    background: #404040 !important;
+    border-color: #404040 !important;
+}
+
+/* Content ghost buttons */
+.customer-hub-content button.btn.ghost, .customer-section-head button.btn {
+    background: #ffffff !important;
+    color: #171717 !important;
+    border: 1px solid #eaeaea !important;
+    border-radius: 8px !important;
+    height: 40px !important;
+    padding: 0 16px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.customer-hub-content button.btn.ghost:hover, .customer-section-head button.btn:hover {
+    background: #f5f5f5 !important;
+    border-color: #d4d4d4 !important;
+}
+
+/* Header Action Buttons - Exactly 44px matching */
+.customer-hub-actions button.btn.ghost, 
+.customer-hub-actions button.customer-notification-button {
+    background: #ffffff !important;
+    color: #171717 !important;
+    border: 1px solid #eaeaea !important;
+    border-radius: 8px !important;
+    height: 44px !important; /* Uniform height */
+    padding: 0 16px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.customer-hub-actions button.customer-notification-button {
+    width: 44px !important; /* Perfect square for icon buttons */
+    padding: 0 !important;
+}
+.customer-hub-actions button.btn.ghost:hover,
+.customer-hub-actions button.customer-notification-button:hover {
+    background: #f5f5f5 !important;
+    border-color: #d4d4d4 !important;
+}
+
+/* Badges / Status */
+.customer-status strong, .badge {
+    background: #f5f5f5 !important;
+    color: #404040 !important;
+    border-radius: 6px !important;
+    text-transform: capitalize !important;
+    font-weight: 500 !important;
+    border: 1px solid #e5e5e5 !important;
+    padding: 4px 8px !important;
+}
+
+.content-status.published, .content-status.completed, .content-status.paid {
+    background: #f0fdf4 !important;
+    color: #15803d !important;
+    border-color: #bbf7d0 !important;
+}
+.content-status.pending {
+    background: #fffbeb !important;
+    color: #b45309 !important;
+    border-color: #fef08a !important;
+}
+.content-status.rejected, .content-status.cancelled {
+    background: #fef2f2 !important;
+    color: #b91c1c !important;
+    border-color: #fecaca !important;
+}

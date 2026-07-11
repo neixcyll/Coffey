@@ -112,7 +112,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                 navigate('checkout');
                 return;
             }
-            setNotice('Produk berhasil ditambahkan ke cart. Cek ikon cart di kanan atas.');
+            setNotice('Products berhasil ditambahkan ke cart. Cek ikon cart di kanan atas.');
         } catch (error) {
             setNotice(error.message);
         }
@@ -162,7 +162,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const descriptionSections = productDescriptionSections(product);
     const highlights = productHighlights(product, currentStock, weightOptions);
     const coffeeInfo = coffeeInformation(product);
-    const roastProfile = roastProfileDetails(product);
+    const roastProfilee = roastProfileeDetailss(product);
     const brewRecommendations = brewingRecommendations(product);
     const packageInfo = packageInformation(product, weightOptions, currentStock);
     const flavorNotes = flavorNoteList(product);
@@ -170,135 +170,137 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     return (
         <div className="pdp-premium">
             {/* ── S1: Image + Title + Short Description ── */}
-            <section className="pdp-hero pdp-hero--stacked">
-                <ProductGallery product={product} images={gallery} selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
-
-                <div className="pdp-identity">
-                    <div className="pdp-breadcrumb">
-                        <span>{product.category?.name || 'Coffee'}</span>
-                        <span className="pdp-breadcrumb-sep">›</span>
-                        <span>{product.origin || 'Indonesia'}</span>
-                    </div>
-
-                    <h1 className="pdp-product-name">{product.name}</h1>
-
-                    <div className="pdp-rating-row">
-                        {reviewsCount > 0 ? (
-                            <>
-                                <StarRating value={averageRating} />
-                                <strong>{Number(averageRating).toLocaleString('id-ID', { maximumFractionDigits: 1 })}</strong>
-                                <span className="pdp-rating-count">{reviewsCount} ulasan</span>
-                            </>
-                        ) : (
-                            <span className="pdp-rating-count">Belum ada rating</span>
-                        )}
-                        <span className={`pdp-availability ${currentStock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                            {currentStock > 0 ? 'In Stock' : 'Sold Out'}
-                        </span>
-                    </div>
-
-                    <p className="pdp-tagline">{premiumSummary(product)}</p>
+            <section className="pdp-hero pdp-hero--two-col">
+                <div className="pdp-hero-image-col">
+                    <ProductGallery product={product} images={gallery} selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
                 </div>
 
-                {/* ── S2: Variants ── */}
-                <div className="pdp-section-block">
-                    {variants.length > 0 ? (
-                        <div className="pdp-variant-selectors">
-                            <VariantGroup label="Berat">
-                                {weightOptions.map((weight) => (
-                                    <button
-                                        type="button"
-                                        className={`pill-button ${selectedWeight === String(weight) ? 'selected' : ''}`}
-                                        key={weight}
-                                        onClick={() => {
-                                            const nextVariant = preferredVariant(variants.filter((variant) => variant.weight_grams === weight));
-                                            setSelectedWeight(String(weight));
-                                            setSelectedGrind(nextVariant?.grind_size || '');
-                                            setQuantity(1);
-                                        }}
-                                    >
-                                        {formatWeight(weight)}
-                                    </button>
-                                ))}
-                            </VariantGroup>
-                            <VariantGroup label="Gilingan">
-                                {grindOptions.map((variant) => (
-                                    <button
-                                        type="button"
-                                        className={`pill-button ${selectedGrind === variant.grind_size ? 'selected' : ''}`}
-                                        key={variant.id}
-                                        disabled={variant.stock <= 0}
-                                        onClick={() => {
-                                            setSelectedGrind(variant.grind_size);
-                                            setQuantity(1);
-                                        }}
-                                    >
-                                        {variant.grind_size}
-                                    </button>
-                                ))}
-                            </VariantGroup>
+                <div className="pdp-hero-info-col">
+                    <div className="pdp-identity">
+                        <div className="pdp-breadcrumb">
+                            <span>{product.category?.name || 'Coffee'}</span>
+                            <span className="pdp-breadcrumb-sep">›</span>
+                            <span>{product.origin || 'Indonesia'}</span>
                         </div>
-                    ) : (
-                        <p className="muted">Varian produk belum tersedia.</p>
-                    )}
-                </div>
 
-                {/* ── S3: Quantity + Price ── */}
-                <div className="pdp-section-block">
-                    <div className="pdp-qty-price-row">
+                        <h1 className="pdp-product-name">{product.name}</h1>
+
+                        <div className="pdp-rating-row">
+                            {reviewsCount > 0 ? (
+                                <>
+                                    <StarRating value={averageRating} />
+                                    <strong>{Number(averageRating).toLocaleString('id-ID', { maximumFractionDigits: 1 })}</strong>
+                                    <span className="pdp-rating-count">{reviewsCount} ulasan</span>
+                                </>
+                            ) : (
+                                <span className="pdp-rating-count">Belum ada rating</span>
+                            )}
+                            <span className={`pdp-availability ${currentStock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                                {currentStock > 0 ? 'In Stock' : 'Sold Out'}
+                            </span>
+                        </div>
+
+                        <div className="pdp-price-display pdp-hero-price">
+                            <strong className="product-detail-price">{formatPrice(currentVariant?.price ?? product.price)}</strong>
+                            {currentVariant && <span className="pdp-per-unit">/ {formatWeight(currentVariant.weight_grams)}</span>}
+                        </div>
+
+                        <p className="pdp-tagline">{premiumSummary(product)}</p>
+                    </div>
+
+                    <div className="pdp-section-block">
+                        <div className="pdp-quick-attrs">
+                            {highlights.map(([label, value]) => (
+                                <div className="pdp-attr" key={label}>
+                                    <span className="pdp-attr-label">{label}</span>
+                                    <span className="pdp-attr-value">{value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="pdp-purchase-card">
+                <div className="pdp-purchase-card-inner">
+                    {/* ── S2: Variants ── */}
+                    <div className="pdp-purchase-section-block pdp-variant-section">
+                        {variants.length > 0 ? (
+                            <div className="pdp-variant-selectors">
+                                <VariantGroup label="Berat">
+                                    {weightOptions.map((weight) => (
+                                        <button
+                                            type="button"
+                                            className={`pill-button ${selectedWeight === String(weight) ? 'selected' : ''}`}
+                                            key={weight}
+                                            onClick={() => {
+                                                const nextVariant = preferredVariant(variants.filter((variant) => variant.weight_grams === weight));
+                                                setSelectedWeight(String(weight));
+                                                setSelectedGrind(nextVariant?.grind_size || '');
+                                                setQuantity(1);
+                                            }}
+                                        >
+                                            {formatWeight(weight)}
+                                        </button>
+                                    ))}
+                                </VariantGroup>
+                                <VariantGroup label="Gilingan">
+                                    {grindOptions.map((variant) => (
+                                        <button
+                                            type="button"
+                                            className={`pill-button ${selectedGrind === variant.grind_size ? 'selected' : ''}`}
+                                            key={variant.id}
+                                            disabled={variant.stock <= 0}
+                                            onClick={() => {
+                                                setSelectedGrind(variant.grind_size);
+                                                setQuantity(1);
+                                            }}
+                                        >
+                                            {variant.grind_size}
+                                        </button>
+                                    ))}
+                                </VariantGroup>
+                            </div>
+                        ) : (
+                            <p className="muted">Varian produk belum tersedia.</p>
+                        )}
+                    </div>
+
+                    {/* ── S3: Quantity + Actions ── */}
+                    <div className="pdp-purchase-section-block pdp-purchase-actions-section">
                         <div className="pdp-quantity-row">
-                            <span>Jumlah</span>
+                            <span className="pdp-qty-label">Jumlah</span>
                             <div className="pdp-quantity-control">
                                 <button type="button" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button>
                                 <strong>{quantity}</strong>
                                 <button type="button" disabled={!canPurchase || quantity >= currentStock} onClick={() => setQuantity((value) => Math.min(currentStock, value + 1))}>+</button>
                             </div>
                         </div>
-                        <div className="pdp-price-display">
-                            <strong className="product-detail-price">{formatPrice(currentVariant?.price ?? product.price)}</strong>
-                            {currentVariant && <span className="pdp-per-unit">/ {formatWeight(currentVariant.weight_grams)}</span>}
+
+                        <div className="pdp-action-buttons">
+                            <button className="btn ghost pdp-add-to-cart" type="button" disabled={!canPurchase} onClick={() => addToCart()}>
+                                Add ke Cart
+                            </button>
+                            <button className="btn primary pdp-buy-now" type="button" disabled={!canPurchase} onClick={() => addToCart({ checkout: true })}>
+                                Beli Sekarang
+                            </button>
                         </div>
+                        {roleName(user) === 'customer' && (
+                            <button className="pdp-affiliate-link" type="button" onClick={copyAffiliateLink}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                Salin link affiliate
+                            </button>
+                        )}
+                        <p className="pdp-purchase-hint">Pastikan berat dan tipe gilingan sudah sesuai sebelum checkout.</p>
                     </div>
-                    <div className="pdp-subtotal">
-                        <span>Subtotal</span>
-                        <strong>{formatPrice(Number(currentVariant?.price ?? product.price ?? 0) * quantity)}</strong>
-                    </div>
-                </div>
-
-                {/* ── S4: Badges + Actions ── */}
-                <div className="pdp-section-block">
-                    <div className="pdp-quick-attrs">
-                        {highlights.map(([label, value]) => (
-                            <div className="pdp-attr" key={label}>
-                                <span className="pdp-attr-label">{label}</span>
-                                <span className="pdp-attr-value">{value}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="pdp-action-buttons">
-                        <button className="btn primary wide" type="button" disabled={!canPurchase} onClick={() => addToCart()}>
-                            Tambah ke Cart
-                        </button>
-                        <button className="btn ghost wide" type="button" disabled={!canPurchase} onClick={() => addToCart({ checkout: true })}>
-                            Beli Sekarang
-                        </button>
-                    </div>
-                    {roleName(user) === 'customer' && (
-                        <button className="pdp-affiliate-link" type="button" onClick={copyAffiliateLink}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                            Salin link affiliate
-                        </button>
-                    )}
-                    <p className="pdp-purchase-hint">Pastikan berat dan tipe gilingan sudah sesuai sebelum checkout.</p>
                 </div>
             </section>
 
-            {/* ── Flavor Profile Bar ── */}
+            {/* ── Flavor Profilee Bar ── */}
             {flavorNotes.length > 0 && (
                 <section className="pdp-flavor-bar">
                     <div className="pdp-flavor-bar-inner">
-                        <h3>Flavor Profile</h3>
+                        <h3>Flavor Profilee</h3>
                         <div className="pdp-flavor-tags">
                             {flavorNotes.map((note) => (
                                 <span className="pdp-flavor-tag" key={note}>{note}</span>
@@ -337,7 +339,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                     {activeTab === 'specs' && (
                         <div className="pdp-specifications fade-in">
                             <SpecSection title="Coffee Information" rows={coffeeInfo} />
-                            <SpecSection title="Roast Profile" rows={roastProfile} />
+                            <SpecSection title="Roast Profilee" rows={roastProfilee} />
                             <SpecSection title="Package Information" rows={packageInfo} />
                         </div>
                     )}
@@ -363,7 +365,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                 </div>
             </section>
 
-            {/* ── Roaster / Seller Profile ── */}
+            {/* ── Roaster / Seller Profilee ── */}
             <section className="pdp-roaster">
                 <div className="pdp-roaster-inner">
                     <div className="pdp-roaster-identity">
@@ -386,7 +388,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
                 <div className="pdp-reviews-header">
                     <div>
                         <p className="pdp-section-label">Customer Reviews</p>
-                        <h2>Ulasan Produk</h2>
+                        <h2>Ulasan Products</h2>
                     </div>
                     <div className="pdp-reviews-summary">
                         {reviewsCount > 0 ? (
@@ -670,7 +672,7 @@ function coffeeInformation(product) {
     ];
 }
 
-function roastProfileDetails(product) {
+function roastProfileeDetailss(product) {
     const roast = optionLabel(ROAST_LEVEL_OPTIONS, product.roast_level) || 'Balanced';
 
     return [

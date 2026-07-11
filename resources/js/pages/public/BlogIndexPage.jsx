@@ -74,7 +74,7 @@ export default function BlogIndexPage({ categorySlug = '', navigate, setNotice }
                             <EmptyState
                                 eyebrow="Artikel"
                                 title="Belum ada artikel published untuk kategori ini."
-                                message="Kategori ini belum punya konten aktif. Lihat semua artikel untuk rekomendasi kopi lainnya."
+                                message="Categories ini belum punya konten aktif. Lihat semua artikel untuk rekomendasi kopi lainnya."
                                 actionLabel="Lihat semua artikel"
                                 onAction={() => openCategory({ slug: '' })}
                             />
@@ -92,7 +92,7 @@ export default function BlogIndexPage({ categorySlug = '', navigate, setNotice }
                                         <small>{category.articles_count} artikel</small>
                                     </button>
                                 ))}
-                                {categories.length === 0 && <p className="muted">Kategori artikel belum tersedia.</p>}
+                                {categories.length === 0 && <p className="muted">Categories artikel belum tersedia.</p>}
                             </div>
                         </div>
                     </aside>

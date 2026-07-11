@@ -98,10 +98,10 @@ export default function SellerReviews({ token, navigate, setNotice }) {
                         </label>
                         <div className="row">
                             <button className="btn primary" onClick={() => submitReply(review)} disabled={savingId === review.id}>
-                                {savingId === review.id ? 'Menyimpan...' : 'Simpan Balasan'}
+                                {savingId === review.id ? 'Menyimpan...' : 'Save Balasan'}
                             </button>
                             <button className="btn ghost" onClick={() => navigate('product', review.product?.slug || review.product?.id)}>
-                                Lihat Produk
+                                Lihat Products
                             </button>
                         </div>
                     </article>

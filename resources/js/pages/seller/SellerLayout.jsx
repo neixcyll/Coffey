@@ -12,8 +12,8 @@ export default function SellerLayout({
     children,
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const sellerProfile = user?.seller_profile || user?.sellerProfile || {};
-    const storeName = sellerProfile.store_name || user?.name || 'Seller Kopi';
+    const SellerProfile = user?.seller_profile || user?.SellerProfile || {};
+    const storeName = SellerProfile.store_name || user?.name || 'Seller Kopi';
 
     return (
         <section className="seller-layout">

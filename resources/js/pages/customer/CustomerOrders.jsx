@@ -32,7 +32,7 @@ export default function CustomerOrders({ token, navigate, setNotice, selectedOrd
             <div className="customer-section-head">
                 <div>
                     <p className="eyebrow">Order Saya</p>
-                    <h2>Pesanan kopi kamu</h2>
+                    <h2>Orders kopi kamu</h2>
                     <p className="muted">Cek status order, pembayaran, produk, dan review dari satu tempat.</p>
                 </div>
                 <button className="btn primary" type="button" onClick={() => navigate('blog')}>Belanja lagi</button>
@@ -54,7 +54,7 @@ export default function CustomerOrders({ token, navigate, setNotice, selectedOrd
                         <span>K</span>
                         <div>
                             <h3>Belum ada order</h3>
-                            <p className="muted">Produk kopi yang kamu checkout akan tampil di halaman ini.</p>
+                            <p className="muted">Products kopi yang kamu checkout akan tampil di halaman ini.</p>
                         </div>
                         <button className="btn primary" type="button" onClick={() => navigate('blog')}>Mulai belanja</button>
                     </div>
@@ -85,7 +85,7 @@ function CustomerOrderCard({ order, expanded, navigate, onToggle }) {
 
             <div className="customer-order-card-body">
                 <div>
-                    <small>Produk dibeli</small>
+                    <small>Products dibeli</small>
                     <strong>{primaryProduct(order)}</strong>
                     <span>{(order.items || []).length} produk dalam order</span>
                 </div>
@@ -107,16 +107,49 @@ function CustomerOrderCard({ order, expanded, navigate, onToggle }) {
 
                         return (
                             <div className="customer-order-product" key={item.id}>
-                                <div>
-                                    <strong>{item.product_name}{item.variant_label ? ` (${item.variant_label})` : ''}</strong>
-                                    <small>{item.quantity} item - Status: {item.status}</small>
+                                <div className="customer-order-product-main">
+                                    <div className="customer-order-product-image">
+                                        <img 
+                                            src={item.product?.image_url || '/images/placeholder.png'} 
+                                            alt={item.product_name}
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <div className="customer-order-product-info">
+                                        <div className="customer-order-product-title-row">
+                                            <div className="customer-order-product-name-col">
+                                                <strong>{item.product_name}{item.variant_label ? ` (${item.variant_label})` : ''}</strong>
+                                                <p className="customer-order-product-desc muted">{item.product?.short_description || item.product?.description || 'Tidak ada deskripsi'}</p>
+                                            </div>
+                                            <div className="customer-order-product-actions">
+                                                {canReview && (
+                                                    <button className="btn ghost compact-btn" type="button" onClick={() => navigate('product', item.product?.slug || item.product_id)}>
+                                                        Tulis Review
+                                                    </button>
+                                                )}
+                                                {!canReview && reviewedProductIds.has(Number(item.product_id)) && <span className="badge">Sudah direview</span>}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                {canReview && (
-                                    <button className="btn ghost compact-btn" type="button" onClick={() => navigate('product', item.product?.slug || item.product_id)}>
-                                        Tulis Review
-                                    </button>
-                                )}
-                                {!canReview && reviewedProductIds.has(Number(item.product_id)) && <span className="badge">Sudah direview</span>}
+                                <div className="customer-order-product-purchase-info">
+                                    <div className="purchase-info-item">
+                                        <small>Weight</small>
+                                        <span>{item.weight_grams ? `${item.weight_grams}g` : '-'}</span>
+                                    </div>
+                                    <div className="purchase-info-item">
+                                        <small>Grind Level</small>
+                                        <span>{item.grind_size || '-'}</span>
+                                    </div>
+                                    <div className="purchase-info-item">
+                                        <small>Quantity</small>
+                                        <span>{item.quantity}</span>
+                                    </div>
+                                    <div className="purchase-info-item">
+                                        <small>Subtotal</small>
+                                        <span>{formatPrice(item.subtotal)}</span>
+                                    </div>
+                                </div>
                             </div>
                         );
                     })}

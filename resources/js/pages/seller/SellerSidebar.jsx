@@ -1,6 +1,6 @@
 const sellerNavItems = [
     { view: 'seller-dashboard', label: 'Dashboard', icon: DashboardIcon },
-    { view: 'seller-profile', label: 'Store Profile', icon: StoreIcon },
+    { view: 'seller-profile', label: 'Store Profilee', icon: StoreIcon },
     { view: 'seller-products', label: 'Products', icon: BoxIcon },
     { view: 'seller-orders', label: 'Orders', icon: ReceiptIcon },
     { view: 'seller-reviews', label: 'Reviews', icon: StarIcon },

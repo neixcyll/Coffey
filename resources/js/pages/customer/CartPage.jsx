@@ -65,7 +65,7 @@ export default function CartPage({ token, navigate, setNotice, refreshCartCount 
             <header className="cart-hero">
                 <div>
                     <p className="eyebrow">Cart</p>
-                    <h1>Keranjang belanja</h1>
+                    <h1>Cart belanja</h1>
                     <p>Review pilihan beans dan brewing gear kamu sebelum checkout.</p>
                 </div>
                 <div className="cart-total-card">
@@ -83,7 +83,7 @@ export default function CartPage({ token, navigate, setNotice, refreshCartCount 
                         <div className="cart-list-head">
                             <div>
                                 <p className="eyebrow">Items</p>
-                                <h2>Produk siap checkout</h2>
+                                <h2>Products siap checkout</h2>
                             </div>
                             <span>{totalItems} item</span>
                         </div>
@@ -185,7 +185,7 @@ function CartLineItem({ item, busy, onQuantityChange, onRemove, navigate }) {
             </div>
 
             <button className="cart-remove-button" type="button" disabled={busy} onClick={() => onRemove(item)}>
-                Hapus
+                Delete
             </button>
         </article>
     );

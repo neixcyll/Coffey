@@ -1,9 +1,10 @@
+import '../../../css/customer-dashboard.css';
 import UserNotificationMenu from '../../components/common/UserNotificationMenu.jsx';
 
 const customerNavItems = [
     { view: 'orders', label: 'Order Saya', description: 'Pantau pesanan', icon: ReceiptIcon },
     { view: 'affiliate-dashboard', label: 'Affiliate Panel', description: 'Kelola komisi', icon: NetworkIcon },
-    { view: 'account-settings', label: 'Pengaturan Akun', description: 'Perbarui profil', icon: AccountIcon },
+    { view: 'account-settings', label: 'Settings Akun', description: 'Perbarui profil', icon: AccountIcon },
 ];
 
 export default function CustomerHub({

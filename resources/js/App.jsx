@@ -172,7 +172,7 @@ export default function App() {
         }
 
         if (user && roleName(user) !== 'seller') {
-            setNotice('Halaman seller hanya untuk akun seller.');
+            setNotice('Seller page is only for seller accounts.');
             navigate(defaultLandingFor(user));
         }
     }, [isSellerRoute, token, user?.role?.name]);
@@ -187,7 +187,7 @@ export default function App() {
         }
 
         if (user && roleName(user) !== 'admin') {
-            setNotice('Halaman admin hanya untuk akun admin.');
+            setNotice('Admin page is only for admin accounts.');
             navigate(defaultLandingFor(user));
         }
     }, [isAdminRoute, token, user?.role?.name]);
@@ -202,7 +202,7 @@ export default function App() {
         }
 
         if (user && roleName(user) !== 'customer') {
-            setNotice('Halaman customer hanya untuk akun customer.');
+            setNotice('Customer page is only for customer accounts.');
             navigate(defaultLandingFor(user));
         }
     }, [isCustomerRoute, token, user?.role?.name]);
@@ -327,12 +327,12 @@ export default function App() {
 
     function renderSellerPage() {
         if (!token) return <NeedLogin navigate={navigate} />;
-        if (!user) return <p className="muted">Memuat akses seller...</p>;
+        if (!user) return <p className="muted">Loading seller access...</p>;
         if (roleName(user) !== 'seller') {
             return (
                 <div className="panel empty-state">
-                    <h1>Akses ditolak</h1>
-                    <p className="muted">Halaman seller hanya bisa dibuka oleh akun seller.</p>
+                    <h1>Access denied</h1>
+                    <p className="muted">Seller page can only be accessed by seller accounts.</p>
                 </div>
             );
         }
@@ -349,12 +349,12 @@ export default function App() {
 
     function renderAdminPage() {
         if (!token) return <NeedLogin navigate={navigate} />;
-        if (!user) return <p className="muted">Memuat akses admin...</p>;
+        if (!user) return <p className="muted">Loading admin access...</p>;
         if (roleName(user) !== 'admin') {
             return (
                 <div className="panel empty-state">
-                    <h1>Akses ditolak</h1>
-                    <p className="muted">Halaman admin hanya bisa dibuka oleh akun admin.</p>
+                    <h1>Access denied</h1>
+                    <p className="muted">Admin page can only be accessed by admin accounts.</p>
                 </div>
             );
         }
@@ -376,12 +376,12 @@ export default function App() {
 
     function renderCustomerPage() {
         if (!token) return <NeedLogin navigate={navigate} />;
-        if (!user) return <p className="muted">Memuat akses customer...</p>;
+        if (!user) return <p className="muted">Loading customer access...</p>;
         if (roleName(user) !== 'customer') {
             return (
                 <div className="panel empty-state">
-                    <h1>Akses ditolak</h1>
-                    <p className="muted">Dashboard customer hanya bisa dibuka oleh akun customer.</p>
+                    <h1>Access denied</h1>
+                    <p className="muted">Customer dashboard can only be accessed by customer accounts.</p>
                 </div>
             );
         }

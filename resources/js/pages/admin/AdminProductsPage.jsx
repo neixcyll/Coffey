@@ -48,7 +48,7 @@ export default function AdminProductsPage({ token, navigate, setNotice, user, lo
             </div>
             <div className="table-wrap">
                 <table>
-                    <thead><tr><th>Produk</th><th>Seller</th><th>Kategori</th><th>Harga</th><th>Stock</th><th>Variant</th></tr></thead>
+                    <thead><tr><th>Products</th><th>Seller</th><th>Categories</th><th>Harga</th><th>Stock</th><th>Variant</th></tr></thead>
                     <tbody>
                         {products.map((product) => (
                             <tr key={product.id}>
