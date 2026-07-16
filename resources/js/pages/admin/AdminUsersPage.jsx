@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import DetailPanel from '../../components/common/DetailPanel.jsx';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
-import PageTitle from '../../components/common/PageTitle.jsx';
+import PageHeader from '../../components/common/PageHeader.jsx';
 import { USER_ROLES, USER_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
@@ -10,6 +10,7 @@ import AdminLayout from './AdminLayout.jsx';
 export default function AdminUsersPage({ token, navigate, setNotice, user, logout, notice }) {
     const [users, setUsers] = useState([]);
     const [filters, setFilters] = useState({ role: '', status: '' });
+    const [search, setSearch] = useState('');
     const [detail, setDetails] = useState(null);
 
     useEffect(() => {
@@ -46,49 +47,133 @@ export default function AdminUsersPage({ token, navigate, setNotice, user, logou
 
     if (!token) return <NeedLogin navigate={navigate} />;
 
+    const filteredUsers = users.filter(u => 
+        u.name?.toLowerCase().includes(search.toLowerCase()) || 
+        u.email?.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <AdminLayout current="admin-users" navigate={navigate} user={user} logout={logout} notice={notice}>
-            <PageTitle eyebrow="Admin" title="User management" />
-            <div className="filters compact">
-                <select value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })}>
-                    <option value="">Semua role</option>
-                    {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
-                </select>
-                <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
-                    <option value="">Semua status</option>
-                    {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                </select>
+            <PageHeader 
+                title="User Management" 
+                description="Kelola hak akses, status, dan data detail seluruh pengguna platform."
+            />
+
+            {/* Filters & Search */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div className="relative flex-1 max-w-md">
+                    <input
+                    type="text"
+                    placeholder="    Cari user berdasarkan nama atau email..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <select 
+                        value={filters.role} 
+                        onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
+                    >
+                        <option value="">Semua Role</option>
+                        {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                    </select>
+                    <select 
+                        value={filters.status} 
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
+                    >
+                        <option value="">Semua Status</option>
+                        {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+                    </select>
+                </div>
             </div>
-            <div className="table-wrap">
-                <table>
-                    <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
-                    <tbody>
-                        {users.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>
-                                    <select value={user.role?.name || ''} onChange={(event) => updateUser(user, { role: event.target.value })}>
-                                        {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
-                                    </select>
-                                </td>
-                                <td>
-                                    <select value={user.status || 'active'} onChange={(event) => updateUser(user, { status: event.target.value })}>
-                                        {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                                    </select>
-                                </td>
-                                <td><button className="btn ghost" onClick={() => showUser(user)}>Details</button></td>
+
+            {/* Table */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200 text-[10px] uppercase tracking-wider text-gray-500 font-bold">
+                                <th className="px-6 py-4">User</th>
+                                <th className="px-6 py-4">Role</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Aksi</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {filteredUsers.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
+                                        Tidak menemukan data user.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredUsers.map((user) => (
+                                    <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-black">
+                                                    {user.name?.[0]?.toUpperCase() || 'U'}
+                                                </div>
+                                                <div>
+                                                    <span className="block font-semibold text-black text-sm">{user.name}</span>
+                                                    <span className="block text-xs text-gray-500">{user.email}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <select 
+                                                value={user.role?.name || ''} 
+                                                onChange={(e) => updateUser(user, { role: e.target.value })}
+                                                className="border border-gray-200 rounded-md py-1 px-2 text-xs bg-white focus:outline-none focus:border-black"
+                                            >
+                                                {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                                            </select>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <select 
+                                                value={user.status || 'active'} 
+                                                onChange={(e) => updateUser(user, { status: e.target.value })}
+                                                className="border border-gray-200 rounded-md py-1 px-2 text-xs bg-white focus:outline-none focus:border-black"
+                                            >
+                                                {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+                                            </select>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button 
+                                                onClick={() => showUser(user)}
+                                                className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                                            >
+                                                Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            {detail && <DetailPanel title={detail.name} rows={[
-                ['Email', detail.email],
-                ['Role', detail.role?.name],
-                ['Status', detail.status],
-                ['Seller', detail.seller_profile?.store_name || '-'],
-            ]} />}
+
+            {detail && (
+                <DetailPanel 
+                    title={detail.name} 
+                    onClose={() => setDetails(null)}
+                    rows={[
+                        ['Email', detail.email],
+                        ['Role', detail.role?.name],
+                        ['Status', detail.status],
+                        ['Store', detail.seller_profile?.store_name || '-'],
+                    ]} 
+                />
+            )}
         </AdminLayout>
     );
 }

@@ -49,7 +49,7 @@ class SellerController extends Controller
     public function updateStatus(Request $request, SellerProfile $seller): JsonResponse
     {
         $data = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'active', 'rejected', 'suspended'])],
+            'status' => ['required', Rule::in(SellerProfile::STATUSES)],
         ]);
 
         $seller->update(['status' => $data['status']]);

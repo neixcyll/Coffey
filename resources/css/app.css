@@ -7744,6 +7744,42 @@ input:focus, select:focus, textarea:focus {
     color: var(--color-text);
 }
 
+/* Creative & Relaxed Dropdowns for Admin Console */
+.admin-content select, .seller-content select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 0.75rem;
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem !important;
+    border: 2px solid #000 !important;
+    border-radius: 9999px !important; /* Fully rounded/pill */
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    background-color: #f3f4f6 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 2px 2px 0px 0px #000;
+}
+
+.admin-content select:hover, .seller-content select:hover {
+    background-color: #e5e7eb !important;
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0px 0px #000;
+}
+
+.admin-content select:focus, .seller-content select:focus {
+    outline: none !important;
+    background-color: #fff !important;
+    transform: translateY(0);
+    box-shadow: 1px 1px 0px 0px #000 !important;
+}
+
 .seller-content input, .seller-content select, .seller-content textarea, .admin-content input, .admin-content select, .admin-content textarea {
     border-color: var(--color-border);
     color: var(--color-text);

@@ -4,30 +4,42 @@ export default function AdminTopbar({ current, user, logout, onMenuClick }) {
     const title = adminTitle(current);
 
     return (
-        <header className="admin-topbar">
-            <button className="admin-menu-button" type="button" onClick={onMenuClick} aria-label="Buka menu admin">
-                <MenuIcon />
-            </button>
-
-            <div className="admin-topbar-title">
-                <strong>{title}</strong>
-                <small>Marketplace Kopi internal control</small>
+        <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6 z-30">
+            <div className="flex items-center gap-4">
+                <button className="md:hidden text-gray-500 hover:text-black" type="button" onClick={onMenuClick} aria-label="Buka menu admin">
+                    <MenuIcon />
+                </button>
+                <div className="flex flex-col">
+                    <strong className="text-sm font-semibold text-black tracking-tight">{title}</strong>
+                    <small className="text-[10px] text-gray-500">Marketplace Console</small>
+                </div>
             </div>
 
-            <div className="admin-topbar-actions">
-                <button className="admin-icon-button" type="button" title="Notifikasi admin" aria-label="Notifikasi admin">
+            <div className="flex items-center gap-4">
+                <button className="relative p-1 text-gray-400 hover:text-black transition-colors" type="button" title="Notifikasi admin" aria-label="Notifikasi admin">
                     <BellIcon />
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-black rounded-full ring-2 ring-white" />
                 </button>
 
-                <div className="admin-account-chip">
-                    <span className="admin-account-avatar">{initials(user?.name)}</span>
-                    <span>
-                        <strong>{user?.name || 'Admin'}</strong>
-                        <small>Administrator</small>
-                    </span>
+                <div className="h-8 w-px bg-gray-200" />
+
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold font-mono">
+                        {initials(user?.name)}
+                    </div>
+                    <div className="hidden sm:flex flex-col text-left">
+                        <strong className="text-xs font-bold text-black leading-none">{user?.name || 'Admin'}</strong>
+                        <small className="text-[10px] text-gray-400 mt-0.5">Administrator</small>
+                    </div>
                 </div>
 
-                <button className="btn ghost admin-logout-button" type="button" onClick={() => logout()}>Logout</button>
+                <button 
+                    className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors" 
+                    type="button" 
+                    onClick={() => logout()}
+                >
+                    Logout
+                </button>
             </div>
         </header>
     );

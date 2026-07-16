@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
-import PageTitle from '../../components/common/PageTitle.jsx';
+import PageHeader from '../../components/common/PageHeader.jsx';
 import TextArea from '../../components/common/TextArea.jsx';
 import TextInput from '../../components/common/TextInput.jsx';
 import { ARTICLE_STATUSES } from '../../constants/statuses.js';
@@ -14,6 +14,7 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
     const [status, setStatus] = useState('');
     const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
     const [editingArticle, setEditingArticle] = useState(null);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [form, setForm] = useState({
         article_category_id: '',
         title: '',
@@ -134,6 +135,7 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
         try {
             await apiRequest('/admin/content/categories', { method: 'POST', token, body: categoryForm });
             setCategoryForm({ name: '', description: '' });
+            setShowCategoryModal(false);
             setNotice('Categories konten dibuat.');
             loadContent();
         } catch (error) {
@@ -145,112 +147,223 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
 
     return (
         <AdminLayout current="admin-content" navigate={navigate} user={user} logout={logout} notice={notice}>
-            <PageTitle eyebrow="Admin" title="Content Management" />
-            <div className="filters compact">
-                <select value={status} onChange={(event) => setStatus(event.target.value)}>
-                    <option value="">All Articles</option>
+            <PageHeader 
+                title="Content Management" 
+                description="Kelola publikasi artikel blog, status approval, dan kategori tulisan."
+            >
+                <button onClick={() => setShowCategoryModal(true)} className="text-sm font-semibold px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+                    Manage Categories
+                </button>
+            </PageHeader>
+
+            {/* Modal Categories */}
+            {showCategoryModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowCategoryModal(false)} />
+                    <div className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-2xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-black">Manage Kategori Artikel</h2>
+                            <button onClick={() => setShowCategoryModal(false)} className="text-gray-400 hover:text-black">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <form className="space-y-4" onSubmit={createCategory}>
+                                <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">Tambah Kategori Baru</h3>
+                                <TextInput label="Nama kategori" value={categoryForm.name} onChange={(value) => setCategoryForm({ ...categoryForm, name: value })} />
+                                <TextArea label="Deskripsi" value={categoryForm.description} onChange={(value) => setCategoryForm({ ...categoryForm, description: value })} />
+                                <button className="w-full text-sm font-bold py-2.5 px-4 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors">
+                                    Tambah Kategori
+                                </button>
+                            </form>
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">Kategori Tersedia</h3>
+                                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2">
+                                    {categories.map((category) => (
+                                        <div className="flex justify-between items-center p-3 border border-gray-100 rounded-lg hover:border-gray-300 transition-colors" key={category.id}>
+                                            <span className="font-semibold text-sm text-black">{category.name}</span>
+                                            <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">{category.articles_count || 0} art</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => setStatus('')} 
+                        className={`text-[11px] font-semibold px-3 py-1 rounded-md transition-colors ${status === '' ? 'bg-black text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                        Semua
+                    </button>
+                    <button 
+                        onClick={() => setStatus('pending')} 
+                        className={`text-[11px] font-semibold px-3 py-1 rounded-md transition-colors ${status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : 'border border-gray-200 bg-white text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 hover:border-yellow-200'}`}
+                    >
+                        Pending
+                    </button>
+                </div>
+                <select 
+                    value={status} 
+                    onChange={(event) => setStatus(event.target.value)}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
+                >
+                    <option value="">Filter Status...</option>
                     {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <button className="btn ghost" onClick={() => setStatus('pending')}>Pending Articles</button>
             </div>
 
             {editingArticle && (
-                <form className="panel form-grid" onSubmit={saveArticle}>
-                    <div className="section-head">
-                        <div>
-                            <p className="eyebrow">Edit Article</p>
-                            <h2>{editingArticle.title}</h2>
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-8">
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <h2 className="text-lg font-bold text-black">Edit Artikel: {editingArticle.title}</h2>
+                        <button type="button" className="text-sm font-semibold text-gray-500 hover:text-black" onClick={() => setEditingArticle(null)}>Tutup</button>
+                    </div>
+                    <form className="p-6 space-y-6" onSubmit={saveArticle}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Kategori</label>
+                                    <select 
+                                        value={form.article_category_id} 
+                                        onChange={(event) => update('article_category_id', event.target.value)} 
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
+                                    >
+                                        <option value="">Pilih Kategori...</option>
+                                        {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                                    </select>
+                                </div>
+                                <TextInput label="Judul Artikel" value={form.title} onChange={(value) => update('title', value)} />
+                                <TextArea label="Excerpt (Ringkasan)" value={form.excerpt} onChange={(value) => update('excerpt', value)} />
+                                <TextInput label="Featured image URL" value={form.featured_image} onChange={(value) => update('featured_image', value)} required={false} />
+                            </div>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput label="Meta title" value={form.meta_title} onChange={(value) => update('meta_title', value)} required={false} />
+                                    <TextInput label="Meta description" value={form.meta_description} onChange={(value) => update('meta_description', value)} required={false} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Status</label>
+                                        <select 
+                                            value={form.status} 
+                                            onChange={(event) => update('status', event.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
+                                        >
+                                            {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
+                                        </select>
+                                    </div>
+                                    <TextInput label="Featured rank (0=default)" type="number" value={form.featured_rank} onChange={(value) => update('featured_rank', value)} required={false} />
+                                </div>
+                                <div className="flex items-center gap-3 pt-6">
+                                    <input 
+                                        type="checkbox" 
+                                        id="is_featured"
+                                        className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+                                        checked={form.is_featured} 
+                                        onChange={(event) => update('is_featured', event.target.checked)} 
+                                    />
+                                    <label htmlFor="is_featured" className="text-sm font-semibold text-gray-900 cursor-pointer">Tandai sebagai Featured Content</label>
+                                </div>
+                            </div>
                         </div>
-                        <button type="button" className="btn ghost compact-btn" onClick={() => setEditingArticle(null)}>Tutup</button>
-                    </div>
-                    <label>
-                        <span>Categories</span>
-                        <select value={form.article_category_id} onChange={(event) => update('article_category_id', event.target.value)} required>
-                            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                        </select>
-                    </label>
-                    <TextInput label="Title" value={form.title} onChange={(value) => update('title', value)} />
-                    <TextInput label="Featured image URL" value={form.featured_image} onChange={(value) => update('featured_image', value)} required={false} />
-                    <TextArea label="Excerpt" value={form.excerpt} onChange={(value) => update('excerpt', value)} />
-                    <label>
-                        <span>Content</span>
-                        <textarea rows="10" value={form.content} onChange={(event) => update('content', event.target.value)} required />
-                    </label>
-                    <div className="grid-2">
-                        <TextInput label="Meta title" value={form.meta_title} onChange={(value) => update('meta_title', value)} required={false} />
-                        <TextInput label="Meta description" value={form.meta_description} onChange={(value) => update('meta_description', value)} required={false} />
-                    </div>
-                    <div className="grid-2">
-                        <label>
-                            <span>Status</span>
-                            <select value={form.status} onChange={(event) => update('status', event.target.value)}>
-                                {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                            </select>
-                        </label>
-                        <TextInput label="Featured rank" type="number" value={form.featured_rank} onChange={(value) => update('featured_rank', value)} required={false} />
-                    </div>
-                    <label className="inline-check">
-                        <input type="checkbox" checked={form.is_featured} onChange={(event) => update('is_featured', event.target.checked)} />
-                        <span>Featured content</span>
-                    </label>
-                    <button className="btn primary">Save artikel</button>
-                </form>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Content HTML / Markdown</label>
+                            <textarea 
+                                rows="12" 
+                                value={form.content} 
+                                onChange={(event) => update('content', event.target.value)} 
+                                required 
+                                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-black font-mono leading-relaxed"
+                            />
+                        </div>
+                        <div className="flex justify-end pt-4 border-t border-gray-100">
+                            <button className="text-sm font-bold py-2.5 px-6 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors">
+                                Simpan Perubahan Artikel
+                            </button>
+                        </div>
+                    </form>
+                </div>
             )}
 
-            <div className="table-wrap">
-                <table>
-                    <thead><tr><th>Artikel</th><th>Author</th><th>Status</th><th>Views</th><th>Clicks</th><th>Featured</th><th>Aksi</th></tr></thead>
-                    <tbody>
-                        {articles.map((article) => (
-                            <tr key={article.id}>
-                                <td>
-                                    <strong>{article.title}</strong>
-                                    <p className="muted">{article.category?.name}</p>
-                                </td>
-                                <td>{article.author?.creator_profile?.display_name || article.author?.name}</td>
-                                <td>{article.status}</td>
-                                <td>{article.views_count || 0}</td>
-                                <td>{article.clicks_count || 0}</td>
-                                <td>
-                                    <button className="btn ghost compact-btn" onClick={() => toggleFeatured(article)}>
-                                        {article.is_featured ? 'Featured' : 'Normal'}
-                                    </button>
-                                </td>
-                                <td>
-                                    <div className="actions">
-                                        <button className="btn ghost compact-btn" onClick={() => editArticle(article)}>Edit</button>
-                                        <button className="btn primary compact-btn" onClick={() => approveArticle(article)}>Approve</button>
-                                        <button className="btn danger compact-btn" onClick={() => rejectArticle(article)}>Reject</button>
-                                    </div>
-                                </td>
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                                <th className="px-6 py-4">Artikel</th>
+                                <th className="px-6 py-4">Author</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Stats (V/C)</th>
+                                <th className="px-6 py-4">Featured</th>
+                                <th className="px-6 py-4 text-right">Aksi</th>
                             </tr>
-                        ))}
-                        {articles.length === 0 && <tr><td colSpan="7">Belum ada artikel.</td></tr>}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="admin-split">
-                <form className="panel form-grid" onSubmit={createCategory}>
-                    <div>
-                        <p className="eyebrow">Manage Categories</p>
-                        <h2>Categories artikel</h2>
-                    </div>
-                    <TextInput label="Nama kategori" value={categoryForm.name} onChange={(value) => setCategoryForm({ ...categoryForm, name: value })} />
-                    <TextArea label="Deskripsi" value={categoryForm.description} onChange={(value) => setCategoryForm({ ...categoryForm, description: value })} />
-                    <button className="btn primary">Add kategori</button>
-                </form>
-                <div className="panel">
-                    <p className="eyebrow">Existing</p>
-                    <h2>Content categories</h2>
-                    <div className="category-list">
-                        {categories.map((category) => (
-                            <div className="category-row" key={category.id}>
-                                <span>{category.name}</span>
-                                <small>{category.articles_count || 0} artikel</small>
-                            </div>
-                        ))}
-                    </div>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {articles.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-12 text-center text-sm text-gray-500">
+                                        Belum ada artikel.
+                                    </td>
+                                </tr>
+                            ) : (
+                                articles.map((article) => (
+                                    <tr key={article.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <span className="block font-bold text-black text-sm">{article.title}</span>
+                                            <span className="block text-xs text-gray-500 mt-0.5">{article.category?.name || 'Uncategorized'}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-800 font-medium">
+                                            {article.author?.creator_profile?.display_name || article.author?.name}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium uppercase ${
+                                                article.status === 'published' ? 'bg-green-100 text-green-700 border border-green-200' :
+                                                article.status === 'pending' ? 'bg-yellow-50 text-yellow-800 border border-yellow-200' :
+                                                article.status === 'rejected' ? 'bg-red-50 text-red-800 border border-red-200' :
+                                                'bg-gray-100 text-gray-700 border border-gray-200'
+                                            }`}>
+                                                {article.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                                            {article.views_count || 0} / {article.clicks_count || 0}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button 
+                                                className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition-colors ${
+                                                    article.is_featured ? 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
+                                                }`} 
+                                                onClick={() => toggleFeatured(article)}
+                                            >
+                                                {article.is_featured ? '★ Featured' : 'Normal'}
+                                            </button>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="inline-flex gap-2 items-center">
+                                                <button className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors" onClick={() => editArticle(article)}>Edit</button>
+                                                {article.status === 'pending' && (
+                                                    <>
+                                                        <button className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-md hover:bg-gray-800 transition-colors" onClick={() => approveArticle(article)}>Approve</button>
+                                                        <button className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-600 rounded-md hover:bg-red-50 transition-colors" onClick={() => rejectArticle(article)}>Reject</button>
+                                                    </>
+                                                )}
+                                                {article.status === 'published' && (
+                                                    <button className="text-xs font-semibold px-3 py-1.5 border border-yellow-200 text-yellow-700 rounded-md hover:bg-yellow-50 transition-colors" onClick={() => update('status', 'draft') /* Simplified UI action */}>Draft</button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </AdminLayout>

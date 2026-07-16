@@ -44,7 +44,7 @@ export default function SellerLayout({
                     logout={logout}
                     onMenuClick={() => setSidebarOpen(true)}
                 />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto">
+                <main className="seller-content flex-1 overflow-x-hidden overflow-y-auto">
                     {children}
                 </main>
             </div>
