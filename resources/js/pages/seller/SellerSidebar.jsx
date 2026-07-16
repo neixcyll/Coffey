@@ -1,9 +1,9 @@
 const sellerNavItems = [
     { view: 'seller-dashboard', label: 'Dashboard', icon: DashboardIcon },
-    { view: 'seller-profile', label: 'Store Profilee', icon: StoreIcon },
     { view: 'seller-products', label: 'Products', icon: BoxIcon },
     { view: 'seller-orders', label: 'Orders', icon: ReceiptIcon },
     { view: 'seller-reviews', label: 'Reviews', icon: StarIcon },
+    { view: 'seller-profile', label: 'Store Profile', icon: StoreIcon },
 ];
 
 export default function SellerSidebar({ current, navigate, storeName, open, onClose }) {
@@ -13,42 +13,49 @@ export default function SellerSidebar({ current, navigate, storeName, open, onCl
     }
 
     return (
-        <aside className={`seller-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-4.5 overflow-y-auto p-5 text-[#fdf8f0] bg-[#2b1b13] shadow-[18px_0_48px_rgba(38,28,21,0.18)]`}>
-            <div className="seller-sidebar-brand grid gap-3">
-                <button className="seller-logo inline-flex items-center gap-2.5 border-0 p-0 text-left bg-transparent cursor-pointer" onClick={() => go('seller-dashboard')} aria-label="Dashboard Seller">
-                    <img className="seller-logo-mark w-[38px] h-[38px] object-contain" src="/logo.png" alt="Seller Logo" style={{ background: 'transparent' }} />
-                    <span className="flex flex-col text-left">
-                        <strong className="block text-[#fffdfa] font-extrabold leading-tight">Marketplace Kopi</strong>
-                        <small className="block text-[#a08a75] text-xs">Seller Panel</small>
+        <aside className="h-full flex flex-col bg-white border-r border-gray-200 w-full overflow-y-auto">
+            <div className="p-5 flex flex-col gap-5">
+                <button 
+                    className="flex items-center gap-3 border-0 bg-transparent p-0 text-left cursor-pointer group" 
+                    onClick={() => go('seller-dashboard')} 
+                    aria-label="Dashboard Seller"
+                >
+                    <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-gray-800 transition-colors">
+                        M
+                    </div>
+                    <span className="flex flex-col">
+                        <strong className="text-gray-900 font-extrabold text-base leading-tight tracking-tight">Marketplace</strong>
+                        <small className="text-gray-500 text-xs font-medium tracking-wide uppercase mt-0.5">Seller Center</small>
                     </span>
                 </button>
-                <span className="seller-panel-badge self-start bg-[#5b3825] text-white text-[0.74rem] font-bold px-2 py-0.5 rounded-full">Seller Panel</span>
+
+                <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                    <span className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-200 text-gray-700 font-bold text-xs flex-shrink-0">
+                        {initials(storeName)}
+                    </span>
+                    <span className="flex flex-col text-left overflow-hidden">
+                        <small className="text-gray-400 text-[10px] font-semibold uppercase tracking-wider mb-0.5">Toko Aktif</small>
+                        <strong className="text-gray-900 text-sm font-bold truncate">{storeName || 'Seller'}</strong>
+                    </span>
+                </div>
             </div>
 
-            <div className="seller-store-card flex items-center gap-3 border border-[rgba(255,253,250,0.12)] rounded-xl p-3 bg-[rgba(255,253,250,0.04)]">
-                <span className="seller-store-avatar w-10 h-10 rounded-lg flex items-center justify-center bg-[#5b3825] text-white font-extrabold text-sm flex-shrink-0">{initials(storeName)}</span>
-                <span className="flex flex-col text-xs text-left">
-                    <small className="text-[#a08a75]">Nama toko</small>
-                    <strong className="text-white text-sm font-extrabold truncate max-w-[150px]">{storeName || 'Seller Kopi'}</strong>
-                </span>
-            </div>
-
-            <nav className="seller-nav grid gap-1 mt-2" aria-label="Menu seller">
+            <nav className="flex-1 px-3 pb-5 flex flex-col gap-1" aria-label="Menu seller">
                 {sellerNavItems.map(({ view, label, icon: Icon }) => {
                     const isActive = current === view;
                     return (
                         <button
                             key={view}
                             type="button"
-                            className={`flex items-center gap-3 w-full text-left p-2.5 rounded-lg font-bold text-sm bg-transparent border-0 cursor-pointer transition-colors ${
+                            className={`flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
                                 isActive 
-                                    ? 'active bg-[#5b3825] text-[#fff]' 
-                                    : 'text-[#d7c4b4] hover:bg-[rgba(255,253,250,0.06)] hover:text-[#fff]'
+                                    ? 'bg-black text-white shadow-md shadow-black/10' 
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                             }`}
                             aria-current={isActive ? 'page' : undefined}
                             onClick={() => go(view)}
                         >
-                            <span className="w-5 h-5 flex items-center justify-center text-inherit"><Icon /></span>
+                            <span className="w-5 h-5 flex items-center justify-center"><Icon /></span>
                             <span>{label}</span>
                         </button>
                     );
@@ -71,10 +78,10 @@ function initials(value) {
 function DashboardIcon() {
     return (
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="8" rx="1.5" />
+            <rect x="3" y="3" width="7" height="9" rx="1.5" />
             <rect x="14" y="3" width="7" height="5" rx="1.5" />
             <rect x="14" y="12" width="7" height="9" rx="1.5" />
-            <rect x="3" y="15" width="7" height="6" rx="1.5" />
+            <rect x="3" y="16" width="7" height="5" rx="1.5" />
         </svg>
     );
 }

@@ -1,8 +1,8 @@
 export default function Stat({ label, value }) {
     return (
-        <div className="stat p-4 border border-[#e1d4c4] rounded-lg bg-[#fffdf9] shadow-[0_8px_24px_rgba(53,34,20,0.06)]">
-            <span className="block text-[#75695d] font-bold text-sm">{label}</span>
-            <strong className="block mt-2 text-2xl font-extrabold text-[#38291e]">{value}</strong>
+        <div className="p-5 border border-gray-200 rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
+            <span className="block text-gray-500 font-semibold text-xs tracking-wider uppercase mb-1">{label}</span>
+            <strong className="block mt-1 text-2xl font-extrabold text-black">{value}</strong>
         </div>
     );
 }

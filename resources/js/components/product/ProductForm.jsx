@@ -109,20 +109,17 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
         }
 
         setProcessingImage(true);
-
         try {
             const compressedFile = await compressImageFile(selectedFile);
-
             if (compressedFile.size > PRODUCT_IMAGE_LIMIT_BYTES) {
                 setFileError('Gambar masih terlalu besar. Gunakan gambar maksimal 2MB.');
                 setFileInputKey((current) => current + 1);
                 return;
             }
-
             setFile(compressedFile);
-            setFileMessage('Gambar besar dikompresi otomatis sebelum upload.');
+            setFileMessage('Gambar dikompresi otomatis.');
         } catch {
-            setFileError('Gagal memproses gambar. Gunakan gambar maksimal 2MB.');
+            setFileError('Gagal memproses gambar.');
             setFileInputKey((current) => current + 1);
         } finally {
             setProcessingImage(false);
@@ -130,91 +127,112 @@ export default function ProductForm({ categories, brewingMethods = [], product, 
     }
 
     return (
-        <form className="panel form-grid" onSubmit={submit}>
-            <h2>Informasi produk</h2>
-            <select value={form.category_id} onChange={(event) => update('category_id', event.target.value)} required>
-                <option value="">Pilih kategori</option>
-                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-            </select>
-            <TextInput label="Name" value={form.name} onChange={(value) => update('name', value)} />
-            <TextArea label="Deskripsi" value={form.description} onChange={(value) => update('description', value)} required />
-            <div className="grid-2">
-                <label>
-                    <span>Roast level</span>
-                    <select value={form.roast_level} onChange={(event) => update('roast_level', event.target.value)} required>
-                        <option value="">Pilih roast level</option>
-                        {ROAST_LEVEL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        <form className="space-y-6" onSubmit={submit}>
+            {/* Informasi Dasar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="block">
+                    <span className="block text-sm font-semibold text-gray-700 mb-1">Kategori</span>
+                    <select className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black outline-none" value={form.category_id} onChange={(event) => update('category_id', event.target.value)} required>
+                        <option value="">Pilih kategori</option>
+                        {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                     </select>
                 </label>
-                <TextInput label="Origin" value={form.origin} onChange={(value) => update('origin', value)} />
+                <TextInput label="Nama Produk" value={form.name} onChange={(value) => update('name', value)} />
+                <TextArea label="Deskripsi" value={form.description} onChange={(value) => update('description', value)} required />
+                <div className="flex flex-col gap-4">
+                    <TextInput label="Origin" value={form.origin} onChange={(value) => update('origin', value)} />
+                    <label className="block">
+                        <span className="block text-sm font-semibold text-gray-700 mb-1">Roast Level</span>
+                        <select className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black outline-none" value={form.roast_level} onChange={(event) => update('roast_level', event.target.value)} required>
+                            <option value="">Pilih tingkat roasting</option>
+                            {ROAST_LEVEL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                        </select>
+                    </label>
+                </div>
             </div>
 
-            <div className="field-block">
-                <span>Brewing method</span>
-                <div className="option-pills">
+            {/* Brewing Methods */}
+            <div className="border-t border-gray-100 pt-5">
+                <span className="block text-sm font-semibold text-gray-700 mb-2">Brewing Method</span>
+                <div className="flex flex-wrap gap-2">
                     {brewingMethods.map((method) => {
                         const selected = form.brewing_method_ids.includes(String(method.id));
-
                         return (
-                            <label className={`pill-check ${selected ? 'selected' : ''}`} key={method.id}>
-                                <input type="checkbox" checked={selected} onChange={() => toggleBrewing(method.id)} />
-                                <span>{method.name}</span>
-                            </label>
+                            <button
+                                key={method.id}
+                                type="button"
+                                onClick={() => toggleBrewing(method.id)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${selected ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            >
+                                {method.name}
+                            </button>
                         );
                     })}
-                    {brewingMethods.length === 0 && <p className="muted">Brewing method belum tersedia.</p>}
                 </div>
             </div>
 
-            <div className="variant-editor">
-                <div className="section-head compact-head">
-                    <h3>Variant berat dan gilingan</h3>
-                    <button type="button" className="btn ghost compact-btn" onClick={addVariant}>Add variant</button>
+            {/* Varian */}
+            <div className="border-t border-gray-100 pt-5">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-bold text-gray-900">Varian Produk</h3>
+                    <button type="button" className="text-sm font-bold text-black hover:underline" onClick={addVariant}>+ Tambah Varian</button>
                 </div>
-                <div className="variant-list">
+                
+                <div className="space-y-3">
                     {form.variants.map((variant, index) => (
-                        <div className="variant-row" key={variant.client_id}>
-                            <div className="unit-row">
-                                <label>
-                                    <span>Berat</span>
-                                    <input type="number" min="1" value={variant.weight} onChange={(event) => updateVariant(index, 'weight', event.target.value)} required />
-                                </label>
-                                <label>
-                                    <span>Satuan</span>
-                                    <select value={variant.weight_unit} onChange={(event) => updateVariant(index, 'weight_unit', event.target.value)}>
-                                        <option value="gram">Gram</option>
-                                        <option value="kg">Kg</option>
+                        <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-6 pb-3 px-3 bg-gray-50 rounded-lg items-end" key={variant.client_id}>
+                            {form.variants.length > 1 && (
+                                <button 
+                                    type="button" 
+                                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors" 
+                                    onClick={() => removeVariant(index)}
+                                    title="Hapus Varian"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                            <label className="block">
+                                <span className="text-[11px] font-semibold text-gray-500 mb-1 block uppercase">Berat</span>
+                                <div className="flex gap-2">
+                                    <input className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-sm bg-white" type="number" min="1" value={variant.weight} onChange={(event) => updateVariant(index, 'weight', event.target.value)} required />
+                                    <select className="px-2 py-1.5 rounded-md border border-gray-300 text-sm bg-white" value={variant.weight_unit} onChange={(event) => updateVariant(index, 'weight_unit', event.target.value)}>
+                                        <option value="gram">g</option>
+                                        <option value="kg">kg</option>
                                     </select>
-                                </label>
-                            </div>
-                            <label>
-                                <span>Gilingan</span>
-                                <input value={variant.grind_size} onChange={(event) => updateVariant(index, 'grind_size', event.target.value)} required />
+                                </div>
                             </label>
-                            <label>
-                                <span>Harga</span>
-                                <input type="number" min="0" value={variant.price} onChange={(event) => updateVariant(index, 'price', event.target.value)} required />
+                            <label className="block">
+                                <span className="text-[11px] font-semibold text-gray-500 mb-1 block uppercase">Tipe Gilingan</span>
+                                <input className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-sm bg-white" value={variant.grind_size} onChange={(event) => updateVariant(index, 'grind_size', event.target.value)} required />
                             </label>
-                            <label>
-                                <span>Stok</span>
-                                <input type="number" min="0" value={variant.stock} onChange={(event) => updateVariant(index, 'stock', event.target.value)} required />
+                            <label className="block">
+                                <span className="text-[11px] font-semibold text-gray-500 mb-1 block uppercase">Harga</span>
+                                <input className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-sm bg-white" type="number" min="0" value={variant.price} onChange={(event) => updateVariant(index, 'price', event.target.value)} required />
                             </label>
-                            <button type="button" className="btn danger compact-btn" disabled={form.variants.length === 1} onClick={() => removeVariant(index)}>
-                                Delete
-                            </button>
+                            <label className="block">
+                                <span className="text-[11px] font-semibold text-gray-500 mb-1 block uppercase">Stok</span>
+                                <input className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-sm bg-white" type="number" min="0" value={variant.stock} onChange={(event) => updateVariant(index, 'stock', event.target.value)} required />
+                            </label>
                         </div>
                     ))}
                 </div>
             </div>
 
-            <input key={fileInputKey} type="file" accept="image/*" onChange={handleFileChange} />
-            {(feedback || fileMessage || fileError) && (
-                <div className={`form-alert ${fileError || feedback ? 'error' : 'success'}`}>
-                    {fileError || feedback || fileMessage}
-                </div>
-            )}
-            <button className="btn primary wide" disabled={processingImage || Boolean(fileError)}>
-                {processingImage ? 'Memproses gambar...' : product ? 'Save perubahan' : 'Add produk'}
+            {/* Gambar */}
+            <div className="border-t border-gray-100 pt-5">
+                <span className="block text-sm font-semibold text-gray-700 mb-2">Foto Produk</span>
+                <input key={fileInputKey} type="file" accept="image/*" className="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-black hover:file:bg-gray-200" onChange={handleFileChange} />
+                {(feedback || fileMessage || fileError) && (
+                    <div className={`mt-3 p-3 rounded-md text-xs font-medium ${fileError || feedback ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                        {fileError || feedback || fileMessage}
+                    </div>
+                )}
+            </div>
+
+            <button className="w-full py-3 bg-black text-white font-bold rounded-lg hover:bg-gray-900 transition-colors shadow-sm" disabled={processingImage || Boolean(fileError)}>
+                {processingImage ? 'Memproses gambar...' : product ? 'Simpan Perubahan' : 'Tambah Produk'}
             </button>
         </form>
     );
