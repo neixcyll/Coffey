@@ -9,7 +9,7 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
     const notificationOrders = sellerNotifications?.orders || [];
 
     return (
-        <header className="topbar sticky top-0 z-10 grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-4 items-center px-7 py-3.5 border-b border-[#e4d7c8] bg-[rgba(255,252,247,0.92)] backdrop-blur-md">
+        <header className="topbar sticky top-0 z-10 grid grid-cols-1 md:grid-cols-[200px_1fr_200px] gap-4 items-center px-7 py-3.5 border-b border-[#e4d7c8] bg-[rgba(255,252,247,0.92)] backdrop-blur-md">
             <button className="brand inline-flex items-center gap-2.5 text-left bg-transparent border-0 cursor-pointer" onClick={() => navigate('products')}>
                 <img className="brand-mark w-[38px] h-[38px] object-contain" src="/logo.png" alt="Marketplace Kopi Logo" style={{ background: 'transparent' }} />
                 <span>

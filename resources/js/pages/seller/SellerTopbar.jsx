@@ -12,7 +12,7 @@ export default function SellerTopbar({ user, storeName, sellerNotifications, nav
     }
 
     return (
-        <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/95 backdrop-blur-md border-b-2 border-black">
             <div className="flex items-center gap-4">
                 <button 
                     className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-black transition-colors" 
@@ -30,6 +30,13 @@ export default function SellerTopbar({ user, storeName, sellerNotifications, nav
             </div>
 
             <div className="flex items-center gap-3">
+                <button
+                    className="md:flex items-center justify-center h-10 px-5 border-2 border-black rounded-full bg-white text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all hidden uppercase"
+                    type="button"
+                    onClick={() => navigate('blog')}
+                >
+                    <span className="text-sm font-bold">Explore</span>
+                </button>
                 <div className="relative">
                     <button
                         className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-black transition-colors relative"

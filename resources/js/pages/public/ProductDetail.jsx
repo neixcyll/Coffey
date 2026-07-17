@@ -168,7 +168,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const flavorNotes = flavorNoteList(product);
 
     return (
-        <div className="pdp-premium">
+        <div className="pdp-premium max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* ── S1: Image + Title + Short Description ── */}
             <section className="pdp-hero pdp-hero--two-col">
                 <div className="pdp-hero-image-col">

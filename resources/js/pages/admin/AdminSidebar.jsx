@@ -20,16 +20,6 @@ export default function AdminSidebar({ current, navigate, open, onClose }) {
 
     return (
         <aside className={`admin-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-6 overflow-y-auto p-6 text-white bg-black border-r border-gray-800`}>
-            <div className="flex flex-col gap-2">
-                <button className="flex items-center gap-3 border-0 p-0 text-left bg-transparent cursor-pointer" type="button" onClick={() => go('admin-dashboard')} aria-label="Dashboard Admin">
-                    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-black font-extrabold text-lg">C</div>
-                    <span className="flex flex-col text-left">
-                        <strong className="block text-white font-extrabold leading-tight text-sm tracking-tight">Coffey</strong>
-                        <small className="block text-gray-400 text-xs">Console</small>
-                    </span>
-                </button>
-            </div>
-
             <nav className="flex flex-col gap-1 mt-4" aria-label="Menu admin">
                 {adminNavItems.map(({ view, label, icon: Icon }) => {
                     const isActive = current === view;
@@ -40,7 +30,7 @@ export default function AdminSidebar({ current, navigate, open, onClose }) {
                             className={`flex items-center gap-3 w-full text-left py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 ${
                                 isActive 
                                     ? 'bg-white text-black font-semibold' 
-                                    : 'text-gray-400 hover:bg-gray-900 hover:text-white'
+                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                             }`}
                             aria-current={isActive ? 'page' : undefined}
                             onClick={() => go(view)}

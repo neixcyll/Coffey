@@ -4,13 +4,13 @@ export default function ProductImage({ product, large = false, small = false }) 
     const fallback = fallbackProductImage(product);
     const src = product.image_url || product.image || fallback;
 
-    let baseClass = 'object-cover bg-gray-100 ';
+    let baseClass = 'object-cover bg-[#f4eee6] w-full h-full absolute inset-0 ';
     if (large) {
-        baseClass += 'w-full h-[min(520px,66vh)] rounded-lg';
+        baseClass += 'rounded-t-lg';
     } else if (small) {
-        baseClass += 'w-full h-full rounded-lg';
+        baseClass += 'rounded-t-lg';
     } else {
-        baseClass += 'w-full h-[180px] rounded-lg';
+        baseClass += 'rounded-t-lg';
     }
 
     return (

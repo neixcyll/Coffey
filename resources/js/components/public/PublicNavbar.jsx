@@ -74,9 +74,9 @@ export default function PublicNavbar({
     return (
         <>
             <div className="navbar-spacer" aria-hidden="true" />
-        <header className={`public-navbar ${scrolled ? 'scrolled' : ''} fixed top-0 left-0 z-[100] grid grid-cols-[auto_1fr] gap-5 items-center w-full bg-[rgba(255,255,255,0.92)] backdrop-blur-md`}>
-            <button className="public-brand inline-flex items-center gap-2.5 bg-transparent border-0 cursor-pointer text-left" type="button" onClick={() => go('products')}>
-                <img className="brand-mark w-14 h-14 object-contain" src="/logo.png" alt="CoffeS Logo" style={{ background: 'transparent' }} />
+        <header className={`public-navbar ${scrolled ? 'scrolled' : ''} fixed top-0 left-0 z-[100] grid grid-cols-1 md:grid-cols-[200px_1fr_200px] gap-4 items-center w-full bg-[rgba(255,255,255,0.92)] backdrop-blur-md px-6 py-2`}>
+            <button className="public-brand inline-flex items-center gap-2.5 bg-transparent border-0 cursor-pointer text-left md:justify-self-start" type="button" onClick={() => go('products')}>
+                <img className="brand-mark w-10 h-10 object-contain" src="/logo.png" alt="CoffeS Logo" style={{ background: 'transparent' }} />
                 <span className="public-brand-copy">
                     <strong className="font-extrabold text-lg text-[#38291e]">CoffeS</strong>
                 </span>
@@ -99,26 +99,23 @@ export default function PublicNavbar({
                 </button>
             </div>
 
-            <div className={`public-nav-panel ${mobileOpen ? 'open' : ''} md:flex flex-col md:flex-row md:items-center gap-4 justify-end w-full`}>
-                <nav className="public-nav flex flex-col md:flex-row md:items-center gap-1.5" aria-label="Navigasi utama">
-                    {navItems.map((item) => (
-                        <button
-                            key={item.key}
-                            className={`public-nav-item inline-flex items-center gap-2 px-3.5 py-2 border rounded-lg font-bold transition-all text-sm ${
-                                item.active 
-                                    ? 'border-[#d7c4b4] bg-[#fffaf2] text-[#38291e]' 
-                                    : 'border-transparent text-gray-500 hover:border-[#d7c4b4] hover:bg-[#fffaf2] hover:text-[#38291e]'
-                            }`}
-                            type="button"
-                            onClick={() => item.onClick ? item.onClick() : go(item.view)}
-                        >
-                            {item.icon}
-                            <span>{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
-
-                <form className="public-nav-search flex items-center gap-2 px-3 py-1.5 border border-[#d8cbbc] rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-[#5b3825] focus-within:border-transparent transition-all w-full md:max-w-[280px]" role="search" onSubmit={submitSearch}>
+            <nav className={`public-nav ${mobileOpen ? 'flex' : 'hidden md:flex'} flex-col md:flex-row md:items-center gap-2 md:justify-self-center w-full md:w-auto absolute md:static top-[60px] left-0 bg-white md:bg-transparent p-4 md:p-0 border-b md:border-b-0 border-[#eadfd4]`} aria-label="Navigasi utama">
+                {navItems.map((item) => (
+                    <button
+                        key={item.key}
+                        className={`public-nav-item inline-flex items-center gap-2 px-3 py-1.5 border rounded-lg font-bold transition-all text-sm ${
+                            item.active 
+                                ? 'border-[#d7c4b4] bg-[#fffaf2] text-[#38291e]' 
+                                : 'border-transparent text-gray-500 hover:border-[#d7c4b4] hover:bg-[#fffaf2] hover:text-[#38291e]'
+                        }`}
+                        type="button"
+                        onClick={() => item.onClick ? item.onClick() : go(item.view)}
+                    >
+                        {item.icon}
+                        <span>{item.label}</span>
+                    </button>
+                ))}
+                <form className="public-nav-search flex items-center gap-2 px-3 py-1.5 border border-[#d8cbbc] rounded-lg bg-white focus-within:ring-2 focus-within:ring-[#5b3825] focus-within:border-transparent transition-all w-full md:w-[220px] ml-0 md:ml-1" role="search" onSubmit={submitSearch}>
                     <SearchIcon />
                     <input
                         aria-label="Search coffee products"
@@ -128,60 +125,44 @@ export default function PublicNavbar({
                         className="bg-transparent border-0 p-0 text-sm focus:outline-none focus:ring-0 text-[#261c15] w-full"
                     />
                 </form>
+            </nav>
 
-                <div className="public-account flex items-center gap-2">
-                    {isCustomer && (
-                        <UserNotificationMenu
-                            notifications={userNotifications}
-                            unreadCount={unreadNotifications}
-                            navigate={navigate}
-                            onMarkRead={markNotificationRead}
-                            onMarkAllRead={markAllNotificationsRead}
-                            buttonClassName="cart-header-button public-notification-button public-desktop-notification-button flex items-center justify-center w-[50px] h-[50px] border border-[#eadfd4] rounded-lg p-0 bg-white"
-                        />
-                    )}
-                    {canUseCart && <CartButton className="public-desktop-cart-button flex items-center justify-center w-[50px] h-[50px] border border-[#eadfd4] rounded-lg p-0 bg-white" cartCount={cartCount} onClick={openCart} />}
-
-                    {user ? (
-                        <div className="public-account-menu relative">
+            <div className="flex items-center gap-4 hidden md:flex md:justify-self-end">
+                    <div className="flex items-center justify-end gap-2 flex-row">
+                        {isCustomer && (
+                            <UserNotificationMenu
+                                notifications={userNotifications}
+                                unreadCount={unreadNotifications}
+                                navigate={navigate}
+                                onMarkRead={markNotificationRead}
+                                onMarkAllRead={markAllNotificationsRead}
+                                buttonClassName="cart-header-button public-notification-button public-desktop-notification-button flex items-center justify-center w-10 h-10 border border-[#eadfd4] rounded-lg p-0 bg-white"
+                            />
+                        )}
+                        {canUseCart && <CartButton className="public-desktop-cart-button flex items-center justify-center w-10 h-10 border border-[#eadfd4] rounded-lg p-0 bg-white" cartCount={cartCount} onClick={openCart} />}
+    
+                        {user ? (
                             <button
-                                className="public-account-button flex items-center gap-2 border border-[#eadfd4] rounded-lg px-2 py-1 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                                className="flex items-center justify-center w-10 h-10 border border-[#eadfd4] rounded-lg bg-white hover:bg-gray-50 text-gray-700 transition-colors cursor-pointer"
                                 type="button"
-                                aria-expanded={accountOpen}
-                                aria-label="Buka menu akun"
-                                onClick={() => setAccountOpen((current) => !current)}
+                                title="Dashboard"
+                                aria-label="Dashboard"
+                                onClick={() => go(getDashboardView(role))}
                             >
-                                <span className="public-account-avatar w-8 h-8 rounded-md flex items-center justify-center bg-gray-900 text-white font-extrabold text-sm">{initials(user.name)}</span>
-                                <span className="public-account-copy flex flex-col text-left text-xs">
-                                    <strong className="text-gray-900 font-bold leading-tight">{user.name}</strong>
-                                    <small className="text-gray-500">{roleLabel(role)}</small>
-                                </span>
-                                <ChevronDownIcon />
+                                <UserIcon />
                             </button>
-                            {accountOpen && (
-                                <div className="public-account-dropdown absolute top-[calc(100%+10px)] right-0 z-30 grid gap-1 border border-[#eadfd4] rounded-lg p-2 bg-white shadow-[0_18px_48px_rgba(53,34,20,0.16)] min-w-[200px]">
-                                    {accountLinks(role).map((item) => (
-                                        <button key={item.view} type="button" className="w-full text-left p-2 rounded hover:bg-gray-50 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-transparent border-0 cursor-pointer" onClick={() => go(item.view)}>
-                                            {item.label}
-                                        </button>
-                                    ))}
-                                    <button type="button" className="w-full text-left p-2 rounded hover:bg-red-50 text-sm font-semibold text-red-600 hover:text-red-700 bg-transparent border-0 cursor-pointer border-t border-gray-100" onClick={() => { setAccountOpen(false); setMobileOpen(false); logout(); }}>Logout</button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="flex gap-2">
-                            <button className="btn ghost" type="button" onClick={() => go('login')}>Login</button>
-                            <button className="btn primary" type="button" onClick={() => go('register')}>Register</button>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="flex items-center gap-2 flex-row">
+                                <button className="btn ghost whitespace-nowrap" type="button" onClick={() => go('login')}>Login</button>
+                                <button className="btn primary whitespace-nowrap" type="button" onClick={() => go('register')}>Register</button>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
         </header>
         </>
     );
 }
-
 function CartButton({ className = '', cartCount, onClick }) {
     return (
         <button className={`cart-header-button public-cart-button ${className}`} title="Cart" aria-label={`Cart ${cartCount || 0} item`} type="button" onClick={onClick}>
@@ -221,6 +202,13 @@ function roleLabel(role) {
     if (role === 'customer') return 'Customer';
 
     return 'Account';
+}
+
+function getDashboardView(role) {
+    if (role === 'admin') return 'admin-dashboard';
+    if (role === 'seller') return 'seller-dashboard';
+    if (role === 'affiliate') return 'affiliate-dashboard';
+    return 'orders'; // Default for customer
 }
 
 function initials(value) {
@@ -317,6 +305,15 @@ function ChevronDownIcon() {
     return (
         <svg className="public-account-chevron" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="m7 10 5 5 5-5" />
+        </svg>
+    );
+}
+
+function UserIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
         </svg>
     );
 }

@@ -4,7 +4,7 @@ export default function AdminTopbar({ current, user, logout, onMenuClick }) {
     const title = adminTitle(current);
 
     return (
-        <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6 z-30">
+        <header className="h-16 border-b-2 border-black bg-white flex items-center justify-between px-6 z-30">
             <div className="flex items-center gap-4">
                 <button className="md:hidden text-gray-500 hover:text-black" type="button" onClick={onMenuClick} aria-label="Buka menu admin">
                     <MenuIcon />
@@ -16,6 +16,14 @@ export default function AdminTopbar({ current, user, logout, onMenuClick }) {
             </div>
 
             <div className="flex items-center gap-4">
+                <button
+                    className="text-xs font-bold px-4 py-1.5 border-2 border-black rounded-full bg-white text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase"
+                    type="button"
+                    onClick={() => navigate('blog')}
+                >
+                    Explore
+                </button>
+
                 <button className="relative p-1 text-gray-400 hover:text-black transition-colors" type="button" title="Notifikasi admin" aria-label="Notifikasi admin">
                     <BellIcon />
                     <span className="absolute top-0 right-0 w-2 h-2 bg-black rounded-full ring-2 ring-white" />
