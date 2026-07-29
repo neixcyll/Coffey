@@ -18,7 +18,6 @@ export default function AuthPage({ mode, saveSession, navigate, notice, setNotic
         description: '',
     });
     const [loading, setLoading] = useState(false);
-    const [remember, setRemember] = useState(true);
     const isLogin = mode === 'login';
 
     function update(field, value) {
@@ -36,7 +35,7 @@ export default function AuthPage({ mode, saveSession, navigate, notice, setNotic
                 ? { email: form.email, password: form.password }
                 : form;
             const data = await apiRequest(path, { method: 'POST', body: payload });
-            saveSession(data.token, data.user, { persist: remember });
+            saveSession(data.token, data.user, { persist: true });
             setNotice(data.message);
             const redirect = sessionStorage.getItem('post_login_redirect');
             sessionStorage.removeItem('post_login_redirect');
@@ -56,11 +55,9 @@ export default function AuthPage({ mode, saveSession, navigate, notice, setNotic
             mode={mode}
             notice={notice}
             onNavigate={navigate}
-            onRememberChange={setRemember}
             onSelectSeller={setIsSeller}
             onSubmit={submit}
             onUpdate={update}
-            remember={remember}
         />
     );
 }

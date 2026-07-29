@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type FormEvent, type RefObject } from "rea
 import { Eye, EyeOff, LoaderCircle, ShoppingBag, Store, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -28,11 +27,9 @@ interface AnimatedCharactersLoginPageProps {
     mode: "login" | "register";
     notice?: string;
     onNavigate: (view: string) => void;
-    onRememberChange: (remember: boolean) => void;
     onSelectSeller: (seller: boolean) => void;
     onSubmit: (event: FormEvent<HTMLFormElement>) => void;
     onUpdate: (field: keyof AuthForm, value: string) => void;
-    remember: boolean;
 }
 
 interface EyeBallProps {
@@ -257,11 +254,9 @@ function LoginPage({
     mode,
     notice,
     onNavigate,
-    onRememberChange,
     onSelectSeller,
     onSubmit,
     onUpdate,
-    remember,
 }: AnimatedCharactersLoginPageProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
@@ -305,21 +300,15 @@ function LoginPage({
         <section className={cn("coffee-auth-page", isLogin ? "login" : isSeller ? "seller-register" : "customer-register")}>
             <aside className={cn("coffee-auth-visual", !isLogin && isSeller && "seller-register")}>
                 <div className="coffee-auth-overlay" />
-                <div className="coffee-auth-brand">
-                    <span><ShoppingBag size={18} /></span>
-                    <div>
-                        <strong>Coffey</strong>
-                    </div>
+                <div className="coffee-auth-story">
+                    <p className="eyebrow">No.01 Coffee Marketplace</p>
+                    <h1>Discover the world's finest beans, handpicked and roasted to perfection.</h1>
                 </div>
 
-                <div className="coffee-auth-story">
-                    <p className="eyebrow">Modern coffee marketplace</p>
-                    <h1>Clean access for buyers, sellers, and creators.</h1>
-                    <div className="coffee-auth-points">
-                        <span>Customer checkout</span>
-                        <span>Seller dashboard</span>
-                        <span>Affiliate content</span>
-                    </div>
+                <div className="coffee-auth-points">
+                    <span>Customer checkout</span>
+                    <span>Seller dashboard</span>
+                    <span>Affiliate content</span>
                 </div>
 
                 <div className="coffee-auth-visual-grid" aria-hidden="true">
@@ -413,15 +402,11 @@ function LoginPage({
                                     <span>Store description</span>
                                     <textarea onChange={(event) => onUpdate("description", event.target.value)} placeholder="Short description" rows={3} value={form.description} />
                                 </label>
-                            </div>
+                            
+                        </div>
                         )}
 
-                        {isLogin && (
-                            <label className="coffee-auth-remember">
-                                <Checkbox checked={remember} onCheckedChange={(checked) => onRememberChange(checked === true)} />
-                                <span>Remember me</span>
-                            </label>
-                        )}
+                        
 
                         {isSellerAccountStep ? (
                             <Button className="h-12 w-full text-base" size="lg" type="button" onClick={continueSellerRegistration}>

@@ -1,3 +1,4 @@
+import '../../../css/seller.css';
 import { useState } from 'react';
 import SellerSidebar from './SellerSidebar.jsx';
 import SellerTopbar from './SellerTopbar.jsx';

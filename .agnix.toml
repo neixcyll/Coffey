@@ -1,0 +1,28 @@
+extend = []          # Optional base config paths, string or array in TOML files
+severity = "Warning"  # Warning, Error, Info
+target = "Generic"    # Deprecated: Generic, ClaudeCode, Cursor, Codex, Kiro
+
+# Multi-tool support (overrides target)
+tools = ["opencode"]  # Valid: claude-code, cursor, codex, kiro, copilot, github-copilot, cline, opencode, gemini-cli, amp, roo-code, windsurf, generic
+
+exclude = [
+  "node_modules/**",
+  ".git/**",
+  "target/**",
+]
+
+[rules]
+# Category toggles - all default to true
+skills = true              # AS-*, CC-SK-* rules
+hooks = true               # CC-HK-* rules
+agents = true              # CC-AG-* rules
+copilot = true             # COP-* rules
+cursor = true              # CUR-* rules
+memory = true              # CC-MEM-* rules
+plugins = true             # CC-PL-* rules
+mcp = true                 # MCP-* rules
+prompt_engineering = true  # PE-* rules
+xml = true                 # XML-* rules
+imports = true             # REF-* rules
+cross_platform = true      # XP-* rules
+agents_md = true           # AGM-* rules

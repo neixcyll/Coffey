@@ -140,7 +140,7 @@ export default function SellerProducts({ token, navigate, setNotice }) {
                             {products.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-6 py-4 align-middle">
-                                        <div className="w-[72px] h-[72px] rounded-xl bg-gray-100 border border-gray-200 overflow-hidden mx-auto">
+                                        <div className="relative w-[72px] h-[72px] rounded-xl bg-gray-100 border border-gray-200 overflow-hidden mx-auto">
                                             <ProductImage product={product} small />
                                         </div>
                                     </td>

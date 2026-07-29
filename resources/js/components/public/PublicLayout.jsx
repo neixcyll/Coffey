@@ -28,7 +28,7 @@ export default function PublicLayout({
 
     return (
         <div className={`public-layout ${isAuthPage ? 'auth-site-layout' : ''}`}>
-            <PublicNavbar
+            {<PublicNavbar
                 user={user}
                 navigate={navigate}
                 logout={logout}
@@ -39,7 +39,7 @@ export default function PublicLayout({
                 markNotificationRead={markNotificationRead}
                 markAllNotificationsRead={markAllNotificationsRead}
                 onCartClick={() => setCartOpen(true)}
-            />
+            />}
             <main className={`page public-page py-7 ${isAuthPage ? 'auth-public-page' : ''} ${isCatalogPage ? 'catalog-public-page' : ''}`}>{children}</main>
             {!isAuthPage && <PublicFooter navigate={navigate} />}
             <CartDrawer

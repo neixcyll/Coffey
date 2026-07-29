@@ -1,3 +1,4 @@
+import '../../../css/admin.css';
 import { useState } from 'react';
 import AdminSidebar from './AdminSidebar.jsx';
 import AdminTopbar from './AdminTopbar.jsx';
