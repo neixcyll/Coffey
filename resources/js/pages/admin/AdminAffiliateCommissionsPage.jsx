@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { AFFILIATE_COMMISSION_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
@@ -66,14 +67,12 @@ export default function AdminAffiliateCommissionsPage({ token, navigate, setNoti
                     </div>
                 </div>
                 <div>
-                    <select 
-                        value={status} 
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Status</option>
-                        {AFFILIATE_COMMISSION_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                    </select>
+                    <Dropdown
+                        value={status}
+                        onChange={setStatus}
+                        options={[{ value: '', label: 'Semua Status' }, ...AFFILIATE_COMMISSION_STATUSES.map((item) => ({ value: item, label: item }))]}
+                        ariaLabel="Filter status"
+                    />
                 </div>
             </div>
 
@@ -111,17 +110,19 @@ export default function AdminAffiliateCommissionsPage({ token, navigate, setNoti
                                         <td className="px-6 py-4 text-sm text-black">{formatPrice(commission.amount)}</td>
                                         <td className="px-6 py-4 text-sm font-semibold text-black">{formatPrice(commission.commission_amount)}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <select 
-                                                value={commission.status} 
-                                                onChange={(e) => updateCommission(commission, e.target.value)}
-                                                className={`border border-gray-200 rounded-md py-1 px-2 text-xs font-semibold bg-white focus:outline-none focus:border-black ${
+                                            <Dropdown
+                                                compact
+                                                align="right"
+                                                value={commission.status}
+                                                onChange={(value) => updateCommission(commission, value)}
+                                                options={AFFILIATE_COMMISSION_STATUSES.map((item) => ({ value: item, label: item }))}
+                                                triggerTextClassName={
                                                     commission.status === 'paid' ? 'text-green-700' :
                                                     commission.status === 'pending' ? 'text-yellow-700' :
                                                     'text-red-700'
-                                                }`}
-                                            >
-                                                {AFFILIATE_COMMISSION_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                                            </select>
+                                                }
+                                                ariaLabel="Ubah status komisi"
+                                            />
                                         </td>
                                     </tr>
                                 ))

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import TextArea from '../../components/common/TextArea.jsx';
 import TextInput from '../../components/common/TextInput.jsx';
 import { ARTICLE_STATUSES } from '../../constants/statuses.js';
@@ -208,14 +209,12 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                         Pending
                     </button>
                 </div>
-                <select 
+                <Dropdown 
                     value={status} 
-                    onChange={(event) => setStatus(event.target.value)}
-                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                >
-                    <option value="">Filter Status...</option>
-                    {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                </select>
+                    onChange={setStatus}
+                    options={[{ value: '', label: 'Filter Status...' }, ...ARTICLE_STATUSES.map((item) => ({ value: item, label: item }))]}
+                    ariaLabel="Filter status"
+                />
             </div>
 
             {editingArticle && (
@@ -229,15 +228,13 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Kategori</label>
-                                    <select 
+                                    <Dropdown 
+                                        fullWidth
                                         value={form.article_category_id} 
-                                        onChange={(event) => update('article_category_id', event.target.value)} 
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                                    >
-                                        <option value="">Pilih Kategori...</option>
-                                        {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                                    </select>
+                                        onChange={(value) => update('article_category_id', value)}
+                                        options={[{ value: '', label: 'Pilih Kategori...' }, ...categories.map((category) => ({ value: category.id, label: category.name }))]}
+                                        ariaLabel="Kategori"
+                                    />
                                 </div>
                                 <TextInput label="Judul Artikel" value={form.title} onChange={(value) => update('title', value)} />
                                 <TextArea label="Excerpt (Ringkasan)" value={form.excerpt} onChange={(value) => update('excerpt', value)} />
@@ -251,13 +248,13 @@ export default function AdminContentPage({ token, navigate, setNotice, user, log
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Status</label>
-                                        <select 
+                                        <Dropdown 
+                                            fullWidth
                                             value={form.status} 
-                                            onChange={(event) => update('status', event.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                                        >
-                                            {ARTICLE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                                        </select>
+                                            onChange={(value) => update('status', value)}
+                                            options={ARTICLE_STATUSES.map((item) => ({ value: item, label: item }))}
+                                            ariaLabel="Status"
+                                        />
                                     </div>
                                     <TextInput label="Featured rank (0=default)" type="number" value={form.featured_rank} onChange={(value) => update('featured_rank', value)} required={false} />
                                 </div>

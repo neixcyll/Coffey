@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import DetailPanel from '../../components/common/DetailPanel.jsx';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { USER_ROLES, USER_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { rowsFrom } from '../../utils/format.js';
@@ -76,22 +77,18 @@ export default function AdminUsersPage({ token, navigate, setNotice, user, logou
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <select 
-                        value={filters.role} 
-                        onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Role</option>
-                        {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
-                    </select>
-                    <select 
-                        value={filters.status} 
-                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Status</option>
-                        {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                    </select>
+                    <Dropdown
+                        value={filters.role}
+                        onChange={(value) => setFilters({ ...filters, role: value })}
+                        options={[{ value: '', label: 'Semua Role' }, ...USER_ROLES.map((role) => ({ value: role, label: role }))]}
+                        ariaLabel="Filter role"
+                    />
+                    <Dropdown
+                        value={filters.status}
+                        onChange={(value) => setFilters({ ...filters, status: value })}
+                        options={[{ value: '', label: 'Semua Status' }, ...USER_STATUSES.map((status) => ({ value: status, label: status }))]}
+                        ariaLabel="Filter status"
+                    />
                 </div>
             </div>
 
@@ -129,22 +126,26 @@ export default function AdminUsersPage({ token, navigate, setNotice, user, logou
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <select 
-                                                value={user.role?.name || ''} 
-                                                onChange={(e) => updateUser(user, { role: e.target.value })}
-                                                className="border border-gray-200 rounded-md py-1 px-2 text-xs bg-white focus:outline-none focus:border-black"
-                                            >
-                                                {USER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
-                                            </select>
+                                            <Dropdown
+                                                compact
+                                                variant="light"
+                                                className="w-28"
+                                                value={user.role?.name || ''}
+                                                onChange={(value) => updateUser(user, { role: value })}
+                                                options={USER_ROLES.map((role) => ({ value: role, label: role }))}
+                                                ariaLabel="Ubah role"
+                                            />
                                         </td>
                                         <td className="px-6 py-4">
-                                            <select 
-                                                value={user.status || 'active'} 
-                                                onChange={(e) => updateUser(user, { status: e.target.value })}
-                                                className="border border-gray-200 rounded-md py-1 px-2 text-xs bg-white focus:outline-none focus:border-black"
-                                            >
-                                                {USER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                                            </select>
+                                            <Dropdown
+                                                compact
+                                                variant="light"
+                                                className="w-28"
+                                                value={user.status || 'active'}
+                                                onChange={(value) => updateUser(user, { status: value })}
+                                                options={USER_STATUSES.map((status) => ({ value: status, label: status }))}
+                                                ariaLabel="Ubah status"
+                                            />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button 

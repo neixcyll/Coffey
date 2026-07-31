@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { AFFILIATE_PROFILE_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
@@ -66,14 +67,12 @@ export default function AdminAffiliatesPage({ token, navigate, setNotice, user, 
                     </div>
                 </div>
                 <div>
-                    <select 
-                        value={status} 
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Status</option>
-                        {AFFILIATE_PROFILE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                    </select>
+                    <Dropdown
+                        value={status}
+                        onChange={setStatus}
+                        options={[{ value: '', label: 'Semua Status' }, ...AFFILIATE_PROFILE_STATUSES.map((item) => ({ value: item, label: item }))]}
+                        ariaLabel="Filter status"
+                    />
                 </div>
             </div>
 
@@ -120,13 +119,13 @@ export default function AdminAffiliatesPage({ token, navigate, setNotice, user, 
                                         <td className="px-6 py-4 text-sm text-black">{affiliate.summary?.total_conversions || 0}</td>
                                         <td className="px-6 py-4 text-sm font-semibold text-black">{formatPrice(affiliate.summary?.total_commission)}</td>
                                         <td className="px-6 py-4">
-                                            <select 
-                                                value={affiliate.status} 
-                                                onChange={(event) => updateAffiliate(affiliate, { status: event.target.value })}
-                                                className="border border-gray-200 rounded-md py-1 px-2 text-xs bg-white focus:outline-none focus:border-black"
-                                            >
-                                                {AFFILIATE_PROFILE_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                                            </select>
+                                            <Dropdown
+                                                compact
+                                                value={affiliate.status}
+                                                onChange={(value) => updateAffiliate(affiliate, { status: value })}
+                                                options={AFFILIATE_PROFILE_STATUSES.map((item) => ({ value: item, label: item }))}
+                                                ariaLabel="Ubah status"
+                                            />
                                         </td>
                                     </tr>
                                 ))

@@ -4,45 +4,45 @@ export default function AdminTopbar({ current, user, logout, onMenuClick }) {
     const title = adminTitle(current);
 
     return (
-        <header className="h-16 border-b-2 border-black bg-white flex items-center justify-between px-6 z-30">
+        <header className="h-16 border-b-2 border-[#7e3f25] bg-[#9c4f2e] flex items-center justify-between px-6 z-30">
             <div className="flex items-center gap-4">
-                <button className="md:hidden text-gray-500 hover:text-black" type="button" onClick={onMenuClick} aria-label="Buka menu admin">
+                <button className="md:hidden text-white/80 hover:text-white" type="button" onClick={onMenuClick} aria-label="Buka menu admin">
                     <MenuIcon />
                 </button>
                 <div className="flex flex-col">
-                    <strong className="text-sm font-semibold text-black tracking-tight">{title}</strong>
-                    <small className="text-[10px] text-gray-500">Marketplace Console</small>
+                    <strong className="text-lg font-semibold text-white tracking-tight">{title}</strong>
+                    <small className="text-xs text-white/70">Marketplace Console</small>
                 </div>
             </div>
 
             <div className="flex items-center gap-4">
                 <button
-                    className="text-xs font-bold px-4 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
+                    className="text-sm font-bold px-5 py-2 bg-white text-[#7e3f25] rounded-lg hover:bg-white/90 transition-colors shadow-sm"
                     type="button"
                     onClick={() => navigate('blog')}
                 >
                     Explore
                 </button>
 
-                <button className="relative p-1 text-gray-400 hover:text-black transition-colors" type="button" title="Notifikasi admin" aria-label="Notifikasi admin">
+                <button className="relative p-1 text-white/75 hover:text-white transition-colors" type="button" title="Notifikasi admin" aria-label="Notifikasi admin">
                     <BellIcon />
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-black rounded-full ring-2 ring-white" />
+                    <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-white rounded-full ring-2 ring-[#9c4f2e]" />
                 </button>
 
-                <div className="h-8 w-px bg-gray-200" />
+                <div className="h-8 w-px bg-white/25" />
 
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold font-mono">
+                    <div className="w-9 h-9 rounded-full bg-white text-[#7e3f25] flex items-center justify-center text-sm font-bold font-mono">
                         {initials(user?.name)}
                     </div>
                     <div className="hidden sm:flex flex-col text-left">
-                        <strong className="text-xs font-bold text-black leading-none">{user?.name || 'Admin'}</strong>
-                        <small className="text-[10px] text-gray-400 mt-0.5">Administrator</small>
+                        <strong className="text-sm font-bold text-white leading-none">{user?.name || 'Admin'}</strong>
+                        <small className="text-xs text-white/60 mt-0.5">Administrator</small>
                     </div>
                 </div>
 
                 <button 
-                    className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors" 
+                    className="text-sm font-semibold px-4 py-2 border border-white/40 text-white rounded-md hover:bg-[#7e3f25] transition-colors" 
                     type="button" 
                     onClick={() => logout()}
                 >

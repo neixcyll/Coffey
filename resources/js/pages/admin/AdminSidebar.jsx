@@ -19,23 +19,21 @@ export default function AdminSidebar({ current, navigate, open, onClose }) {
     }
 
     return (
-        <aside className={`admin-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-6 overflow-y-auto p-6 text-white bg-black border-r border-gray-800`}>
-            <nav className="flex flex-col gap-1 mt-4" aria-label="Menu admin">
+        <aside className={`admin-sidebar ${open ? 'open' : ''} sticky top-0 h-screen flex flex-col gap-6 overflow-y-auto p-6 text-white bg-[#9c4f2e] border-r border-[#7e3f25]`}>
+            <nav className="flex flex-col gap-1.5 mt-10" aria-label="Menu admin">
                 {adminNavItems.map(({ view, label, icon: Icon }) => {
                     const isActive = current === view;
                     return (
                         <button
                             key={view}
                             type="button"
-                            className={`flex items-center gap-3 w-full text-left py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 ${
-                                isActive 
-                                    ? 'bg-white text-black font-semibold' 
-                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                            className={`flex items-center gap-3 w-full text-left py-3 px-4 rounded-xl font-medium text-base transition-all duration-150 ${
+                                isActive ? 'active bg-white text-black font-semibold' : 'text-white/75'
                             }`}
                             aria-current={isActive ? 'page' : undefined}
                             onClick={() => go(view)}
                         >
-                            <span className="w-4 h-4 flex items-center justify-center text-inherit"><Icon /></span>
+                            <span className="w-5 h-5 flex items-center justify-center text-inherit"><Icon /></span>
                             <span>{label}</span>
                         </button>
                     );

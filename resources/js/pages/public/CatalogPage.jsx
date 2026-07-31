@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import EmptyState from '../../components/public/EmptyState.jsx';
 import ProductCard from '../../components/product/ProductCard.jsx';
 import { ROAST_LEVEL_OPTIONS } from '../../constants/options.js';
-import { applyFallbackImage, fallbackArticleImage, fallbackProductImage, fallbackRoasterImage } from '../../constants/images.js';
+import { applyFallbackImage, fallbackArticleImage, fallbackProductImage } from '../../constants/images.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 
@@ -374,13 +374,25 @@ function RoasterCard({ seller, index, onOpen }) {
     }
 
     const name = seller.name || seller.store_name || 'Coffee Seller';
-    const fallbackBanner = fallbackRoasterImage(seller, index);
-    const banner = seller.banner || fallbackBanner;
+    const bannerImage = seller.banner || seller.logo || '';
 
     return (
         <button className={`roaster-card ${themeClass}`} type="button" onClick={onOpen}>
-            <span className="roaster-banner-wrap">
-                <img src={banner} alt={`${name} banner`} draggable="false" onError={(event) => applyFallbackImage(event, fallbackBanner)} />
+            <span className={`roaster-banner-wrap ${bannerImage ? 'has-image' : ''}`}>
+                {bannerImage && (
+                    <img
+                        src={bannerImage}
+                        alt={`${name} banner`}
+                        draggable="false"
+                        onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                            event.currentTarget.closest('.roaster-banner-wrap')?.classList.remove('has-image');
+                        }}
+                    />
+                )}
+                <span className="roaster-banner-placeholder">
+                    <strong>{initials(name)}</strong>
+                </span>
             </span>
             <span className="roaster-card-body">
                 <span className="roaster-avatar">

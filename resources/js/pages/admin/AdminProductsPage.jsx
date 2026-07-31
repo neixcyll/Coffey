@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
 import AdminLayout from './AdminLayout.jsx';
@@ -63,22 +64,18 @@ export default function AdminProductsPage({ token, navigate, setNotice, user, lo
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <select 
-                        value={filters.category_id} 
-                        onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Kategori</option>
-                        {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                    </select>
-                    <select 
-                        value={filters.seller_id} 
-                        onChange={(e) => setFilters({ ...filters, seller_id: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Seller</option>
-                        {sellers.map((seller) => <option key={seller.id} value={seller.id}>{seller.store_name}</option>)}
-                    </select>
+                    <Dropdown
+                        value={filters.category_id}
+                        onChange={(value) => setFilters({ ...filters, category_id: value })}
+                        options={[{ value: '', label: 'Semua Kategori' }, ...categories.map((category) => ({ value: category.id, label: category.name }))]}
+                        ariaLabel="Filter kategori"
+                    />
+                    <Dropdown
+                        value={filters.seller_id}
+                        onChange={(value) => setFilters({ ...filters, seller_id: value })}
+                        options={[{ value: '', label: 'Semua Seller' }, ...sellers.map((seller) => ({ value: seller.id, label: seller.store_name }))]}
+                        ariaLabel="Filter seller"
+                    />
                 </div>
             </div>
 

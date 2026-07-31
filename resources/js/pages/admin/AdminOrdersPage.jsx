@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { ORDER_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
@@ -62,22 +63,18 @@ export default function AdminOrdersPage({ token, navigate, setNotice, user, logo
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <select 
-                        value={filters.status} 
-                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Status</option>
-                        {ORDER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                    </select>
-                    <select 
-                        value={filters.seller_id} 
-                        onChange={(e) => setFilters({ ...filters, seller_id: e.target.value })}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Seller</option>
-                        {sellers.map((seller) => <option key={seller.id} value={seller.id}>{seller.store_name}</option>)}
-                    </select>
+                    <Dropdown
+                        value={filters.status}
+                        onChange={(value) => setFilters({ ...filters, status: value })}
+                        options={[{ value: '', label: 'Semua Status' }, ...ORDER_STATUSES.map((status) => ({ value: status, label: status }))]}
+                        ariaLabel="Filter status"
+                    />
+                    <Dropdown
+                        value={filters.seller_id}
+                        onChange={(value) => setFilters({ ...filters, seller_id: value })}
+                        options={[{ value: '', label: 'Semua Seller' }, ...sellers.map((seller) => ({ value: seller.id, label: seller.store_name }))]}
+                        ariaLabel="Filter seller"
+                    />
                 </div>
             </div>
             

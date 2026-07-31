@@ -89,9 +89,9 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                             </div>
                         )}
                         {role === 'customer' && (
-                            <button className={`${itemClass('cart')} cart-header-button cursor-pointer`} title="Cart" aria-label={`Cart ${cartCount || 0} item`} onClick={() => navigate('cart')}>
-                                <CartIcon />
-                                <span className="cart-button-label">Cart</span>
+                            <button className={`${itemClass('cart')} cart-header-button cursor-pointer`} style={{ padding: '8px 14px', fontSize: '16px', fontWeight: 700, boxShadow: 'none', transform: 'none' }} title="Cart" aria-label={`Cart ${cartCount || 0} item`} onClick={() => navigate('cart')}>
+                                <CartIcon size={16} />
+                                <span className="cart-button-label" style={{ fontSize: '16px', fontWeight: 700 }}>Cart</span>
                                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                             </button>
                         )}
@@ -100,8 +100,8 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
                     </>
                 ) : (
                     <>
-                        <button className="btn ghost" onClick={() => navigate('login')}>Login</button>
-                        <button className="btn primary" onClick={() => navigate('register')}>Register</button>
+                        <button className="btn ghost" style={{ padding: '8px 14px', fontSize: '16px', fontWeight: 700 }} onClick={() => navigate('login')}>Login</button>
+                        <button className="btn primary" style={{ padding: '8px 14px', fontSize: '16px', fontWeight: 700 }} onClick={() => navigate('register')}>Register</button>
                     </>
                 )}
             </div>
@@ -109,9 +109,9 @@ export default function Header({ user, navigate, logout, currentView, cartCount,
     );
 }
 
-export function CartIcon() {
+export function CartIcon({ size = 21 }) {
     return (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H6.1" />
             <path d="M9 20h.01" />
             <path d="M18 20h.01" />

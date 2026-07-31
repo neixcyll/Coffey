@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import NeedLogin from '../../components/common/NeedLogin.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import Dropdown from '../../components/admin/Dropdown.jsx';
 import { PAYMENT_STATUSES } from '../../constants/statuses.js';
 import { apiRequest } from '../../services/api.js';
 import { formatPrice, rowsFrom } from '../../utils/format.js';
@@ -55,14 +56,12 @@ export default function AdminPaymentsPage({ token, navigate, setNotice, user, lo
                     </div>
                 </div>
                 <div>
-                    <select 
-                        value={status} 
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-black"
-                    >
-                        <option value="">Semua Status</option>
-                        {PAYMENT_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}
-                    </select>
+                    <Dropdown
+                        value={status}
+                        onChange={setStatus}
+                        options={[{ value: '', label: 'Semua Status' }, ...PAYMENT_STATUSES.map((item) => ({ value: item, label: item }))]}
+                        ariaLabel="Filter status"
+                    />
                 </div>
             </div>
 
