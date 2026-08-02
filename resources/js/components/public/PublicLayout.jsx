@@ -19,7 +19,7 @@ export default function PublicLayout({
     children,
 }) {
     const [cartOpen, setCartOpen] = useState(false);
-    const isAuthPage = ['login', 'register'].includes(currentView);
+    const isAuthPage = ['login', 'register', 'forgot-password', 'reset-password'].includes(currentView);
     const isCatalogPage = currentView === 'products';
 
     useEffect(() => {

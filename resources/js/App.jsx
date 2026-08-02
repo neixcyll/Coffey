@@ -5,6 +5,8 @@ import PublicLayout from './components/public/PublicLayout.jsx';
 import { apiRequest } from './services/api.js';
 import { affiliateRefFromUrl, defaultLandingFor, parseRoute, publicPathFor, rememberCurrentRoute, roleName } from './utils/route.js';
 import AuthPage from './pages/auth/AuthPage.jsx';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage.jsx';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage.jsx';
 import AdminAffiliateCommissionsPage from './pages/admin/AdminAffiliateCommissionsPage.jsx';
 import AdminAffiliatesPage from './pages/admin/AdminAffiliatesPage.jsx';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage.jsx';
@@ -442,6 +444,8 @@ export default function App() {
                 >
                         {route.view === 'login' && <AuthPage mode="login" {...context} />}
                         {route.view === 'register' && <AuthPage mode="register" {...context} />}
+                        {route.view === 'forgot-password' && <ForgotPasswordPage navigate={navigate} />}
+                        {route.view === 'reset-password' && <ResetPasswordPage token={route.id} navigate={navigate} setNotice={setNotice} />}
                         {route.view === 'blog' && <ExplorePage {...context} />}
                         {route.view === 'deals' && <BlogIndexPage categorySlug="deals" {...context} />}
                         {route.view === 'review' && <BlogIndexPage categorySlug="review" {...context} />}
@@ -457,6 +461,8 @@ export default function App() {
                         {![ 
                             'login',
                             'register',
+                            'forgot-password',
+                            'reset-password',
                             'blog',
                             'deals',
                             'review',

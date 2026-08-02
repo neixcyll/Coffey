@@ -376,6 +376,14 @@ function LoginPage({
                             </div>
                         </div>}
 
+                        {isLogin && (
+                            <div className="flex justify-end">
+                                <button type="button" onClick={() => onNavigate("forgot-password")} className="text-sm font-semibold text-[#2563eb] hover:underline">
+                                    Lupa password?
+                                </button>
+                            </div>
+                        )}
+
                         {!isLogin && !isSellerStoreStep && (
                             <Field
                                 autoComplete="new-password"

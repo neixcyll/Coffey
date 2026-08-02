@@ -32,6 +32,8 @@ export function parsePathRoute() {
     if (path === 'blog' || path === 'explore') return { view: 'blog' };
     if (path === 'login') return { view: 'login' };
     if (path === 'register') return { view: 'register' };
+    if (path === 'forgot-password') return { view: 'forgot-password' };
+    if (parts[0] === 'reset-password' && parts[1]) return { view: 'reset-password', id: parts[1] };
     if (path === 'about') return { view: 'about' };
     if (path === 'contact') return { view: 'contact' };
     if (parts[0] === 'blog' && parts[1]) return { view: 'blog-detail', id: parts[1] };
@@ -59,6 +61,7 @@ export function publicPathFor(view, id) {
     if (SELLER_ROUTE_MAP[view]) return SELLER_ROUTE_MAP[view];
     if (ADMIN_ROUTE_MAP[view]) return ADMIN_ROUTE_MAP[view];
     if (view === 'blog-detail' && id) return `/blog/${id}`;
+    if (view === 'reset-password' && id) return `/reset-password/${id}`;
     if (view === 'creator' && id) return `/creator/${id}`;
     if (view === 'product' && id) return `/product/${id}`;
     if (view === 'seller-order-print' && id) return `/seller/orders/${id}/print`;

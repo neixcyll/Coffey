@@ -33,6 +33,7 @@
     --color-ring: var(--ring);
 }
 
+@layer components {
 :root {
     --color-bg: #ffffff;
     --color-bg-soft: #f6f6f4;
@@ -8190,7 +8191,7 @@ body, button, input, select, textarea {
 
 .page.public-page.auth-public-page {
     
-    max-width: 100%;width: none;
+    max-width: 100%;width: 100%;
     padding: 0;
     margin: 0;
 }
@@ -10942,4 +10943,5 @@ img.brand-mark {
 .roaster-banner-wrap img {
     position: relative;
     z-index: 1;
+}
 }

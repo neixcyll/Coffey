@@ -17,6 +17,8 @@ export const PUBLIC_ROUTE_MAP = {
     blog: '/explore',
     login: '/login',
     register: '/register',
+    'forgot-password': '/forgot-password',
+    'reset-password': '/reset-password',
     about: '/about',
     contact: '/contact',
     deals: '/deals',

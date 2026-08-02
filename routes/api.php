@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\MidtransNotificationController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
@@ -33,6 +34,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register/seller', [AuthController::class, 'registerSeller']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 
 Route::get('/categories', [ProductController::class, 'categories']);
 Route::get('/brewing-methods', [ProductController::class, 'brewingMethods']);
