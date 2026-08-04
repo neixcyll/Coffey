@@ -8185,8 +8185,8 @@ body, button, input, select, textarea {
 }
 
 .page.public-page {
-    width: min(var(--container), calc(100% - 32px));
-    padding-block: clamp(24px, 4vw, 56px);
+    width: min(var(--container), calc(100% - 16px));
+    padding-block: clamp(12px, 2vw, 28px);
 }
 
 .page.public-page.auth-public-page {
@@ -9025,8 +9025,8 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 760px) {
     .page.public-page {
-        width: min(100% - 24px, var(--container));
-        padding-block: 18px 40px;
+        width: min(100% - 12px, var(--container));
+        padding-block: 12px 20px;
     }
 
     .featured-product-grid, .marketplace-product-grid, .trade-featured-grid, .community-feed-grid, .trade-community-grid {

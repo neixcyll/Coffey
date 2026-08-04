@@ -108,7 +108,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
                 return;
             }
 
-            setNotice('Link produk belum tersedia.');
+            setNotice('Product link not available.');
         } catch (error) {
             if (item.product?.slug) {
                 navigate('product', item.product.slug);
@@ -127,7 +127,7 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
     async function shareArticle(article) {
         const url = `${window.location.origin}/blog/${article.slug}`;
         await navigator.clipboard?.writeText(url);
-        setNotice('Link affiliate content disalin.');
+        setNotice('Affiliate content link copied.');
     }
 
     return (
@@ -166,8 +166,8 @@ export default function ContentLayerPage({ token, navigate, setNotice }) {
             ) : (
                 <EmptyState
                     eyebrow="Content"
-                    title="Belum ada postingan yang cocok."
-                    message="Coba gunakan kata kunci lain untuk menemukan rekomendasi kopi dari creator."
+                    title="No matching posts found."
+                    message="Try using other keywords to find coffee recommendations from creators."
                 />
             )}
 
@@ -206,7 +206,7 @@ function CommunityPostCard({ article, state, onRead, onProductClick, onToggle, o
                     <small>{formatDate(article.published_at)}</small>
                 </div>
                 <button className="community-post-title" type="button" onClick={onRead}>{article.title}</button>
-                <p className="muted">{article.excerpt || 'Baca rekomendasi lengkap dari creator.'}</p>
+                <p className="muted">{article.excerpt || 'Read the full recommendation from the creator.'}</p>
                 <div className="creator-chip">
                     <span>{creatorInitials(article)}</span>
                     <strong>{creatorName(article)}</strong>
@@ -274,7 +274,7 @@ function ContentDetailsDrawer({ article, state, loading, onClose, onProductClick
                         <span>{creatorInitials(article)}</span>
                         <strong>{creatorName(article)}</strong>
                     </div>
-                    {loading && <p className="muted">Memuat detail postingan...</p>}
+                    {loading && <p className="muted">Loading post details...</p>}
                     <p className="article-excerpt">{article.excerpt}</p>
                     <div className="article-body">{plainParagraphs(article.content || article.excerpt || '').map((paragraph, index) => <p key={`${article.id}-${index}`}>{paragraph}</p>)}</div>
                     {products.length > 0 && (
@@ -307,7 +307,7 @@ function ContentDetailsDrawer({ article, state, loading, onClose, onProductClick
                     <section className="content-discussion" id="content-discussion">
                         <p className="eyebrow">Discussion</p>
                         <form className="content-comment-form" onSubmit={submitComment}>
-                            <input placeholder="Tulis komentar atau diskusi kopi..." value={comment} onChange={(event) => setComment(event.target.value)} />
+                            <input placeholder="Write a comment or discuss coffee..." value={comment} onChange={(event) => setComment(event.target.value)} />
                             <button className="btn primary" type="submit">Send</button>
                         </form>
                         <div className="content-comment-list">
@@ -317,7 +317,7 @@ function ContentDetailsDrawer({ article, state, loading, onClose, onProductClick
                                     <p>{item.text}</p>
                                 </div>
                             ))}
-                            {!(state.comments || []).length && <p className="muted">Belum ada diskusi. Mulai percakapan tentang rekomendasi ini.</p>}
+                            {!(state.comments || []).length && <p className="muted">No discussion yet. Start a conversation about this recommendation.</p>}
                         </div>
                     </section>
                 </div>

@@ -40,7 +40,7 @@ export default function PublicLayout({
                 markAllNotificationsRead={markAllNotificationsRead}
                 onCartClick={() => setCartOpen(true)}
             />}
-            <main className={`page public-page py-7 ${isAuthPage ? 'auth-public-page' : ''} ${isCatalogPage ? 'catalog-public-page' : ''}`}>{children}</main>
+            <main className={`page public-page ${isAuthPage ? 'auth-public-page' : ''} ${isCatalogPage ? 'catalog-public-page' : ''}`}>{children}</main>
             {!isAuthPage && <PublicFooter navigate={navigate} />}
             <CartDrawer
                 open={cartOpen}
