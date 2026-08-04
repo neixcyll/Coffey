@@ -5,13 +5,6 @@ export default function ProductImage({ product, large = false, small = false }) 
     const src = product.image_url || product.image || fallback;
 
     let baseClass = 'object-cover bg-[#f4eee6] w-full h-full absolute inset-0 ';
-    if (large) {
-        baseClass += 'rounded-t-lg';
-    } else if (small) {
-        baseClass += 'rounded-t-lg';
-    } else {
-        baseClass += 'rounded-t-lg';
-    }
 
     return (
         <img

@@ -168,7 +168,7 @@ export default function ProductDetail({ productId, token, user, navigate, setNot
     const flavorNotes = flavorNoteList(product);
 
     return (
-        <div className="pdp-premium max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pdp-premium max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             {/* ── S1: Image + Title + Short Description ── */}
             <section className="pdp-hero pdp-hero--two-col">
                 <div className="pdp-hero-image-col">
@@ -525,14 +525,27 @@ function ProductGallery({ product, images, selectedImage, setSelectedImage }) {
     const fallback = fallbackProductImage(product);
     const currentImage = selectedImage || images[0]?.url || product.image_url || product.image || fallback;
 
+    function handleMouseMove(event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        event.currentTarget.style.setProperty('--zx', `${x}%`);
+        event.currentTarget.style.setProperty('--zy', `${y}%`);
+    }
+
+    function handleMouseLeave(event) {
+        event.currentTarget.style.removeProperty('--zx');
+        event.currentTarget.style.removeProperty('--zy');
+    }
+
     return (
         <div className="product-gallery">
             {currentImage ? (
-                <div className="product-gallery-main">
-                    <img className="product-image large" src={currentImage} alt={product.name} onError={(event) => applyFallbackImage(event, fallback)} />
+                <div className="product-gallery-main aspect-square" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+                    <img className="product-image large w-full h-full object-cover" src={currentImage} alt={product.name} onError={(event) => applyFallbackImage(event, fallback)} />
                 </div>
             ) : (
-                <div className="product-gallery-main">
+                <div className="product-gallery-main aspect-square">
                     <ProductImage product={product} large />
                 </div>
             )}

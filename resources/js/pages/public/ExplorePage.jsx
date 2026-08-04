@@ -129,15 +129,15 @@ export default function ExplorePage({ navigate, setNotice }) {
                         </div>
                     </div>
                     <div className="product-grid marketplace-product-grid">
-                        {sortedProducts.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
+                        {sortedProducts.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} small />)}
                     </div>
                 </section>
             ) : (
                 <>
-                    <ProductRail eyebrow="Trending Products" title="Popular picks from active buyers" products={sections.trending} navigate={navigate} />
-                    <ProductRail eyebrow="New Arrivals" title="Fresh listings from local roasters" products={sections.newest} navigate={navigate} />
-                    <ProductRail eyebrow="Best Rated" title="Highly reviewed coffee selections" products={sections.bestRated} navigate={navigate} />
-                    <ProductRail eyebrow="Recommended" title="Good stock and ready to brew" products={sections.recommended} navigate={navigate} />
+                    <ProductRail eyebrow="Trending Products" title="Popular picks from active buyers" products={sections.trending} navigate={navigate} large />
+                    <ProductRail eyebrow="New Arrivals" title="Fresh listings from local roasters" products={sections.newest} navigate={navigate} small />
+                    <ProductRail eyebrow="Best Rated" title="Highly reviewed coffee selections" products={sections.bestRated} navigate={navigate} small />
+                    <ProductRail eyebrow="Recommended" title="Good stock and ready to brew" products={sections.recommended} navigate={navigate} small />
                 </>
             )}
 
@@ -153,7 +153,7 @@ export default function ExplorePage({ navigate, setNotice }) {
     );
 }
 
-function ProductRail({ eyebrow, title, products, navigate }) {
+function ProductRail({ eyebrow, title, products, navigate, small = false }) {
     if (!products.length) return null;
 
     return (
@@ -164,8 +164,8 @@ function ProductRail({ eyebrow, title, products, navigate }) {
                     <h2>{title}</h2>
                 </div>
             </div>
-            <div className="featured-product-grid">
-                {products.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} />)}
+            <div className={`featured-product-grid ${small ? 'explore-small-grid' : ''}`}>
+                {products.map((product) => <ProductCard key={product.id} product={product} navigate={navigate} small={small} />)}
             </div>
         </section>
     );
